@@ -51,11 +51,11 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
   const [myId] = useState(() => "WL" + Math.floor(1000 + Math.random() * 9000));
 
   useEffect(() => {
-    const stored = localStorage.getItem("wanderlust_friends");
+    const stored = localStorage.getItem("lumina_friends");
     if (stored) setFriends(JSON.parse(stored));
   }, []);
 
-  const save = (data: Friend[]) => localStorage.setItem("wanderlust_friends", JSON.stringify(data));
+  const save = (data: Friend[]) => localStorage.setItem("lumina_friends", JSON.stringify(data));
 
   const addFriend = (f: Friend) => { const next = [...friends, f]; setFriends(next); save(next); };
   const removeFriend = (id: string) => { const next = friends.filter((f) => f.id !== id); setFriends(next); save(next); };

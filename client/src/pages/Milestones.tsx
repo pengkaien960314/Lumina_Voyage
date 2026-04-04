@@ -244,7 +244,7 @@ export default function Milestones() {
 
               {/* Region Header */}
               <div className="relative h-48 rounded-2xl overflow-hidden mb-8">
-                <img src={selected.image} alt={selected.name} className="w-full h-full object-cover" />
+                <img src={selected.image} alt={selected.name} className="w-full h-full object-cover" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                 <div className="absolute bottom-4 left-4 flex items-center gap-3">
                   <div className={`w-12 h-12 rounded-xl ${selected.bg} flex items-center justify-center`}>

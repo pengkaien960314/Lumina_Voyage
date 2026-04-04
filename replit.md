@@ -1,4 +1,4 @@
-# Wanderlust Travel (Lumina Voyage)
+# Lumina Voyage
 
 A travel platform built with React 19 + TypeScript + Vite, featuring flight/hotel bookings, trip planning (including AI-assisted), a travel diary, social features, and translation tools. The UI is in Traditional Chinese.
 
@@ -30,9 +30,9 @@ A travel platform built with React 19 + TypeScript + Vite, featuring flight/hote
 ## Features
 
 - Image upload with FileReader (5MB limit) for diary, planner activities, and profile avatar
-- User diary entries persisted in `localStorage("wanderlust_user_diaries")`
+- User diary entries persisted in `localStorage("lumina_user_diaries_<userId>")`
 - Profile extra data in `localStorage("lumina_profile_extra")`
-- Auth state in `localStorage("wanderlust_user")` via AuthContext
+- Auth state in `localStorage("lumina_user")` via AuthContext
 - Live currency rates via `exchangerate-api.com`
 - Live weather via `wttr.in` API
 - AI translation and trip planning via Gemini API (key hardcoded)

@@ -54,7 +54,7 @@ export default function MyBookings() {
                         <CardContent className="p-5">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-3">
-                              {f.logo ? <img src={f.logo} alt={f.airline} className="w-8 h-8 rounded" /> : <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center"><Plane className="w-4 h-4 text-primary" /></div>}
+                              {f.logo ? <img src={f.logo} alt={f.airline} className="w-8 h-8 rounded" loading="lazy" /> : <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center"><Plane className="w-4 h-4 text-primary" /></div>}
                               <div>
                                 <p className="font-semibold text-sm">{f.airline} {f.code}</p>
                                 <p className="text-xs text-muted-foreground">{f.class}</p>
@@ -97,7 +97,7 @@ export default function MyBookings() {
                     <motion.div key={h.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                       <Card className="border-border/50 overflow-hidden">
                         <div className="flex flex-col sm:flex-row">
-                          <img src={h.image} alt={h.hotelName} className="w-full sm:w-40 h-32 object-cover" />
+                          <img src={h.image} alt={h.hotelName} className="w-full sm:w-40 h-32 object-cover" loading="lazy" />
                           <CardContent className="p-4 flex-1">
                             <div className="flex items-start justify-between mb-2">
                               <div>

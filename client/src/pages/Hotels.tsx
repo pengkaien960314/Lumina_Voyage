@@ -298,7 +298,7 @@ export default function Hotels() {
               <motion.div key={hotel.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: i * 0.08 }}>
                 <Card className="organic-card overflow-hidden border-border/50 group h-full flex flex-col cursor-pointer !py-0 !gap-0" onClick={() => { setSelectedHotel(hotel); setDetailTab("info"); setDetailImageIdx(0); }}>
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <img src={hotel.images[0]} alt={hotel.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <img src={hotel.images[0]} alt={hotel.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
                     <Badge className="absolute top-3 left-3 rounded-full bg-white/90 text-stone-700 border-0">{hotel.type}</Badge>
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
                       <div className="flex items-center gap-1">
@@ -345,7 +345,7 @@ export default function Hotels() {
             <div>
               {/* Image Carousel */}
               <div className="relative rounded-xl overflow-hidden mb-4">
-                <img src={selectedHotel.images[detailImageIdx]} alt={selectedHotel.name} className="w-full h-56 object-cover" />
+                <img src={selectedHotel.images[detailImageIdx]} alt={`${selectedHotel.name} 照片`} className="w-full h-56 object-cover" loading="lazy" />
                 {selectedHotel.images.length > 1 && (
                   <>
                     <button className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60" onClick={() => setDetailImageIdx((prev) => (prev - 1 + selectedHotel.images.length) % selectedHotel.images.length)}><ChevronLeft className="w-4 h-4" /></button>

@@ -417,7 +417,7 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               className="relative rounded-3xl overflow-hidden"
             >
-              <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hero-bg-g7PvFnkctds2rCztknx8gW.webp" alt="CTA" className="absolute inset-0 w-full h-full object-cover" />
+              <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hero-bg-g7PvFnkctds2rCztknx8gW.webp" alt="加入 Lumina Voyage 旅行平台" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
               <div className="absolute inset-0 bg-black/50" />
               <div className="relative z-10 py-16 px-8 md:px-16 text-center">
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-4" style={{ fontFamily: "var(--font-display)" }}>

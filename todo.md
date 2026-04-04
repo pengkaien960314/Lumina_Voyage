@@ -1,7 +1,7 @@
 # Lumina Voyage 修改待辦事項
 
 ## 名稱修改
-- [ ] 網站名稱改為 Lumina Voyage（所有出現 Wanderlust 的地方）
+- [x] 網站名稱改為 Lumina Voyage（所有出現 Wanderlust 的地方）
 
 ## UI 修復
 - [ ] 行程規劃：編輯活動裡的時間跟類別框衝突
