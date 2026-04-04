@@ -42,7 +42,7 @@ export default function Settings() {
               </h1>
             </div>
             <p className="text-muted-foreground">
-              自訂你的 Wanderlust 使用體驗
+              自訂你的 Lumina Voyage 使用體驗
             </p>
           </motion.div>
         </div>

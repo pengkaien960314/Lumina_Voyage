@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const createUser = (overrides: Partial<User>): User => ({
     id: overrides.id || `u${Date.now()}`,
     name: overrides.name || "旅行者",
-    email: overrides.email || "user@wanderlust.com",
+    email: overrides.email || "user@luminavoyage.com",
     provider: overrides.provider || "email",
     avatar: overrides.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${Date.now()}`,
     phone: overrides.phone || "",

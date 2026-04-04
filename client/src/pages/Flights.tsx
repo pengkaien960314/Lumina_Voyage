@@ -234,16 +234,16 @@ export default function Flights() {
 
                 {/* Passengers & Class */}
                 <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-border/50">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Users className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">乘客：</span>
                     {[1, 2, 3, 4, 5, 6].map((n) => (
                       <Button key={n} variant={passengers === n && !customPassengers ? "default" : "outline"} size="sm" className="rounded-full w-8 h-8 p-0 text-xs" onClick={() => { setPassengers(n); setCustomPassengers(""); }}>{n}</Button>
                     ))}
-                    <div className="flex items-center gap-1">
-                      <Button variant="outline" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => { const v = Math.max(1, (parseInt(customPassengers) || passengers) - 1); setCustomPassengers(String(v)); }}><Minus className="w-3 h-3" /></Button>
-                      <Input type="number" value={customPassengers} onChange={(e) => setCustomPassengers(e.target.value)} placeholder="自訂" className="w-14 h-8 rounded-xl text-center text-xs" min={1} />
-                      <Button variant="outline" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => { const v = (parseInt(customPassengers) || passengers) + 1; setCustomPassengers(String(v)); }}><Plus className="w-3 h-3" /></Button>
+                    <div className="flex items-center gap-1 ml-2 border-l border-border/50 pl-2">
+                      <Button variant="outline" size="sm" className="rounded-full w-7 h-7 p-0" onClick={() => { const cur = parseInt(customPassengers) || passengers; const v = Math.max(1, cur - 1); setCustomPassengers(String(v)); }}><Minus className="w-3 h-3" /></Button>
+                      <Input type="number" value={customPassengers || String(passengers)} onChange={(e) => { const v = e.target.value; setCustomPassengers(v); if (v && parseInt(v) >= 1) setPassengers(parseInt(v)); }} className="w-14 h-7 rounded-lg text-center text-xs" min={1} />
+                      <Button variant="outline" size="sm" className="rounded-full w-7 h-7 p-0" onClick={() => { const cur = parseInt(customPassengers) || passengers; setCustomPassengers(String(cur + 1)); }}><Plus className="w-3 h-3" /></Button>
                     </div>
                   </div>
                   <Select value={cabinClass} onValueChange={setCabinClass}>

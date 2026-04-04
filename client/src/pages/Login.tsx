@@ -45,7 +45,7 @@ export default function Login() {
           return;
         }
         await register(name, email, password);
-        toast.success("註冊成功！歡迎加入 Wanderlust");
+        toast.success("註冊成功！歡迎加入 Lumina Voyage");
       } else {
         await login(email, password);
         toast.success("登入成功！歡迎回來");
@@ -97,7 +97,7 @@ export default function Login() {
                 <Leaf className="w-6 h-6 text-white" />
               </div>
               <span className="text-3xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
-                Wanderlust
+                Lumina Voyage
               </span>
             </div>
             <h2
@@ -127,7 +127,7 @@ export default function Login() {
               <Leaf className="w-5 h-5 text-primary" />
             </div>
             <span className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
-              Wanderlust
+              Lumina Voyage
             </span>
           </div>
 
@@ -141,7 +141,7 @@ export default function Login() {
             </h1>
             <p className="text-muted-foreground">
               {isRegister
-                ? "加入 Wanderlust，開始你的旅行探索之旅"
+                ? "加入 Lumina Voyage，開始你的旅行探索之旅"
                 : "登入你的帳號，繼續探索世界"}
             </p>
           </div>

@@ -29,9 +29,9 @@ export default function About() {
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
               <Leaf className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: "var(--font-display)" }}>關於 Wanderlust</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: "var(--font-display)" }}>關於 Lumina Voyage</h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
-              Wanderlust 是一個由資管系學生團隊打造的旅行探索平台。我們的使命是讓每一次旅行都成為生命中最美好的篇章，從規劃到出發，從探索到記錄，陪伴你走過每一段旅途。
+              Lumina Voyage 是一個由資管系學生團隊打造的旅行探索平台。我們的使命是讓每一次旅行都成為生命中最美好的篇章，從規劃到出發，從探索到記錄，陪伴你走過每一段旅途。
             </p>
           </motion.div>
         </div>
@@ -101,7 +101,7 @@ export default function About() {
           <p className="text-muted-foreground mb-6">有任何問題或建議？歡迎與我們聯繫</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center text-sm text-muted-foreground">
             <span className="flex items-center gap-2"><MapPin className="w-4 h-4" />台灣台北市大安區</span>
-            <span className="flex items-center gap-2"><Compass className="w-4 h-4" />contact@wanderlust.app</span>
+            <span className="flex items-center gap-2"><Compass className="w-4 h-4" />contact@luminavoyage.app</span>
           </div>
         </div>
       </section>

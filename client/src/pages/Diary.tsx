@@ -253,7 +253,7 @@ export default function Diary() {
 
                     {/* Comments Toggle */}
                     <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mt-3 transition-colors" onClick={() => toggleComments(entry.id)}>
-                      {expandedComments.includes(entry.id) ? <><ChevronUp className="w-3.5 h-3.5" />收起留言</> : <><ChevronDown className="w-3.5 h-3.5" />查看 {entry.comments.length} 則留言</>}
+                      {expandedComments.includes(entry.id) ? <><ChevronUp className="w-3.5 h-3.5" />收起</> : <><ChevronDown className="w-3.5 h-3.5" />留言 ({entry.comments.length})</>}
                     </button>
 
                     {/* Comments Section */}

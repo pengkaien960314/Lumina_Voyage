@@ -185,9 +185,9 @@ export default function Hotels() {
                 <span className="text-sm text-muted-foreground">NT${minPrice.toLocaleString()} — NT${priceRange[0].toLocaleString()}</span>
               </div>
               <div className="flex gap-4 items-center">
-                <Input type="number" value={minPrice} onChange={(e) => setMinPrice(parseInt(e.target.value) || 0)} className="w-28 rounded-xl h-9 text-sm" placeholder="最低" />
+                <Input type="number" value={minPrice === 0 ? "0" : minPrice || ""} onChange={(e) => { const v = e.target.value; setMinPrice(v === "" ? 0 : parseInt(v) || 0); }} className="w-28 rounded-xl h-9 text-sm" placeholder="最低" />
                 <Slider value={priceRange} onValueChange={(v) => setPriceRange(v as [number])} min={0} max={40000} step={500} className="flex-1" />
-                <Input type="number" value={priceRange[0]} onChange={(e) => setPriceRange([parseInt(e.target.value) || 40000])} className="w-28 rounded-xl h-9 text-sm" placeholder="最高" />
+                <Input type="number" value={priceRange[0] || ""} onChange={(e) => { const v = e.target.value; setPriceRange([v === "" ? 40000 : parseInt(v) || 40000]); }} className="w-28 rounded-xl h-9 text-sm" placeholder="最高" />
               </div>
             </div>
           </motion.div>
@@ -329,7 +329,7 @@ export default function Hotels() {
                 </TabsContent>
 
                 <TabsContent value="booking" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-4">
                     <div className="space-y-2">
                       <Label className="text-sm">入住日期</Label>
                       <Input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="rounded-xl" />
@@ -345,10 +345,10 @@ export default function Hotels() {
                       {[1, 2, 3, 4, 5, 6].map((n) => (
                         <Button key={n} variant={bookingGuests === n && !customGuests ? "default" : "outline"} size="sm" className="rounded-full w-10 h-10 p-0" onClick={() => { setBookingGuests(n); setCustomGuests(""); }}>{n}</Button>
                       ))}
-                      <div className="flex items-center gap-1">
-                        <Button variant="outline" size="sm" className="rounded-full w-10 h-10 p-0" onClick={() => { const v = Math.max(1, (parseInt(customGuests) || bookingGuests) - 1); setCustomGuests(String(v)); }}><Minus className="w-3 h-3" /></Button>
-                        <Input type="number" value={customGuests} onChange={(e) => setCustomGuests(e.target.value)} placeholder="自訂" className="w-16 h-10 rounded-xl text-center text-sm" min={1} />
-                        <Button variant="outline" size="sm" className="rounded-full w-10 h-10 p-0" onClick={() => { const v = (parseInt(customGuests) || bookingGuests) + 1; setCustomGuests(String(v)); }}><PlusIcon className="w-3 h-3" /></Button>
+                      <div className="flex items-center gap-1 ml-2 border-l border-border/50 pl-2">
+                        <Button variant="outline" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => { const cur = parseInt(customGuests) || bookingGuests; const v = Math.max(1, cur - 1); setCustomGuests(String(v)); }}><Minus className="w-3 h-3" /></Button>
+                        <Input type="number" value={customGuests || String(bookingGuests)} onChange={(e) => { const v = e.target.value; setCustomGuests(v); if (v && parseInt(v) >= 1) setBookingGuests(parseInt(v)); }} className="w-14 h-8 rounded-lg text-center text-xs" min={1} />
+                        <Button variant="outline" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => { const cur = parseInt(customGuests) || bookingGuests; setCustomGuests(String(cur + 1)); }}><PlusIcon className="w-3 h-3" /></Button>
                       </div>
                     </div>
                   </div>

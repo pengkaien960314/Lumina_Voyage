@@ -11,7 +11,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Compass, Map, BookOpen, Hotel, Plane, Languages, Settings, LogOut, User, Menu, X, Leaf, CalendarCheck, Users,
+  Compass, Map, BookOpen, Hotel, Plane, Languages, Settings, LogOut, User, Menu, X, Leaf, CalendarCheck, Users, Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -23,6 +23,11 @@ const navItems = [
   { path: "/hotels", label: "旅館", icon: Hotel },
   { path: "/flights", label: "機票", icon: Plane },
   { path: "/tools", label: "工具", icon: Languages },
+];
+
+const aiItems = [
+  { path: "/ai-planner", label: "AI 行程", icon: Sparkles },
+  { path: "/ai-translate", label: "AI 翻譯", icon: Languages },
 ];
 
 export default function Navbar() {
@@ -38,7 +43,7 @@ export default function Navbar() {
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
               <Leaf className="w-5 h-5 text-primary" />
             </div>
-            <span className="text-xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)" }}>Wanderlust</span>
+            <span className="text-xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)" }}>Lumina Voyage</span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-1">
@@ -53,6 +58,26 @@ export default function Navbar() {
                 </Link>
               );
             })}
+            {/* AI Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${location.startsWith("/ai-") ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent"}`} style={{ fontFamily: "var(--font-sans)" }}>
+                  <Sparkles className="w-4 h-4" />AI
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-40">
+                {aiItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link key={item.path} href={item.path}>
+                      <DropdownMenuItem>
+                        <Icon className="mr-2 h-4 w-4" />{item.label}
+                      </DropdownMenuItem>
+                    </Link>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className="flex items-center gap-2">
@@ -107,6 +132,20 @@ export default function Navbar() {
                   </Link>
                 );
               })}
+              <div className="pt-2 mt-2 border-t border-border/30">
+                <p className="px-4 py-1 text-xs text-muted-foreground font-medium">AI 功能</p>
+                {aiItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location === item.path;
+                  return (
+                    <Link key={item.path} href={item.path}>
+                      <span onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent"}`} style={{ fontFamily: "var(--font-sans)" }}>
+                        <Icon className="w-5 h-5" />{item.label}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           </motion.div>
         )}

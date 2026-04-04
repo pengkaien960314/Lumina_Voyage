@@ -85,7 +85,7 @@ export default function Spots() {
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>探索景點</h1>
-            <p className="text-muted-foreground mb-6">發現世界各地令人驚嘆的旅遊目的地，點擊卡片翻轉查看詳情</p>
+            <p className="text-muted-foreground mb-6">發現世界各地令人驚嘆的旅遊目的地</p>
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -147,7 +147,7 @@ export default function Spots() {
                       <span className="text-sm font-semibold text-primary">{spot.price}</span>
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-2">{spot.description}</p>
-                    <p className="text-xs text-primary/70 mt-2 text-center">點擊翻轉查看詳情 →</p>
+
                   </div>
                 </div>
               </motion.div>
@@ -186,9 +186,7 @@ export default function Spots() {
                 <div className="relative h-48 overflow-hidden">
                   <img src={flippedSpot.image} alt={flippedSpot.name} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <button onClick={() => setFlippedId(null)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors">
-                    <X className="w-4 h-4" />
-                  </button>
+
                   <div className="absolute bottom-4 left-4 right-4">
                     <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm rounded-full mb-2">{flippedSpot.category}</Badge>
                     <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{flippedSpot.name}</h2>

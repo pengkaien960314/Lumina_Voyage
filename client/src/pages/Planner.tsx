@@ -421,15 +421,13 @@ export default function Planner() {
           <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>編輯活動</DialogTitle></DialogHeader>
           {editingAct && (
             <div className="space-y-4 mt-2">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>時間</Label><Input type="time" value={editForm.time || ""} onChange={(e) => setEditForm({ ...editForm, time: e.target.value })} /></div>
-                <div className="space-y-2">
-                  <Label>類型</Label>
-                  <Select value={editForm.type || "sightseeing"} onValueChange={(v) => setEditForm({ ...editForm, type: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{activityTypes.map((t) => { const TI = t.icon; return <SelectItem key={t.value} value={t.value}><span className="flex items-center gap-2"><TI className="w-3.5 h-3.5" />{t.label}</span></SelectItem>; })}</SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2"><Label>時間</Label><Input type="time" value={editForm.time || ""} onChange={(e) => setEditForm({ ...editForm, time: e.target.value })} /></div>
+              <div className="space-y-2">
+                <Label>類型</Label>
+                <Select value={editForm.type || "sightseeing"} onValueChange={(v) => setEditForm({ ...editForm, type: v })}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>{activityTypes.map((t) => { const TI = t.icon; return <SelectItem key={t.value} value={t.value}><span className="flex items-center gap-2"><TI className="w-3.5 h-3.5" />{t.label}</span></SelectItem>; })}</SelectContent>
+                </Select>
               </div>
               <div className="space-y-2"><Label>活動名稱</Label><Input value={editForm.title || ""} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} /></div>
               <div className="space-y-2"><Label>地點</Label><Input value={editForm.location || ""} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} /></div>

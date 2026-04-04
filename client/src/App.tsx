@@ -22,6 +22,8 @@ import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Friends from "./pages/Friends";
+import AiPlanner from "./pages/AiPlanner";
+import AiTranslate from "./pages/AiTranslate";
 
 function Router() {
   return (
@@ -41,6 +43,8 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/friends" component={Friends} />
+      <Route path="/ai-planner" component={AiPlanner} />
+      <Route path="/ai-translate" component={AiTranslate} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

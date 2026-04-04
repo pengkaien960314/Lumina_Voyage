@@ -98,7 +98,7 @@ export default function Home() {
               <span className="text-amber-300">生命的詩篇</span>
             </h1>
             <p className="text-lg text-white/85 mb-8 max-w-lg leading-relaxed">
-              從規劃到出發，從探索到記錄。Wanderlust 陪伴你走過每一段旅途，
+              從規劃到出發，從探索到記錄。Lumina Voyage 陪伴你走過每一段旅途，
               讓每一次冒險都成為永恆的回憶。
             </p>
             <div className="flex flex-wrap gap-4">
@@ -301,7 +301,7 @@ export default function Home() {
                 準備好出發了嗎？
               </h2>
               <p className="text-white/80 mb-8 max-w-lg mx-auto">
-                加入 Wanderlust，與數千位旅人一起探索世界的每一個角落
+                加入 Lumina Voyage，與數千位旅人一起探索世界的每一個角落
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link href="/login">

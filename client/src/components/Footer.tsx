@@ -17,7 +17,7 @@ export default function Footer() {
                 <Leaf className="w-4 h-4 text-primary" />
               </div>
               <span className="text-lg font-bold" style={{ fontFamily: "var(--font-display)" }}>
-                Wanderlust
+                Lumina Voyage
               </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -57,7 +57,7 @@ export default function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
-            © 2026 Wanderlust 旅行探索. 資管系專題作品.
+            © 2026 Lumina Voyage. 資管系專題作品.
           </p>
           <p className="text-xs text-muted-foreground">
             以自然之心，探索世界之美
