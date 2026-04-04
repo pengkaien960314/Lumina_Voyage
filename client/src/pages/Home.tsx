@@ -1,68 +1,139 @@
 /*
  * Design: Organic Naturalism — Home Page
  * - Full-width hero with parallax-like effect
- * - Featured destinations in organic cards
- * - Feature highlights with earth-tone icons
- * - Warm, inviting atmosphere
+ * - Featured destinations with flip cards (same as Spots)
+ * - Feature icons with fullscreen zoom then navigate
+ * - Milestone system in avatar popover
  */
-import { Link } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Map, BookOpen, Hotel, Plane, Languages, DollarSign,
-  Cloud, Navigation, ArrowRight, Star, MapPin, Calendar,
+  Cloud, Navigation, ArrowRight, Star, MapPin, Train, Clock, Ticket, TreePine, ChevronLeft,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const featuredSpots = [
+interface FeaturedSpot {
+  id: number;
+  name: string;
+  location: string;
+  rating: number;
+  reviews: number;
+  category: string;
+  image: string;
+  description: string;
+  priceJPY: string;
+  priceTWD: string;
+  highlights: string[];
+  access: string;
+  hours: string;
+  bestSeason: string;
+  backDesc: string;
+  tips: string;
+}
+
+const featuredSpots: FeaturedSpot[] = [
   {
-    id: 1,
-    name: "京都・伏見稻荷",
-    location: "日本京都",
-    rating: 4.9,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/spot-kyoto-VxfUvqn5Qab4pRbZXHFPXx.webp",
-    description: "千本鳥居的壯觀景象，感受日本傳統文化的魅力",
+    id: 1, name: "小樽運河", location: "北海道小樽市", rating: 4.8, reviews: 12453, category: "文化",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hcx6bCKuu4qj_230abfb2.jpg",
+    description: "浪漫運河與石造倉庫群，冬季雪燈路超夢幻",
+    priceJPY: "免費", priceTWD: "免費",
+    highlights: ["雪燈路祭典", "玻璃工藝體驗", "運河遊船", "壽司屋通"],
+    access: "JR小樽站步行10分鐘", hours: "全天開放", bestSeason: "冬季（12-2月）",
+    backDesc: "小樽運河建於1923年，全長1,140公尺，沿岸的石造倉庫群已改建為餐廳、商店和博物館。冬季的雪燈路祭典期間，運河兩旁點滿蠟燭與雪燈，營造出如夢似幻的氛圍。",
+    tips: "建議傍晚前抵達，可以同時欣賞日景與夜景。"
   },
   {
-    id: 2,
-    name: "聖托里尼",
-    location: "希臘愛琴海",
-    rating: 4.8,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/spot-santorini-XZm7tE8W65MFkrA8cQULBz.webp",
-    description: "白色建築與藍色穹頂的夢幻組合",
+    id: 2, name: "函館山夜景", location: "北海道函館市", rating: 4.9, reviews: 21345, category: "城市",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg",
+    description: "世界三大夜景之一，百萬夜景盡收眼底",
+    priceJPY: "¥1,800", priceTWD: "約NT$390",
+    highlights: ["纜車體驗", "星形城郭", "日落時分最美", "函館朝市"],
+    access: "函館山纜車3分鐘", hours: "10:00-22:00", bestSeason: "全年",
+    backDesc: "函館山標高334公尺，從山頂展望台可以俯瞰函館市區兩側被海灣環繞的獨特扇形地形，入選世界三大夜景。",
+    tips: "建議日落前30分鐘上山，可以同時欣賞夕陽與夜景的完美過渡。"
   },
   {
-    id: 3,
-    name: "峇里島・烏布",
-    location: "印尼峇里島",
-    rating: 4.7,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/spot-bali-BsoH2DrzKRxcnT4gKhZpEX.webp",
-    description: "翠綠梯田與古老寺廟的熱帶天堂",
+    id: 3, name: "美瑛青池", location: "北海道美瑛町", rating: 4.8, reviews: 9876, category: "自然",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/sjxMy1SHqrpv_20205869.jpg",
+    description: "Apple桌布取景地，夢幻的鈷藍色湖面",
+    priceJPY: "免費", priceTWD: "免費",
+    highlights: ["冬季點燈", "Apple桌布", "白鬚瀑布", "拼布之路"],
+    access: "JR美瑛站開車20分鐘", hours: "全天開放", bestSeason: "全年",
+    backDesc: "青池因被Apple選為macOS桌布而聞名世界。湖水呈現獨特的鈷藍色，枯木佇立水中的景象如夢似幻。",
+    tips: "清晨無風時湖面最平靜，倒影最美。冬季點燈期間的夜景非常夢幻。"
   },
 ];
 
 const features = [
-  { icon: Map, title: "景點瀏覽", desc: "探索全球精選景點", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
-  { icon: BookOpen, title: "行程規劃", desc: "智慧安排你的旅程", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/30" },
-  { icon: Hotel, title: "旅館預訂", desc: "精選優質住宿", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-950/30" },
-  { icon: Plane, title: "機票查詢", desc: "即時比價搜尋", color: "text-sky-600 dark:text-sky-400", bg: "bg-sky-50 dark:bg-sky-950/30" },
-  { icon: Languages, title: "即時翻譯", desc: "跨越語言障礙", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/30" },
-  { icon: DollarSign, title: "匯率換算", desc: "即時匯率資訊", color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-950/30" },
-  { icon: Cloud, title: "天氣預報", desc: "掌握旅途天氣", color: "text-cyan-600 dark:text-cyan-400", bg: "bg-cyan-50 dark:bg-cyan-950/30" },
-  { icon: Navigation, title: "地圖導航", desc: "精準路線指引", color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-950/30" },
+  { icon: Map, title: "景點瀏覽", desc: "探索全球精選景點", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/30", path: "/spots" },
+  { icon: BookOpen, title: "行程規劃", desc: "智慧安排你的旅程", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/30", path: "/planner" },
+  { icon: Hotel, title: "旅館預訂", desc: "精選優質住宿", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-950/30", path: "/hotels" },
+  { icon: Plane, title: "機票查詢", desc: "即時比價搜尋", color: "text-sky-600 dark:text-sky-400", bg: "bg-sky-50 dark:bg-sky-950/30", path: "/flights" },
+  { icon: Languages, title: "即時翻譯", desc: "跨越語言障礙", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/30", path: "/tools" },
+  { icon: DollarSign, title: "匯率換算", desc: "即時匯率資訊", color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-950/30", path: "/tools" },
+  { icon: Cloud, title: "天氣預報", desc: "掌握旅途天氣", color: "text-cyan-600 dark:text-cyan-400", bg: "bg-cyan-50 dark:bg-cyan-950/30", path: "/tools" },
+  { icon: Navigation, title: "地圖導航", desc: "精準路線指引", color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-950/30", path: "/tools" },
 ];
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
+    opacity: 1, y: 0,
     transition: { duration: 0.6, delay: i * 0.1 },
   }),
 };
 
 export default function Home() {
+  const [, navigate] = useLocation();
+  const [flippedId, setFlippedId] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [zoomedFeature, setZoomedFeature] = useState<number | null>(null);
+
+  const handleFlip = (id: number) => {
+    if (flippedId === id) {
+      setExpanded(false);
+      setTimeout(() => setFlippedId(null), 300);
+    } else {
+      setFlippedId(id);
+      setTimeout(() => setExpanded(true), 400);
+    }
+  };
+
+  const handleCloseFlip = () => {
+    setExpanded(false);
+    setTimeout(() => setFlippedId(null), 300);
+  };
+
+  const flippedSpot = featuredSpots.find((s) => s.id === flippedId);
+
+  const handleFeatureClick = (index: number) => {
+    setZoomedFeature(index);
+    setTimeout(() => {
+      navigate(features[index].path);
+      setZoomedFeature(null);
+    }, 600);
+  };
+
+  useEffect(() => {
+    if (flippedId) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [flippedId]);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === "Escape") handleCloseFlip(); };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -84,16 +155,10 @@ export default function Home() {
             transition={{ duration: 1 }}
             className="max-w-2xl"
           >
-            <span
-              className="inline-block px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-white/90 text-sm mb-6 border border-white/20"
-              style={{ fontFamily: "var(--font-sans)" }}
-            >
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-white/90 text-sm mb-6 border border-white/20" style={{ fontFamily: "var(--font-sans)" }}>
               探索 · 體驗 · 記錄
             </span>
-            <h1
-              className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight" style={{ fontFamily: "var(--font-display)" }}>
               讓旅行成為<br />
               <span className="text-amber-300">生命的詩篇</span>
             </h1>
@@ -103,22 +168,12 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="/spots">
-                <Button
-                  size="lg"
-                  className="rounded-full px-8 h-13 text-base gap-2 bg-white text-stone-800 hover:bg-white/90"
-                  style={{ fontFamily: "var(--font-sans)" }}
-                >
-                  開始探索
-                  <ArrowRight className="w-4 h-4" />
+                <Button size="lg" className="rounded-full px-8 h-13 text-base gap-2 bg-white text-stone-800 hover:bg-white/90" style={{ fontFamily: "var(--font-sans)" }}>
+                  開始探索 <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
               <Link href="/planner">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="rounded-full px-8 h-13 text-base border-white/40 text-white hover:bg-white/10 bg-transparent"
-                  style={{ fontFamily: "var(--font-sans)" }}
-                >
+                <Button size="lg" variant="outline" className="rounded-full px-8 h-13 text-base border-white/40 text-white hover:bg-white/10 bg-transparent" style={{ fontFamily: "var(--font-sans)" }}>
                   規劃行程
                 </Button>
               </Link>
@@ -126,66 +181,57 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Scroll indicator */}
-        <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
+        <motion.div className="absolute bottom-8 left-1/2 -translate-x-1/2" animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity }}>
           <div className="w-6 h-10 rounded-full border-2 border-white/40 flex items-start justify-center p-1.5">
             <div className="w-1.5 h-3 rounded-full bg-white/60" />
           </div>
         </motion.div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - Click to zoom fullscreen then navigate */}
       <section className="py-20 watercolor-wash">
         <div className="container relative z-10">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="text-center mb-14"
-          >
-            <motion.h2
-              variants={fadeUp}
-              custom={0}
-              className="text-3xl md:text-4xl font-bold mb-4"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="text-center mb-14">
+            <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: "var(--font-display)" }}>
               一站式旅行體驗
             </motion.h2>
-            <motion.p
-              variants={fadeUp}
-              custom={1}
-              className="text-muted-foreground max-w-xl mx-auto"
-            >
+            <motion.p variants={fadeUp} custom={1} className="text-muted-foreground max-w-xl mx-auto">
               從靈感到出發，我們提供你所需的一切旅行工具
             </motion.p>
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"
-          >
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {features.map((f, i) => {
               const Icon = f.icon;
+              const isZoomed = zoomedFeature === i;
               return (
                 <motion.div
                   key={f.title}
                   variants={fadeUp}
                   custom={i}
-                  className="group p-5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 hover:shadow-lg transition-all duration-400 text-center"
+                  className="relative cursor-pointer"
+                  onClick={() => handleFeatureClick(i)}
                 >
-                  <div className={`w-12 h-12 rounded-xl ${f.bg} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
-                    <Icon className={`w-6 h-6 ${f.color}`} />
-                  </div>
-                  <h3 className="font-semibold text-sm mb-1" style={{ fontFamily: "var(--font-sans)" }}>
-                    {f.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">{f.desc}</p>
+                  <motion.div
+                    className={`group p-5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 hover:shadow-lg transition-all duration-400 text-center ${isZoomed ? "z-[200]" : ""}`}
+                    animate={isZoomed ? {
+                      scale: 8,
+                      opacity: 0,
+                      zIndex: 200,
+                    } : {
+                      scale: 1,
+                      opacity: 1,
+                      zIndex: 1,
+                    }}
+                    transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    style={isZoomed ? { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)" } : {}}
+                  >
+                    <div className={`w-12 h-12 rounded-xl ${f.bg} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
+                      <Icon className={`w-6 h-6 ${f.color}`} />
+                    </div>
+                    <h3 className="font-semibold text-sm mb-1" style={{ fontFamily: "var(--font-sans)" }}>{f.title}</h3>
+                    <p className="text-xs text-muted-foreground">{f.desc}</p>
+                  </motion.div>
                 </motion.div>
               );
             })}
@@ -193,22 +239,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Destinations */}
+      {/* Featured Destinations - Flip Cards (same as Spots page) */}
       <section className="py-20 bg-secondary/30">
         <div className="container">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="flex items-end justify-between mb-12"
-          >
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="flex items-end justify-between mb-12">
             <div>
-              <motion.h2
-                variants={fadeUp}
-                custom={0}
-                className="text-3xl md:text-4xl font-bold mb-3"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
+              <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-bold mb-3" style={{ fontFamily: "var(--font-display)" }}>
                 精選目的地
               </motion.h2>
               <motion.p variants={fadeUp} custom={1} className="text-muted-foreground">
@@ -224,58 +260,146 @@ export default function Home() {
             </motion.div>
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featuredSpots.map((spot, i) => (
               <motion.div
                 key={spot.id}
                 variants={fadeUp}
                 custom={i}
-                className="organic-card overflow-hidden bg-card border border-border/50 group"
+                className="cursor-pointer"
+                onClick={() => handleFlip(spot.id)}
               >
-                <div className="relative aspect-[3/4] overflow-hidden">
-                  <img
-                    src={spot.image}
-                    alt={spot.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                      <span className="text-white text-sm font-medium">{spot.rating}</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-white mb-1" style={{ fontFamily: "var(--font-display)" }}>
-                      {spot.name}
-                    </h3>
-                    <div className="flex items-center gap-1.5 text-white/80 text-sm">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {spot.location}
+                <div className="organic-card overflow-hidden bg-card border border-border/50 group hover:shadow-lg transition-shadow duration-300">
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img src={spot.image} alt={spot.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <Badge className="absolute top-3 left-3 rounded-full bg-white/80 text-stone-700 backdrop-blur-sm border-0 text-xs">{spot.category}</Badge>
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <h3 className="text-white font-bold text-lg drop-shadow-lg" style={{ fontFamily: "var(--font-display)" }}>{spot.name}</h3>
+                      <div className="flex items-center gap-1.5 text-white/90 text-sm mt-1">
+                        <MapPin className="w-3.5 h-3.5" />{spot.location}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="p-5">
-                  <p className="text-sm text-muted-foreground mb-4">{spot.description}</p>
-                  <Link href={`/spots`}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="gap-2 text-primary p-0 h-auto"
-                      style={{ fontFamily: "var(--font-sans)" }}
-                    >
-                      了解更多 <ArrowRight className="w-3.5 h-3.5" />
-                    </Button>
-                  </Link>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                        <span className="text-sm font-medium">{spot.rating}</span>
+                        <span className="text-xs text-muted-foreground">({spot.reviews.toLocaleString()})</span>
+                      </div>
+                      <span className="text-sm font-semibold text-primary">
+                        {spot.priceJPY}{spot.priceTWD !== spot.priceJPY && spot.priceTWD !== "免費" ? ` (${spot.priceTWD})` : ""}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{spot.description}</p>
+                  </div>
                 </div>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
+
+      {/* Flip Modal for Featured Spots */}
+      <AnimatePresence>
+        {flippedSpot && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={handleCloseFlip}
+          >
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            <motion.div
+              className="relative z-10"
+              initial={{ rotateY: 0, scale: 0.6 }}
+              animate={{ rotateY: 180, scale: expanded ? 1 : 0.75, width: expanded ? "100%" : "320px" }}
+              exit={{ rotateY: 0, scale: 0.5, opacity: 0 }}
+              transition={{
+                rotateY: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+                scale: { duration: 0.4, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] },
+                width: { duration: 0.4, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] },
+              }}
+              style={{ perspective: "1200px", transformStyle: "preserve-3d", maxWidth: expanded ? "640px" : "320px" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="bg-card rounded-2xl overflow-hidden shadow-2xl border border-border/50" style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
+                <div className="relative h-52 overflow-hidden">
+                  <img src={flippedSpot.image} alt={flippedSpot.name} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm rounded-full mb-2">{flippedSpot.category}</Badge>
+                    <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{flippedSpot.name}</h2>
+                    <div className="flex items-center gap-3 text-white/90 text-sm mt-1">
+                      <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{flippedSpot.location}</span>
+                      <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />{flippedSpot.rating}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-5 space-y-4 max-h-[55vh] overflow-y-auto">
+                  <p className="text-sm leading-relaxed text-muted-foreground">{flippedSpot.backDesc}</p>
+                  <div>
+                    <h3 className="text-sm font-bold mb-2 flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-500" />亮點特色</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {flippedSpot.highlights.map((h) => (<Badge key={h} variant="outline" className="rounded-full text-xs">{h}</Badge>))}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800">
+                    <h3 className="text-sm font-bold mb-1 text-amber-700 dark:text-amber-400">旅行小貼士</h3>
+                    <p className="text-xs text-amber-600 dark:text-amber-300">{flippedSpot.tips}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="flex items-start gap-2 p-3 bg-secondary/50 rounded-xl">
+                      <Train className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div><span className="font-medium">交通方式</span><p className="text-muted-foreground text-xs mt-0.5">{flippedSpot.access}</p></div>
+                    </div>
+                    <div className="flex items-start gap-2 p-3 bg-secondary/50 rounded-xl">
+                      <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div><span className="font-medium">開放時間</span><p className="text-muted-foreground text-xs mt-0.5">{flippedSpot.hours}</p></div>
+                    </div>
+                    <div className="flex items-start gap-2 p-3 bg-secondary/50 rounded-xl">
+                      <Ticket className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div><span className="font-medium">門票</span><p className="text-muted-foreground text-xs mt-0.5">{flippedSpot.priceJPY}{flippedSpot.priceTWD !== flippedSpot.priceJPY && flippedSpot.priceTWD !== "免費" ? ` (${flippedSpot.priceTWD})` : ""}</p></div>
+                    </div>
+                    <div className="flex items-start gap-2 p-3 bg-secondary/50 rounded-xl">
+                      <TreePine className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div><span className="font-medium">最佳季節</span><p className="text-muted-foreground text-xs mt-0.5">{flippedSpot.bestSeason}</p></div>
+                    </div>
+                  </div>
+                  <Button className="w-full rounded-xl" variant="outline" onClick={handleCloseFlip}>
+                    <ChevronLeft className="w-4 h-4 mr-1" />返回
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Fullscreen zoom overlay for features */}
+      <AnimatePresence>
+        {zoomedFeature !== null && (
+          <motion.div
+            className="fixed inset-0 z-[150] flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              className={`w-32 h-32 rounded-3xl ${features[zoomedFeature].bg} flex items-center justify-center`}
+              initial={{ scale: 1 }}
+              animate={{ scale: 15, opacity: 0.3 }}
+              transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              {(() => { const Icon = features[zoomedFeature].icon; return <Icon className={`w-16 h-16 ${features[zoomedFeature].color}`} />; })()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* CTA Section */}
       <section className="py-20">
@@ -287,17 +411,10 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="relative rounded-3xl overflow-hidden"
           >
-            <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hero-bg-g7PvFnkctds2rCztknx8gW.webp"
-              alt="CTA"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
+            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hero-bg-g7PvFnkctds2rCztknx8gW.webp" alt="CTA" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/50" />
             <div className="relative z-10 py-16 px-8 md:px-16 text-center">
-              <h2
-                className="text-3xl md:text-4xl font-bold text-white mb-4"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4" style={{ fontFamily: "var(--font-display)" }}>
                 準備好出發了嗎？
               </h2>
               <p className="text-white/80 mb-8 max-w-lg mx-auto">
@@ -305,21 +422,12 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link href="/login">
-                  <Button
-                    size="lg"
-                    className="rounded-full px-8 bg-white text-stone-800 hover:bg-white/90"
-                    style={{ fontFamily: "var(--font-sans)" }}
-                  >
+                  <Button size="lg" className="rounded-full px-8 bg-white text-stone-800 hover:bg-white/90" style={{ fontFamily: "var(--font-sans)" }}>
                     免費加入
                   </Button>
                 </Link>
                 <Link href="/spots">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="rounded-full px-8 border-white/40 text-white hover:bg-white/10 bg-transparent"
-                    style={{ fontFamily: "var(--font-sans)" }}
-                  >
+                  <Button size="lg" variant="outline" className="rounded-full px-8 border-white/40 text-white hover:bg-white/10 bg-transparent" style={{ fontFamily: "var(--font-sans)" }}>
                     瀏覽景點
                   </Button>
                 </Link>

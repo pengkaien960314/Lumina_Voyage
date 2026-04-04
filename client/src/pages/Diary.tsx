@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BookOpen, Plus, MapPin, Calendar, Heart, MessageCircle, ImagePlus, Globe, Users, Star, Send, ChevronDown, ChevronUp } from "lucide-react";
+import { BookOpen, Plus, MapPin, Calendar, Heart, MessageCircle, ImagePlus, Globe, Users, Star, Send, ChevronDown, ChevronUp, Clock, Archive } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
@@ -91,6 +91,44 @@ const visibilityOptions = [
   { value: "bestFriends", label: "摯友可見", icon: Star },
 ];
 
+const historyEntries: DiaryEntry[] = [
+  {
+    id: "h1", title: "北海道的冬日童話", date: "2024-12-20", location: "日本北海道",
+    content: "小樽運河的雪景如夢似幻，運河兩旁的石造倉庫在白雪覆蓋下格外浪漫。走在堺町通，品嚐了著名的 LeTAO 雙層起司蛋糕，入口即化的口感讓人難忘。晚上泡了登別的溫泉，在零下的氣溫中享受露天風呂，看著雪花飄落在溫泉水面上，這就是冬天的北海道。",
+    image: "https://images.unsplash.com/photo-1551009175-15bdf9dcb580?w=800&q=80",
+    likes: 89, liked: true, mood: "❄️", visibility: "public", comments: [
+      { id: "hc1", author: "雪國愛好者", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=snow", text: "小樽運河的夜景超美的！", date: "2024-12-21" },
+    ],
+    author: "旅行者小林", authorAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=kobayashi",
+  },
+  {
+    id: "h2", title: "倫敦的雨天漫步", date: "2024-10-05", location: "英國倫敦",
+    content: "倫敦的秋天總是帶著一絲憂鬱的美。撐著傘走過泰晤士河畔，大笨鐘在雨霧中若隱若現。在Borough Market品嚐了正宗的Fish & Chips，外酥內嫩。下午在大英博物館待了整整三個小時，羅塞塔石碑和埃及木乃伊讓人嘆為觀止。",
+    image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80",
+    likes: 56, liked: false, mood: "🌧️", visibility: "friends", comments: [
+      { id: "hc2", author: "英倫控", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=london", text: "Borough Market 的美食真的超多選擇！", date: "2024-10-06" },
+      { id: "hc3", author: "博物館迷", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=museum", text: "大英博物館可以逛一整天都不夠", date: "2024-10-07" },
+    ],
+    author: "攝影師小陳", authorAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=chen",
+  },
+  {
+    id: "h3", title: "紐約的不夜城", date: "2024-07-15", location: "美國紐約",
+    content: "時代廣場的霓虹燈讓人目眩神迷，即使是深夜也人潮洶湧。在中央公園慢跑，感受這座城市難得的寧靜。登上帝國大廈的觀景台，俯瞰整個曼哈頓的天際線，那一刻真的覺得紐約是世界的中心。晚上在百老匯看了《歌劇魅影》，被震撼到說不出話。",
+    image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80",
+    likes: 73, liked: true, mood: "🗽", visibility: "public", comments: [
+      { id: "hc4", author: "百老匯迷", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=broadway", text: "歌劇魅影真的是必看！", date: "2024-07-16" },
+    ],
+    author: "花草控小美", authorAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=mei",
+  },
+  {
+    id: "h4", title: "首爾的美食之旅", date: "2024-04-10", location: "韓國首爾",
+    content: "明洞的街頭小吃讓人停不下來，辣炒年糕、魚板串、雞蛋糕⋯⋯每一樣都好吃到不行。在北村韓屋村穿了韓服拍照，傳統建築配上春天的櫻花，美得像畫一樣。晚上去了弘大的夜市，看了街頭表演，感受首爾年輕人的活力。",
+    image: "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=800&q=80",
+    likes: 61, liked: false, mood: "🍜", visibility: "bestFriends", comments: [],
+    author: "旅行者小林", authorAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=kobayashi",
+  },
+];
+
 export default function Diary() {
   const [entries, setEntries] = useState<DiaryEntry[]>(sampleEntries);
   const [expandedComments, setExpandedComments] = useState<string[]>([]);
@@ -100,6 +138,7 @@ export default function Diary() {
   const [newContent, setNewContent] = useState("");
   const [newLocation, setNewLocation] = useState("");
   const [newVisibility, setNewVisibility] = useState<"public" | "friends" | "bestFriends">("public");
+  const [activeTab, setActiveTab] = useState<"current" | "history">("current");
 
   const toggleLike = (id: string) => {
     setEntries((prev) => prev.map((d) => d.id === id ? { ...d, liked: !d.liked, likes: d.liked ? d.likes - 1 : d.likes + 1 } : d));
@@ -154,6 +193,15 @@ export default function Diary() {
                 <h1 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: "var(--font-display)" }}>旅遊日記</h1>
               </div>
               <p className="text-muted-foreground">記錄旅途中的每一份感動與回憶</p>
+              {/* Tabs */}
+              <div className="flex gap-2 mt-4">
+                <button onClick={() => setActiveTab("current")} className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${activeTab === "current" ? "bg-primary text-primary-foreground" : "bg-accent/50 text-muted-foreground hover:bg-accent"}`}>
+                  <BookOpen className="w-4 h-4" />最新日記
+                </button>
+                <button onClick={() => setActiveTab("history")} className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${activeTab === "history" ? "bg-primary text-primary-foreground" : "bg-accent/50 text-muted-foreground hover:bg-accent"}`}>
+                  <Archive className="w-4 h-4" />歷史日記
+                </button>
+              </div>
             </div>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
@@ -201,8 +249,16 @@ export default function Diary() {
 
       <section className="py-8 flex-1">
         <div className="container max-w-2xl">
+          {activeTab === "history" && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Clock className="w-5 h-5 text-muted-foreground" />
+                <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)" }}>過往旅行回憶</h2>
+              </div>
+            </div>
+          )}
           <div className="space-y-6">
-            {entries.map((entry, i) => (
+            {(activeTab === "current" ? entries : historyEntries).map((entry, i) => (
               <motion.div key={entry.id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: i * 0.1 }}>
                 <Card className="overflow-hidden organic-card border-border/50">
                   {/* Author Header */}

@@ -350,12 +350,14 @@ ${specialRequests ? `特殊需求：${specialRequests}` : ""}
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">旅客人數</Label>
                       <Input
-                        type="number"
-                        value={travelers}
-                        onChange={(e) =>
-                          setTravelers(Math.max(1, parseInt(e.target.value) || 1))
-                        }
-                        min={1}
+                        type="text"
+                        inputMode="numeric"
+                        value={travelers === 0 ? "" : String(travelers)}
+                        onChange={(e) => {
+                          const v = e.target.value.replace(/[^0-9]/g, "");
+                          setTravelers(v === "" ? 0 : parseInt(v));
+                        }}
+                        placeholder="1"
                         className="rounded-xl"
                       />
                     </div>

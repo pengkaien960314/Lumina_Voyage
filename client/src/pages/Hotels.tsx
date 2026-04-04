@@ -53,7 +53,7 @@ interface Hotel {
 const hotels: Hotel[] = [
   {
     id: 1, name: "札幌 JR Tower 日航酒店", location: "北海道札幌市", address: "北海道札幌市中央區北5條西2丁目5番地", phone: "+81-11-251-2222", website: "https://www.jrhotels.co.jp", rating: 4.7, price: 6800, currency: "TWD",
-    images: ["https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80", "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800&q=80", "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80"],
+    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/x39aXpwEtLst_8846c9e7.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/LRUGkcBfWVtk_7ef685d3.jpg"],
     amenities: ["wifi", "parking", "breakfast", "gym", "restaurant"], type: "商務", rooms: 350,
     description: "直通 JR 札幌站，交通極為便利。酒店位於 JR Tower 高層，客房可俯瞰札幌市區全景。設有多間餐廳、健身中心及天然溫泉大浴場，是商務與觀光旅客的理想選擇。",
     highlights: ["直通 JR 札幌站", "高層景觀客房", "天然溫泉大浴場", "多間特色餐廳"],
@@ -64,7 +64,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 2, name: "函館 La Vista 海峽之風", location: "北海道函館市", address: "北海道函館市豐川町12-6", phone: "+81-138-23-6111", website: "https://www.hotespa.net", rating: 4.8, price: 9200, currency: "TWD",
-    images: ["https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&q=80", "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80", "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80"],
+    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/pbWZIGqzFwb3_1cf8cb26.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/kJs3KSAvxgSG_5a6666d1.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/95POE5gU6sqd_5ef46c71.jpg"],
     amenities: ["wifi", "breakfast", "spa", "restaurant"], type: "溫泉旅館", rooms: 350,
     description: "位於函館灣區的人氣溫泉酒店，頂樓露天溫泉可眺望函館山和津輕海峽。以豐盛的海鮮自助早餐聞名，連續多年獲得旅客高度評價。",
     highlights: ["頂樓露天溫泉", "海鮮自助早餐", "函館灣區絕佳位置", "可眺望函館山"],
@@ -75,7 +75,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 3, name: "星野 TOMAMU 度假村", location: "北海道占冠村", address: "北海道勇拂郡占冠村中TOMAMU", phone: "+81-167-58-1111", website: "https://www.snowtomamu.jp", rating: 4.9, price: 14500, currency: "TWD",
-    images: ["https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80", "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80", "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&q=80"],
+    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/rF49zu1jbWf6_d55a82e5.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/SSs2wBQG9ItV_30bd75ef.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/LRUGkcBfWVtk_7ef685d3.jpg"],
     amenities: ["wifi", "parking", "pool", "gym", "restaurant", "spa"], type: "度假村", rooms: 200,
     description: "星野集團旗下的頂級度假村，冬季是粉雪天堂，夏季則有雲海平台和微笑海灘等設施。全年提供豐富的戶外活動和自然體驗，適合家庭和情侶。",
     highlights: ["雲海平台絕景", "冬季粉雪滑雪", "日本最大室內海灘", "星野集團頂級服務"],
@@ -86,7 +86,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 4, name: "小樽朝里克拉瑟酒店", location: "北海道小樽市", address: "北海道小樽市朝里川溫泉2丁目676", phone: "+81-134-52-3800", website: "https://www.classe-hotel.com", rating: 4.6, price: 7500, currency: "TWD",
-    images: ["https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80", "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800&q=80", "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&q=80"],
+    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/u4W9AXbKy8Dp_4a8d7b4b.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/wjGGKabeMPEH_11d64129.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hcx6bCKuu4qj_230abfb2.jpg"],
     amenities: ["wifi", "parking", "spa", "restaurant"], type: "溫泉旅館", rooms: 171,
     description: "位於小樽朝里川溫泉區的度假酒店，被大自然環繞。設有天然溫泉、室內外泳池及多間餐廳。距離小樽運河車程約15分鐘，是遠離喧囂的理想住所。",
     highlights: ["天然溫泉", "被大自然環繞", "近小樽運河", "四季不同景色"],
@@ -96,7 +96,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 5, name: "洞爺湖萬世閣", location: "北海道洞爺湖町", address: "北海道虻田郡洞爺湖町洞爺湖溫泉21", phone: "+81-142-73-3500", website: "https://www.toyamanseikaku.jp", rating: 4.5, price: 8800, currency: "TWD",
-    images: ["https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80", "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80", "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80"],
+    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/YlBFWcMSsdrX_e9bb0e08.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/sjxMy1SHqrpv_20205869.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/95POE5gU6sqd_5ef46c71.jpg"],
     amenities: ["wifi", "breakfast", "spa", "pool", "restaurant"], type: "溫泉旅館", rooms: 246,
     description: "面朝洞爺湖的大型溫泉旅館，露天溫泉可直接欣賞湖景和羊蹄山。每年4月至10月的花火大會期間，可從房間直接觀賞煙火，是北海道最受歡迎的溫泉旅館之一。",
     highlights: ["湖景露天溫泉", "花火大會觀賞", "羊蹄山絕景", "豐盛自助餐"],
@@ -107,12 +107,65 @@ const hotels: Hotel[] = [
   },
   {
     id: 6, name: "京都嵐山翠嵐豪華精選酒店", location: "日本京都", address: "京都府京都市右京區嵯峨天龍寺芒之馬場町12", phone: "+81-75-872-0101", website: "https://www.suirankyoto.com", rating: 4.9, price: 12800, currency: "TWD",
-    images: ["https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80", "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80", "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&q=80"],
+    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/x39aXpwEtLst_8846c9e7.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/rF49zu1jbWf6_d55a82e5.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/SSs2wBQG9ItV_30bd75ef.jpg"],
     amenities: ["wifi", "parking", "spa", "restaurant"], type: "豪華", rooms: 39,
     description: "嵐山保津川畔的頂級酒店，融合日式傳統與現代奢華。每間客房都能欣賞到嵐山的自然美景，設有私人溫泉和米其林餐廳。",
     highlights: ["保津川畔絕景", "私人溫泉", "米其林餐廳", "日式奢華體驗"],
     reviews: [
       { author: "奢旅達人", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=luxury", rating: 5, text: "此生住過最美的酒店之一，每個細節都很完美。", date: "2025-11-01" },
+    ],
+  },
+  {
+    id: 7, name: "東京安達仕酒店", location: "日本東京", address: "東京都港區虎之門1-23-4", phone: "+81-3-6830-1234", website: "https://www.hyatt.com/andaz", rating: 4.8, price: 11500, currency: "TWD",
+    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/kJs3KSAvxgSG_5a6666d1.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/LRUGkcBfWVtk_7ef685d3.jpg"],
+    amenities: ["wifi", "gym", "spa", "restaurant", "parking"], type: "設計", rooms: 164,
+    description: "位於虎之門之丘52樓的頂級設計酒店，以「在地文化體驗」為核心理念。大廳設計融入日本傳統工藝元素，客房採用自然木質色調搭配落地窗，可俯瞰東京鐵塔和東京灣全景。",
+    highlights: ["52樓高空景觀", "東京鐵塔全景", "日式設計美學", "頂級健身中心"],
+    reviews: [
+      { author: "設計控", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=design", rating: 5, text: "房間設計太美了，每個角落都是拍照點。東京鐵塔夜景超震撼！", date: "2026-03-01" },
+      { author: "商務旅客", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=business", rating: 4, text: "服務很好，位置方便，適合商務出差。", date: "2026-02-10" },
+    ],
+  },
+  {
+    id: 8, name: "大阪瑞吉酒店", location: "日本大阪", address: "大阪府大阪市中央區本町3-6-12", phone: "+81-6-6258-3333", website: "https://www.marriott.com/stregis", rating: 4.7, price: 10200, currency: "TWD",
+    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/pbWZIGqzFwb3_1cf8cb26.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/wjGGKabeMPEH_11d64129.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hcx6bCKuu4qj_230abfb2.jpg"],
+    amenities: ["wifi", "gym", "spa", "restaurant", "breakfast"], type: "豪華", rooms: 160,
+    description: "位於大阪本町的頂級酒店，以精緻的管家服務聞名。酒店內設有多間米其林推薦餐廳，頂樓酒吧可俯瞰大阪城市天際線。距離心齋橋和道頓堀步行僅10分鐘。",
+    highlights: ["專屬管家服務", "米其林推薦餐廳", "近心齋橋商圈", "頂樓景觀酒吧"],
+    reviews: [
+      { author: "美食愛好者", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=osaka", rating: 5, text: "管家服務太貼心了！幫我們預約了隱藏版的壽司店。", date: "2026-01-15" },
+    ],
+  },
+  {
+    id: 9, name: "沖繩海麗客蘭尼度假村", location: "日本沖繩", address: "沖繩縣國頭郡恩納村名嘉真ヤーシ原2260-36", phone: "+81-98-965-0707", website: "https://www.kahanuresort.com", rating: 4.6, price: 8500, currency: "TWD",
+    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/YlBFWcMSsdrX_e9bb0e08.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/rF49zu1jbWf6_d55a82e5.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/sjxMy1SHqrpv_20205869.jpg"],
+    amenities: ["wifi", "pool", "spa", "restaurant", "parking"], type: "度假村", rooms: 315,
+    description: "面朝東海的沖繩頂級海濱度假村，擁有私人沙灘和多個無邊際泳池。提供浮潛、潛水、獨木舟等豐富水上活動，是享受沖繩碧海藍天的理想選擇。",
+    highlights: ["私人沙灘", "無邊際泳池", "豐富水上活動", "海景客房"],
+    reviews: [
+      { author: "海島控", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=beach", rating: 5, text: "沖繩的海太美了！度假村的私人沙灘人很少，超放鬆。", date: "2025-07-20" },
+      { author: "潛水愛好者", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=diver", rating: 4, text: "浮潛看到了好多熱帶魚，泳池也很讚。", date: "2025-08-05" },
+    ],
+  },
+  {
+    id: 10, name: "首爾四季酒店", location: "韓國首爾", address: "首爾特別市鍾路區新門內路97", phone: "+82-2-6388-5000", website: "https://www.fourseasons.com/seoul", rating: 4.9, price: 13200, currency: "TWD",
+    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/u4W9AXbKy8Dp_4a8d7b4b.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/x39aXpwEtLst_8846c9e7.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/SSs2wBQG9ItV_30bd75ef.jpg"],
+    amenities: ["wifi", "gym", "spa", "pool", "restaurant", "breakfast"], type: "豪華", rooms: 317,
+    description: "位於光化門廣場旁的頂級酒店，可俯瞰景福宮和北漢山。設有韓國最大的酒店水療中心、室內泳池及多間獲獎餐廳。距離明洞、北村韓屋村等熱門景點交通便利。",
+    highlights: ["景福宮全景", "頂級水療中心", "近光化門商圈", "獲獎餐廳"],
+    reviews: [
+      { author: "韓流迷", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=kpop", rating: 5, text: "從房間看景福宮的夜景太夢幻了！水療中心也超棒。", date: "2026-03-15" },
+      { author: "購物達人", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=shopping", rating: 5, text: "位置超好，走路就能到明洞和光化門，購物超方便。", date: "2026-02-20" },
+    ],
+  },
+  {
+    id: 11, name: "曼谷文華東方酒店", location: "泰國曼谷", address: "48 Oriental Avenue, Bangkok 10500", phone: "+66-2-659-9000", website: "https://www.mandarinoriental.com/bangkok", rating: 4.8, price: 7800, currency: "TWD",
+    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/95POE5gU6sqd_5ef46c71.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/kJs3KSAvxgSG_5a6666d1.jpg"],
+    amenities: ["wifi", "pool", "spa", "gym", "restaurant", "breakfast"], type: "經典", rooms: 393,
+    description: "昭披耶河畔的傳奇酒店，自1876年開業以來一直是亞洲最頂級的酒店之一。擁有獲獎無數的泰式水療、河畔無邊際泳池及多間世界級餐廳，是體驗曼谷奢華的首選。",
+    highlights: ["百年傳奇酒店", "昭披耶河畔", "頂級泰式水療", "河畔無邊際泳池"],
+    reviews: [
+      { author: "奢旅達人", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=luxtravel", rating: 5, text: "不愧是亞洲最好的酒店之一，服務無可挑剔。", date: "2025-12-10" },
     ],
   },
 ];
@@ -185,9 +238,9 @@ export default function Hotels() {
                 <span className="text-sm text-muted-foreground">NT${minPrice.toLocaleString()} — NT${priceRange[0].toLocaleString()}</span>
               </div>
               <div className="flex gap-4 items-center">
-                <Input type="number" value={minPrice === 0 ? "0" : minPrice || ""} onChange={(e) => { const v = e.target.value; setMinPrice(v === "" ? 0 : parseInt(v) || 0); }} className="w-28 rounded-xl h-9 text-sm" placeholder="最低" />
+                <Input type="text" inputMode="numeric" value={minPrice === 0 ? "" : String(minPrice)} onChange={(e) => { const v = e.target.value.replace(/[^0-9]/g, ""); setMinPrice(v === "" ? 0 : parseInt(v)); }} className="w-28 rounded-xl h-9 text-sm" placeholder="最低" />
                 <Slider value={priceRange} onValueChange={(v) => setPriceRange(v as [number])} min={0} max={40000} step={500} className="flex-1" />
-                <Input type="number" value={priceRange[0] || ""} onChange={(e) => { const v = e.target.value; setPriceRange([v === "" ? 40000 : parseInt(v) || 40000]); }} className="w-28 rounded-xl h-9 text-sm" placeholder="最高" />
+                <Input type="text" inputMode="numeric" value={priceRange[0] === 40000 ? "" : String(priceRange[0])} onChange={(e) => { const v = e.target.value.replace(/[^0-9]/g, ""); setPriceRange([v === "" ? 40000 : parseInt(v)]); }} className="w-28 rounded-xl h-9 text-sm" placeholder="最高" />
               </div>
             </div>
           </motion.div>
@@ -200,7 +253,7 @@ export default function Hotels() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((hotel, i) => (
               <motion.div key={hotel.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: i * 0.08 }}>
-                <Card className="organic-card overflow-hidden border-border/50 group h-full flex flex-col cursor-pointer" onClick={() => { setSelectedHotel(hotel); setDetailTab("info"); setDetailImageIdx(0); }}>
+                <Card className="organic-card overflow-hidden border-border/50 group h-full flex flex-col cursor-pointer !py-0 !gap-0" onClick={() => { setSelectedHotel(hotel); setDetailTab("info"); setDetailImageIdx(0); }}>
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img src={hotel.images[0]} alt={hotel.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <Badge className="absolute top-3 left-3 rounded-full bg-white/90 text-stone-700 border-0">{hotel.type}</Badge>
@@ -282,7 +335,10 @@ export default function Hotels() {
                     <div className="flex items-center gap-2 text-sm"><Phone className="w-4 h-4 text-primary" /><span>{selectedHotel.phone}</span></div>
                     <div className="flex items-center gap-2 text-sm"><Globe className="w-4 h-4 text-primary" /><a href={selectedHotel.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{selectedHotel.website}</a></div>
                   </div>
-                  <Button variant="outline" className="w-full rounded-xl gap-2" onClick={() => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedHotel.address)}`, "_blank"); }}><Navigation className="w-4 h-4" />在 Google Maps 中導航</Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1 rounded-xl gap-2" onClick={() => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedHotel.address)}`, "_blank"); }}><Navigation className="w-4 h-4" />Google Maps</Button>
+                    <Button variant="outline" className="flex-1 rounded-xl gap-2" onClick={() => { window.open(`https://maps.apple.com/?q=${encodeURIComponent(selectedHotel.address)}`, "_blank"); }}><Navigation className="w-4 h-4" />Apple Maps</Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="facilities">
@@ -330,24 +386,26 @@ export default function Hotels() {
 
                 <TabsContent value="booking" className="space-y-4">
                   <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm">入住日期</Label>
-                      <Input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="rounded-xl" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm">退房日期</Label>
-                      <Input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="rounded-xl" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-medium text-muted-foreground">入住日期</Label>
+                        <Input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="rounded-xl h-10 text-sm" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-medium text-muted-foreground">退房日期</Label>
+                        <Input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="rounded-xl h-10 text-sm" />
+                      </div>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="text-sm">房客人數</Label>
                     <div className="flex gap-2 flex-wrap">
-                      {[1, 2, 3, 4, 5, 6].map((n) => (
+                      {[1, 2, 3, 4, 5].map((n) => (
                         <Button key={n} variant={bookingGuests === n && !customGuests ? "default" : "outline"} size="sm" className="rounded-full w-10 h-10 p-0" onClick={() => { setBookingGuests(n); setCustomGuests(""); }}>{n}</Button>
                       ))}
                       <div className="flex items-center gap-1 ml-2 border-l border-border/50 pl-2">
                         <Button variant="outline" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => { const cur = parseInt(customGuests) || bookingGuests; const v = Math.max(1, cur - 1); setCustomGuests(String(v)); }}><Minus className="w-3 h-3" /></Button>
-                        <Input type="number" value={customGuests || String(bookingGuests)} onChange={(e) => { const v = e.target.value; setCustomGuests(v); if (v && parseInt(v) >= 1) setBookingGuests(parseInt(v)); }} className="w-14 h-8 rounded-lg text-center text-xs" min={1} />
+                        <Input type="text" inputMode="numeric" value={customGuests !== "" ? customGuests : String(bookingGuests)} onChange={(e) => { const v = e.target.value.replace(/[^0-9]/g, ""); setCustomGuests(v); if (v !== "" && parseInt(v) >= 1) setBookingGuests(parseInt(v)); }} className="w-14 h-8 rounded-lg text-center text-xs" />
                         <Button variant="outline" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => { const cur = parseInt(customGuests) || bookingGuests; setCustomGuests(String(cur + 1)); }}><PlusIcon className="w-3 h-3" /></Button>
                       </div>
                     </div>

@@ -7,8 +7,10 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { BookingProvider } from "./contexts/BookingContext";
 import { FriendProvider } from "./contexts/FriendContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
 import Spots from "./pages/Spots";
 import Planner from "./pages/Planner";
 import Diary from "./pages/Diary";
@@ -22,14 +24,14 @@ import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Friends from "./pages/Friends";
-import AiPlanner from "./pages/AiPlanner";
-import AiTranslate from "./pages/AiTranslate";
+import Milestones from "./pages/Milestones";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
+      <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/spots" component={Spots} />
       <Route path="/planner" component={Planner} />
       <Route path="/diary" component={Diary} />
@@ -43,8 +45,7 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/friends" component={Friends} />
-      <Route path="/ai-planner" component={AiPlanner} />
-      <Route path="/ai-translate" component={AiTranslate} />
+      <Route path="/milestones" component={Milestones} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -54,18 +55,20 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="light" switchable>
-        <AuthProvider>
-          <BookingProvider>
-            <FriendProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Router />
-              </TooltipProvider>
-            </FriendProvider>
-          </BookingProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <LanguageProvider>
+        <ThemeProvider defaultTheme="light" switchable>
+          <AuthProvider>
+            <BookingProvider>
+              <FriendProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Router />
+                </TooltipProvider>
+              </FriendProvider>
+            </BookingProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </LanguageProvider>
     </ErrorBoundary>
   );
 }

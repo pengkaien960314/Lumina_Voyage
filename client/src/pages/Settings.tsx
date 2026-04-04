@@ -1,15 +1,16 @@
 /*
  * Design: Organic Naturalism — Settings Page
- * - Dark mode toggle
- * - Language, notification, privacy settings
+ * - Dark mode toggle with preview
+ * - Multi-language support (10 languages)
+ * - Notification & privacy settings
  */
 import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Settings as SettingsIcon, Moon, Sun, Globe, Bell, Shield, Palette, Monitor } from "lucide-react";
+import { Settings as SettingsIcon, Moon, Sun, Globe, Bell, Shield, Palette, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
@@ -18,7 +19,7 @@ import { useState } from "react";
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
-  const [language, setLanguage] = useState("zh-TW");
+  const { lang, setLang, t, languages } = useLanguage();
   const [notifications, setNotifications] = useState(true);
   const [emailNotif, setEmailNotif] = useState(true);
   const [locationAccess, setLocationAccess] = useState(true);
@@ -30,15 +31,11 @@ export default function Settings() {
 
       <section className="pt-24 pb-8 bg-secondary/30">
         <div className="container">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <div className="flex items-center gap-3 mb-2">
               <SettingsIcon className="w-6 h-6 text-primary" />
               <h1 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
-                設定
+                {t("settings.title")}
               </h1>
             </div>
             <p className="text-muted-foreground">
@@ -51,16 +48,12 @@ export default function Settings() {
       <section className="py-8 flex-1">
         <div className="container max-w-2xl space-y-6">
           {/* Appearance */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg" style={{ fontFamily: "var(--font-display)" }}>
                   <Palette className="w-5 h-5 text-primary" />
-                  外觀設定
+                  {t("settings.theme")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -68,14 +61,10 @@ export default function Settings() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
-                      {theme === "dark" ? (
-                        <Moon className="w-5 h-5 text-primary" />
-                      ) : (
-                        <Sun className="w-5 h-5 text-amber-500" />
-                      )}
+                      {theme === "dark" ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-amber-500" />}
                     </div>
                     <div>
-                      <Label className="font-medium">深色模式</Label>
+                      <Label className="font-medium">{t("settings.dark")}</Label>
                       <p className="text-xs text-muted-foreground">
                         {theme === "dark" ? "目前使用深色主題" : "目前使用淺色主題"}
                       </p>
@@ -98,9 +87,7 @@ export default function Settings() {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => { if (theme === "dark") toggleTheme?.(); }}
-                      className={`p-4 rounded-xl border-2 transition-all ${
-                        theme === "light" ? "border-primary" : "border-border hover:border-primary/50"
-                      }`}
+                      className={`p-4 rounded-xl border-2 transition-all ${theme === "light" ? "border-primary" : "border-border hover:border-primary/50"}`}
                     >
                       <div className="w-full h-20 rounded-lg bg-[#F7F5F0] mb-2 flex items-end p-2">
                         <div className="flex gap-1">
@@ -110,14 +97,12 @@ export default function Settings() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Sun className="w-4 h-4" />
-                        <span className="text-sm font-medium">淺色</span>
+                        <span className="text-sm font-medium">{t("settings.light")}</span>
                       </div>
                     </button>
                     <button
                       onClick={() => { if (theme === "light") toggleTheme?.(); }}
-                      className={`p-4 rounded-xl border-2 transition-all ${
-                        theme === "dark" ? "border-primary" : "border-border hover:border-primary/50"
-                      }`}
+                      className={`p-4 rounded-xl border-2 transition-all ${theme === "dark" ? "border-primary" : "border-border hover:border-primary/50"}`}
                     >
                       <div className="w-full h-20 rounded-lg bg-[#1A1A18] mb-2 flex items-end p-2">
                         <div className="flex gap-1">
@@ -127,7 +112,7 @@ export default function Settings() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Moon className="w-4 h-4" />
-                        <span className="text-sm font-medium">深色</span>
+                        <span className="text-sm font-medium">{t("settings.dark")}</span>
                       </div>
                     </button>
                   </div>
@@ -137,49 +122,48 @@ export default function Settings() {
           </motion.div>
 
           {/* Language */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg" style={{ fontFamily: "var(--font-display)" }}>
                   <Globe className="w-5 h-5 text-primary" />
-                  語言與地區
+                  {t("settings.language")}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="font-medium">介面語言</Label>
-                    <p className="text-xs text-muted-foreground">選擇應用程式的顯示語言</p>
-                  </div>
-                  <Select value={language} onValueChange={(v) => { setLanguage(v); toast.success("語言已更新"); }}>
-                    <SelectTrigger className="w-40 rounded-xl"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="zh-TW">繁體中文</SelectItem>
-                      <SelectItem value="zh-CN">簡體中文</SelectItem>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="ja">日本語</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">選擇應用程式的顯示語言</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {languages.map(l => (
+                    <button
+                      key={l.code}
+                      onClick={() => { setLang(l.code); toast.success(`語言已切換為 ${l.nativeName}`); }}
+                      className={`relative p-3 rounded-xl border-2 text-left transition-all ${
+                        lang === l.code
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50 hover:bg-accent/30"
+                      }`}
+                    >
+                      {lang === l.code && (
+                        <Check className="absolute top-2 right-2 w-4 h-4 text-primary" />
+                      )}
+                      <p className="font-medium text-sm">{l.nativeName}</p>
+                      {l.name !== l.nativeName && (
+                        <p className="text-xs text-muted-foreground">{l.name}</p>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
           {/* Notifications */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }}>
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg" style={{ fontFamily: "var(--font-display)" }}>
                   <Bell className="w-5 h-5 text-primary" />
-                  通知設定
+                  {t("settings.notifications") || "通知設定"}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -203,11 +187,7 @@ export default function Settings() {
           </motion.div>
 
           {/* Privacy */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }}>
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg" style={{ fontFamily: "var(--font-display)" }}>

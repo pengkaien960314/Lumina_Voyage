@@ -1,26 +1,34 @@
-/*
+/**
  * Design: Organic Naturalism — Tools Page
- * - Real-time weather with popular spots
+ * - AI-powered translation with Gemini API + quick reply conversation
  * - Live currency exchange with many currencies
+ * - Real-time weather with popular spots
  * - Real navigation with geolocation
- * - Translation with quick reply conversation
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Languages, DollarSign, Cloud, Navigation, ArrowRightLeft, MapPin, Thermometer, Wind, Droplets, Eye, Sun, Moon, CloudRain, CloudSnow, Loader2, Send, RotateCcw, Locate, Search } from "lucide-react";
-import { motion } from "framer-motion";
+import {
+  Languages, DollarSign, Cloud, Navigation, ArrowRightLeft, MapPin,
+  Thermometer, Wind, Droplets, Eye, Sun, Moon, CloudRain, CloudSnow,
+  Loader2, Send, RotateCcw, Locate, Search, Sparkles, Copy, Volume2,
+  BookOpen, ChevronDown, ChevronUp, History,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { MapView } from "@/components/Map";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-/* ==================== TRANSLATION TAB ==================== */
+const GEMINI_API_KEY = "AIzaSyB_tEx6ILOy6U7NOwtYmclHwLWqNXyRQmQ";
+
+/* ==================== AI TRANSLATION TAB ==================== */
 interface ChatMessage {
   id: string;
   from: "A" | "B";
@@ -31,6 +39,7 @@ interface ChatMessage {
 
 const langOptions = [
   { code: "zh-TW", label: "繁體中文", flag: "🇹🇼" },
+  { code: "zh-CN", label: "簡體中文", flag: "🇨🇳" },
   { code: "ja", label: "日本語", flag: "🇯🇵" },
   { code: "en", label: "English", flag: "🇺🇸" },
   { code: "ko", label: "한국어", flag: "🇰🇷" },
@@ -38,55 +47,42 @@ const langOptions = [
   { code: "fr", label: "Français", flag: "🇫🇷" },
   { code: "es", label: "Español", flag: "🇪🇸" },
   { code: "de", label: "Deutsch", flag: "🇩🇪" },
+  { code: "it", label: "Italiano", flag: "🇮🇹" },
+  { code: "pt", label: "Português", flag: "🇵🇹" },
+  { code: "ru", label: "Русский", flag: "🇷🇺" },
+  { code: "ar", label: "العربية", flag: "🇸🇦" },
+  { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
+  { code: "id", label: "Bahasa Indonesia", flag: "🇮🇩" },
+  { code: "ms", label: "Bahasa Melayu", flag: "🇲🇾" },
 ];
 
-// Quick replies per language: [original, translated to the OTHER person's language]
-const quickRepliesMap: Record<string, Record<string, string[][]>> = {
-  "zh-TW": {
-    "ja": [["謝謝你的幫忙", "手伝ってくれてありがとう"], ["好的，沒問題", "はい、大丈夫です"], ["請問這個多少錢？", "これはいくらですか？"]],
-    "en": [["謝謝你的幫忙", "Thank you for your help"], ["好的，沒問題", "OK, no problem"], ["請問這個多少錢？", "How much is this?"]],
-    "ko": [["謝謝你的幫忙", "도와주셔서 감사합니다"], ["好的，沒問題", "네, 괜찮습니다"], ["請問這個多少錢？", "이거 얼마예요?"]],
-    "_default": [["謝謝你的幫忙", "Thank you"], ["好的，沒問題", "OK, no problem"], ["請問這個多少錢？", "How much?"]],
-  },
-  "ja": {
-    "zh-TW": [["ありがとうございます", "謝謝您"], ["はい、わかりました", "好的，我知道了"], ["すみません、もう一度お願いします", "不好意思，請再說一次"]],
-    "en": [["ありがとうございます", "Thank you very much"], ["はい、わかりました", "Yes, I understand"], ["すみません、もう一度お願いします", "Excuse me, could you say that again?"]],
-    "_default": [["ありがとうございます", "Thank you"], ["はい、わかりました", "Yes, understood"], ["すみません", "Excuse me"]],
-  },
-  "en": {
-    "zh-TW": [["Thank you very much", "非常感謝"], ["Yes, I understand", "是的，我了解"], ["Could you repeat that?", "可以再說一次嗎？"]],
-    "ja": [["Thank you very much", "どうもありがとうございます"], ["Yes, I understand", "はい、わかりました"], ["Could you repeat that?", "もう一度言ってもらえますか？"]],
-    "_default": [["Thank you very much", "Thank you"], ["Yes, I understand", "Understood"], ["Could you repeat that?", "Repeat please"]],
-  },
-  "ko": {
-    "zh-TW": [["감사합니다", "謝謝"], ["네, 알겠습니다", "好的，我知道了"], ["다시 한번 말씀해 주세요", "請再說一次"]],
-    "_default": [["감사합니다", "Thank you"], ["네, 알겠습니다", "Yes, understood"], ["다시 한번 말씀해 주세요", "Please say again"]],
-  },
-  "_default": {
-    "_default": [["Thank you", "謝謝"], ["Yes, understood", "好的"], ["Please repeat", "請再說一次"]],
-  },
-};
+const travelPhrases = [
+  { category: "基本問候", phrases: ["你好", "謝謝", "不好意思", "再見", "請問"] },
+  { category: "交通", phrases: ["請問車站在哪裡？", "我要搭計程車", "這班車到哪裡？", "多少錢？"] },
+  { category: "餐廳", phrases: ["請給我菜單", "我要點餐", "結帳", "好吃", "不辣"] },
+  { category: "住宿", phrases: ["我有預訂", "幾點退房？", "Wi-Fi 密碼是什麼？", "可以寄放行李嗎？"] },
+  { category: "緊急", phrases: ["請幫幫我", "我迷路了", "請叫救護車", "我的護照不見了"] },
+];
 
-function getQuickReplies(speakerLang: string, otherLang: string): string[][] {
-  const langMap = quickRepliesMap[speakerLang] || quickRepliesMap["_default"];
-  return langMap[otherLang] || langMap["_default"] || quickRepliesMap["_default"]["_default"];
-}
-
-const mockTranslate = (text: string, _from: string, to: string): string => {
-  const suffixes: Record<string, string> = {
-    "zh-TW": "（已翻譯為中文）",
-    "ja": "（日本語に翻訳済み）",
-    "en": " (Translated to English)",
-    "ko": " (한국어로 번역됨)",
-    "th": " (แปลเป็นภาษาไทย)",
-    "fr": " (Traduit en français)",
-    "es": " (Traducido al español)",
-    "de": " (Ins Deutsche übersetzt)",
-  };
-  return text + (suffixes[to] || ` [→${to}]`);
+const callGemini = async (prompt: string): Promise<string> => {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
+      }),
+    }
+  );
+  if (!response.ok) throw new Error(`API 錯誤: ${response.status}`);
+  const data = await response.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 };
 
 function TranslatorTab() {
+  const [mode, setMode] = useState<"ai" | "conversation" | "phrases">("ai");
   const [langA, setLangA] = useState("zh-TW");
   const [langB, setLangB] = useState("ja");
   const [inputText, setInputText] = useState("");
@@ -95,97 +91,337 @@ function TranslatorTab() {
   const [loading, setLoading] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
+  // AI translate state
+  const [aiResult, setAiResult] = useState<{ translated: string; pronunciation?: string; alternatives?: string[]; context?: string } | null>(null);
+  const [aiHistory, setAiHistory] = useState<{ source: string; translated: string; from: string; to: string; time: string }[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [expandedPhrase, setExpandedPhrase] = useState<string | null>(null);
+  const [phraseLoading, setPhraseLoading] = useState<string | null>(null);
+
   useEffect(() => {
     chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!inputText.trim()) return;
+  // AI Translation
+  const aiTranslate = async () => {
+    if (!inputText.trim()) { toast.error("請輸入要翻譯的文字"); return; }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 500));
-    const fromLang = currentTurn === "A" ? langA : langB;
-    const toLang = currentTurn === "A" ? langB : langA;
-    const translated = mockTranslate(inputText, fromLang, toLang);
-    setMessages((prev) => [...prev, { id: `m${Date.now()}`, from: currentTurn, text: inputText, translated, lang: fromLang }]);
-    setCurrentTurn(currentTurn === "A" ? "B" : "A");
-    setInputText("");
+    setAiResult(null);
+    const fromLabel = langOptions.find(l => l.code === langA)?.label || langA;
+    const toLabel = langOptions.find(l => l.code === langB)?.label || langB;
+    const prompt = `你是一位專業翻譯。請將以下文字從${fromLabel}翻譯成${toLabel}。
+請以 JSON 格式回覆（不要加 markdown 代碼塊標記）：
+{"translated":"翻譯結果","pronunciation":"發音提示（如適用）","alternatives":["替代翻譯1","替代翻譯2"],"context":"使用情境說明"}
+
+要翻譯的文字：${inputText}`;
+    try {
+      const raw = await callGemini(prompt);
+      let jsonStr = raw;
+      const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (m) jsonStr = m[1];
+      const bs = jsonStr.indexOf("{");
+      const be = jsonStr.lastIndexOf("}");
+      if (bs !== -1 && be !== -1) jsonStr = jsonStr.substring(bs, be + 1);
+      const parsed = JSON.parse(jsonStr);
+      setAiResult(parsed);
+      setAiHistory(prev => [{ source: inputText, translated: parsed.translated, from: langA, to: langB, time: new Date().toLocaleTimeString() }, ...prev].slice(0, 20));
+      toast.success("翻譯完成");
+    } catch {
+      toast.error("翻譯失敗，請重試");
+    }
     setLoading(false);
   };
 
-  const handleQuickReply = async (original: string, translated: string) => {
+  // Conversation mode with AI
+  const handleConvoSend = async () => {
+    if (!inputText.trim()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 300));
     const fromLang = currentTurn === "A" ? langA : langB;
-    setMessages((prev) => [...prev, { id: `m${Date.now()}`, from: currentTurn, text: original, translated, lang: fromLang }]);
-    setCurrentTurn(currentTurn === "A" ? "B" : "A");
+    const toLang = currentTurn === "A" ? langB : langA;
+    const fromLabel = langOptions.find(l => l.code === fromLang)?.label || fromLang;
+    const toLabel = langOptions.find(l => l.code === toLang)?.label || toLang;
+    try {
+      const prompt = `將以下${fromLabel}文字翻譯成${toLabel}，只回覆翻譯結果，不要加任何解釋：\n${inputText}`;
+      const translated = await callGemini(prompt);
+      setMessages(prev => [...prev, { id: `m${Date.now()}`, from: currentTurn, text: inputText, translated: translated.trim(), lang: fromLang }]);
+      setCurrentTurn(currentTurn === "A" ? "B" : "A");
+      setInputText("");
+    } catch {
+      toast.error("翻譯失敗");
+    }
     setLoading(false);
+  };
+
+  // Quick reply with AI
+  const handleQuickReply = async (original: string) => {
+    setLoading(true);
+    const fromLang = currentTurn === "A" ? langA : langB;
+    const toLang = currentTurn === "A" ? langB : langA;
+    const fromLabel = langOptions.find(l => l.code === fromLang)?.label || fromLang;
+    const toLabel = langOptions.find(l => l.code === toLang)?.label || toLang;
+    try {
+      const prompt = `將以下${fromLabel}文字翻譯成${toLabel}，只回覆翻譯結果：\n${original}`;
+      const translated = await callGemini(prompt);
+      setMessages(prev => [...prev, { id: `m${Date.now()}`, from: currentTurn, text: original, translated: translated.trim(), lang: fromLang }]);
+      setCurrentTurn(currentTurn === "A" ? "B" : "A");
+    } catch {
+      toast.error("翻譯失敗");
+    }
+    setLoading(false);
+  };
+
+  // Generate quick replies dynamically
+  const [quickReplies, setQuickReplies] = useState<string[]>([]);
+  const [qrLoading, setQrLoading] = useState(false);
+
+  const generateQuickReplies = useCallback(async () => {
+    const speakerLang = currentTurn === "A" ? langA : langB;
+    const speakerLabel = langOptions.find(l => l.code === speakerLang)?.label || speakerLang;
+    const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
+    const contextHint = lastMsg ? `對方剛說：「${lastMsg.translated}」` : "這是對話開始";
+    setQrLoading(true);
+    try {
+      const prompt = `你是旅行對話助手。${contextHint}
+請用${speakerLabel}生成3個簡短的旅行場景快速回覆（每個不超過15字）。
+只回覆 JSON 陣列格式（不要加 markdown 代碼塊標記）：["回覆1","回覆2","回覆3"]`;
+      const raw = await callGemini(prompt);
+      let jsonStr = raw;
+      const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (m) jsonStr = m[1];
+      const bs = jsonStr.indexOf("[");
+      const be = jsonStr.lastIndexOf("]");
+      if (bs !== -1 && be !== -1) jsonStr = jsonStr.substring(bs, be + 1);
+      setQuickReplies(JSON.parse(jsonStr));
+    } catch {
+      setQuickReplies(["謝謝", "好的", "請問"]);
+    }
+    setQrLoading(false);
+  }, [currentTurn, langA, langB, messages]);
+
+  useEffect(() => {
+    if (mode === "conversation") generateQuickReplies();
+  }, [mode, currentTurn, generateQuickReplies]);
+
+  // Phrase translation
+  const translatePhrase = async (phrase: string) => {
+    setPhraseLoading(phrase);
+    const toLabel = langOptions.find(l => l.code === langB)?.label || langB;
+    try {
+      const prompt = `將「${phrase}」翻譯成${toLabel}，並附上發音提示。格式：翻譯結果（發音）`;
+      const result = await callGemini(prompt);
+      toast.success(result.trim(), { duration: 5000 });
+    } catch {
+      toast.error("翻譯失敗");
+    }
+    setPhraseLoading(null);
+  };
+
+  const speakText = (text: string, lang: string) => {
+    if ("speechSynthesis" in window) {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang;
+      u.rate = 0.9;
+      speechSynthesis.speak(u);
+    }
+  };
+
+  const copyText = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("已複製到剪貼簿");
   };
 
   const speakerLang = currentTurn === "A" ? langA : langB;
-  const otherLang = currentTurn === "A" ? langB : langA;
-  const currentQuickReplies = getQuickReplies(speakerLang, otherLang);
-  const currentLangInfo = langOptions.find((l) => l.code === speakerLang);
+  const currentLangInfo = langOptions.find(l => l.code === speakerLang);
 
   return (
     <div className="space-y-4">
+      {/* Mode Selector */}
+      <div className="flex gap-2">
+        <Button variant={mode === "ai" ? "default" : "outline"} size="sm" className="rounded-full gap-1.5 flex-1" onClick={() => setMode("ai")}>
+          <Sparkles className="w-3.5 h-3.5" />AI 翻譯
+        </Button>
+        <Button variant={mode === "conversation" ? "default" : "outline"} size="sm" className="rounded-full gap-1.5 flex-1" onClick={() => setMode("conversation")}>
+          <Languages className="w-3.5 h-3.5" />對話翻譯
+        </Button>
+        <Button variant={mode === "phrases" ? "default" : "outline"} size="sm" className="rounded-full gap-1.5 flex-1" onClick={() => setMode("phrases")}>
+          <BookOpen className="w-3.5 h-3.5" />旅行用語
+        </Button>
+      </div>
+
+      {/* Language Selectors */}
       <div className="flex items-center gap-3">
         <div className="flex-1">
-          <Label className="text-xs text-muted-foreground mb-1 block">A 的語言</Label>
+          <Label className="text-xs text-muted-foreground mb-1 block">{mode === "conversation" ? "A 的語言" : "來源語言"}</Label>
           <Select value={langA} onValueChange={setLangA}>
             <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
-            <SelectContent>{langOptions.map((l) => <SelectItem key={l.code} value={l.code}>{l.flag} {l.label}</SelectItem>)}</SelectContent>
+            <SelectContent className="max-h-60">{langOptions.map(l => <SelectItem key={l.code} value={l.code}>{l.flag} {l.label}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <ArrowRightLeft className="w-5 h-5 text-muted-foreground mt-5 shrink-0" />
+        <Button variant="ghost" size="sm" className="rounded-full w-10 h-10 p-0 mt-5" onClick={() => { setLangA(langB); setLangB(langA); }}>
+          <ArrowRightLeft className="w-4 h-4" />
+        </Button>
         <div className="flex-1">
-          <Label className="text-xs text-muted-foreground mb-1 block">B 的語言</Label>
+          <Label className="text-xs text-muted-foreground mb-1 block">{mode === "conversation" ? "B 的語言" : "目標語言"}</Label>
           <Select value={langB} onValueChange={setLangB}>
             <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
-            <SelectContent>{langOptions.map((l) => <SelectItem key={l.code} value={l.code}>{l.flag} {l.label}</SelectItem>)}</SelectContent>
+            <SelectContent className="max-h-60">{langOptions.map(l => <SelectItem key={l.code} value={l.code}>{l.flag} {l.label}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       </div>
 
-      <Card className="border-border/50">
-        <CardContent className="p-0">
-          <div ref={chatRef} className="h-[300px] overflow-y-auto p-4 space-y-3">
-            {messages.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">開始對話翻譯吧！<br />A 輸入文字後翻譯給 B，B 可用快速回覆</p>}
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.from === "A" ? "justify-start" : "justify-end"}`}>
-                <div className={`max-w-[80%] rounded-2xl p-3 ${msg.from === "A" ? "bg-primary/10 rounded-tl-sm" : "bg-secondary rounded-tr-sm"}`}>
-                  <p className="text-xs font-medium text-primary mb-1">{msg.from === "A" ? "A" : "B"} ({langOptions.find((l) => l.code === msg.lang)?.flag})</p>
-                  <p className="text-sm font-medium">{msg.text}</p>
-                  <div className="mt-1.5 pt-1.5 border-t border-border/30">
-                    <p className="text-xs text-muted-foreground">翻譯：</p>
-                    <p className="text-sm">{msg.translated}</p>
+      {/* AI Translation Mode */}
+      {mode === "ai" && (
+        <div className="space-y-4">
+          <Textarea placeholder="輸入要翻譯的文字..." value={inputText} onChange={e => setInputText(e.target.value)} rows={4} className="rounded-xl resize-none" />
+          <Button className="w-full rounded-xl h-11 gap-2" onClick={aiTranslate} disabled={loading}>
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            AI 翻譯
+          </Button>
+
+          {aiResult && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="border-primary/30">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <Badge className="bg-primary/10 text-primary border-0 rounded-full mb-2"><Sparkles className="w-3 h-3 mr-1" />AI 翻譯結果</Badge>
+                      <p className="text-lg font-semibold">{aiResult.translated}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => copyText(aiResult.translated)}><Copy className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => speakText(aiResult.translated, langB)}><Volume2 className="w-3.5 h-3.5" /></Button>
+                    </div>
                   </div>
+                  {aiResult.pronunciation && (
+                    <p className="text-sm text-muted-foreground">📖 {aiResult.pronunciation}</p>
+                  )}
+                  {aiResult.alternatives && aiResult.alternatives.length > 0 && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">替代翻譯：</p>
+                      <div className="flex flex-wrap gap-2">{aiResult.alternatives.map((a, i) => (
+                        <Badge key={i} variant="outline" className="rounded-full cursor-pointer hover:bg-accent" onClick={() => copyText(a)}>{a}</Badge>
+                      ))}</div>
+                    </div>
+                  )}
+                  {aiResult.context && (
+                    <p className="text-xs text-muted-foreground italic">💡 {aiResult.context}</p>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* History */}
+          {aiHistory.length > 0 && (
+            <div>
+              <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => setShowHistory(!showHistory)}>
+                <History className="w-4 h-4" />翻譯紀錄 ({aiHistory.length})
+                {showHistory ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
+              <AnimatePresence>
+                {showHistory && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mt-2 space-y-2 max-h-60 overflow-y-auto">
+                    {aiHistory.map((h, i) => (
+                      <div key={i} className="p-3 bg-secondary/30 rounded-xl text-sm">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                          <span>{langOptions.find(l => l.code === h.from)?.flag} → {langOptions.find(l => l.code === h.to)?.flag}</span>
+                          <span className="ml-auto">{h.time}</span>
+                        </div>
+                        <p className="text-muted-foreground">{h.source}</p>
+                        <p className="font-medium">{h.translated}</p>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Conversation Mode */}
+      {mode === "conversation" && (
+        <div>
+          <Card className="border-border/50">
+            <CardContent className="p-0">
+              <div ref={chatRef} className="h-[300px] overflow-y-auto p-4 space-y-3">
+                {messages.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">開始 AI 對話翻譯吧！<br />A 輸入文字後 AI 即時翻譯給 B</p>}
+                {messages.map(msg => (
+                  <div key={msg.id} className={`flex ${msg.from === "A" ? "justify-start" : "justify-end"}`}>
+                    <div className={`max-w-[80%] rounded-2xl p-3 ${msg.from === "A" ? "bg-primary/10 rounded-tl-sm" : "bg-secondary rounded-tr-sm"}`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-xs font-medium text-primary">{msg.from} ({langOptions.find(l => l.code === msg.lang)?.flag})</p>
+                        <Button variant="ghost" size="sm" className="rounded-full w-5 h-5 p-0 ml-auto" onClick={() => speakText(msg.text, msg.lang)}><Volume2 className="w-3 h-3" /></Button>
+                      </div>
+                      <p className="text-sm font-medium">{msg.text}</p>
+                      <div className="mt-1.5 pt-1.5 border-t border-border/30">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm flex-1">{msg.translated}</p>
+                          <Button variant="ghost" size="sm" className="rounded-full w-5 h-5 p-0" onClick={() => speakText(msg.translated, msg.from === "A" ? langB : langA)}><Volume2 className="w-3 h-3" /></Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-border/50 p-3">
+                <p className="text-xs text-muted-foreground mb-2">{currentLangInfo?.flag} {currentTurn} 的 AI 快速回覆：</p>
+                <div className="flex gap-2 flex-wrap">
+                  {qrLoading ? (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" />AI 生成中...</div>
+                  ) : (
+                    quickReplies.map((qr, i) => (
+                      <Button key={i} variant="outline" size="sm" className="rounded-full text-xs h-7" onClick={() => handleQuickReply(qr)} disabled={loading}>{qr}</Button>
+                    ))
+                  )}
+                  <Button variant="ghost" size="sm" className="rounded-full text-xs h-7" onClick={generateQuickReplies} disabled={qrLoading}><RotateCcw className="w-3 h-3" /></Button>
                 </div>
               </div>
-            ))}
-          </div>
 
-          <div className="border-t border-border/50 p-3">
-            <p className="text-xs text-muted-foreground mb-2">{currentLangInfo?.flag} {currentTurn} 的快速回覆：</p>
-            <div className="flex gap-2 flex-wrap">
-              {currentQuickReplies.map(([original, translated], i) => (
-                <Button key={i} variant="outline" size="sm" className="rounded-full text-xs h-7" onClick={() => handleQuickReply(original, translated)} disabled={loading}>{original}</Button>
-              ))}
-            </div>
-          </div>
+              <div className="border-t border-border/50 p-3 flex gap-2">
+                <Badge variant="outline" className="shrink-0 rounded-full">{currentTurn}</Badge>
+                <Input placeholder={`${currentTurn} 輸入 (${currentLangInfo?.label})...`} value={inputText} onChange={e => setInputText(e.target.value)} onKeyDown={e => e.key === "Enter" && handleConvoSend()} className="rounded-xl" disabled={loading} />
+                <Button size="sm" className="rounded-xl shrink-0" onClick={handleConvoSend} disabled={loading || !inputText.trim()}>
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="border-t border-border/50 p-3 flex gap-2">
-            <Badge variant="outline" className="shrink-0 rounded-full">{currentTurn}</Badge>
-            <Input placeholder={`${currentTurn} 輸入 (${currentLangInfo?.label})...`} value={inputText} onChange={(e) => setInputText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSend()} className="rounded-xl" disabled={loading} />
-            <Button size="sm" className="rounded-xl shrink-0" onClick={handleSend} disabled={loading || !inputText.trim()}>
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          <Button variant="outline" className="w-full rounded-xl mt-3" onClick={() => { setMessages([]); setCurrentTurn("A"); }}>
+            <RotateCcw className="w-4 h-4 mr-2" />重新開始對話
+          </Button>
+        </div>
+      )}
 
-      <Button variant="outline" className="w-full rounded-xl" onClick={() => { setMessages([]); setCurrentTurn("A"); }}>
-        <RotateCcw className="w-4 h-4 mr-2" />重新開始對話
-      </Button>
+      {/* Travel Phrases Mode */}
+      {mode === "phrases" && (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">點擊旅行用語，AI 即時翻譯成 {langOptions.find(l => l.code === langB)?.flag} {langOptions.find(l => l.code === langB)?.label}</p>
+          {travelPhrases.map(cat => (
+            <Card key={cat.category} className="border-border/50">
+              <button className="w-full text-left p-4 flex items-center justify-between" onClick={() => setExpandedPhrase(expandedPhrase === cat.category ? null : cat.category)}>
+                <span className="font-semibold text-sm">{cat.category}</span>
+                {expandedPhrase === cat.category ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+              <AnimatePresence>
+                {expandedPhrase === cat.category && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                    <div className="px-4 pb-4 flex flex-wrap gap-2">
+                      {cat.phrases.map(p => (
+                        <Button key={p} variant="outline" size="sm" className="rounded-full text-xs" onClick={() => translatePhrase(p)} disabled={phraseLoading === p}>
+                          {phraseLoading === p ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}{p}
+                        </Button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -238,7 +474,7 @@ function CurrencyTab() {
       } else { throw new Error(); }
     } catch {
       const varied = { ...baseRates };
-      Object.keys(varied).forEach((k) => { if (k !== "USD") varied[k] *= (0.998 + Math.random() * 0.004); });
+      Object.keys(varied).forEach(k => { if (k !== "USD") varied[k] *= (0.998 + Math.random() * 0.004); });
       setLiveRates(varied);
       setLastUpdate(new Date().toLocaleTimeString());
     }
@@ -255,8 +491,8 @@ function CurrencyTab() {
 
   const rate = convert(1);
   const result = convert(parseFloat(amount) || 0);
-  const fromInfo = currencies.find((c) => c.code === fromCurrency);
-  const toInfo = currencies.find((c) => c.code === toCurrency);
+  const fromInfo = currencies.find(c => c.code === fromCurrency);
+  const toInfo = currencies.find(c => c.code === toCurrency);
 
   const popularPairs = [
     { from: "TWD", to: "JPY" }, { from: "TWD", to: "USD" }, { from: "TWD", to: "EUR" },
@@ -276,14 +512,14 @@ function CurrencyTab() {
         <CardContent className="p-4 space-y-4">
           <div>
             <Label className="text-xs text-muted-foreground mb-1 block">金額</Label>
-            <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="rounded-xl text-lg font-semibold h-12" />
+            <Input type="text" inputMode="decimal" value={amount} onChange={e => { const v = e.target.value.replace(/[^0-9.]/g, ""); setAmount(v); }} className="rounded-xl text-lg font-semibold h-12" placeholder="輸入金額" />
           </div>
           <div className="grid grid-cols-[1fr,auto,1fr] gap-2 items-end">
             <div>
               <Label className="text-xs text-muted-foreground mb-1 block">從</Label>
               <Select value={fromCurrency} onValueChange={setFromCurrency}>
                 <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
-                <SelectContent className="max-h-60">{currencies.map((c) => <SelectItem key={c.code} value={c.code}>{c.flag} {c.code} - {c.name}</SelectItem>)}</SelectContent>
+                <SelectContent className="max-h-60">{currencies.map(c => <SelectItem key={c.code} value={c.code}>{c.flag} {c.code} - {c.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <Button variant="ghost" size="sm" className="rounded-full w-10 h-10 p-0 mb-0.5" onClick={() => { setFromCurrency(toCurrency); setToCurrency(fromCurrency); }}>
@@ -293,7 +529,7 @@ function CurrencyTab() {
               <Label className="text-xs text-muted-foreground mb-1 block">到</Label>
               <Select value={toCurrency} onValueChange={setToCurrency}>
                 <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
-                <SelectContent className="max-h-60">{currencies.map((c) => <SelectItem key={c.code} value={c.code}>{c.flag} {c.code} - {c.name}</SelectItem>)}</SelectContent>
+                <SelectContent className="max-h-60">{currencies.map(c => <SelectItem key={c.code} value={c.code}>{c.flag} {c.code} - {c.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
@@ -309,10 +545,10 @@ function CurrencyTab() {
       <div>
         <h3 className="text-sm font-bold mb-2">熱門匯率</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {popularPairs.map((p) => {
+          {popularPairs.map(p => {
             const r = (liveRates[p.to] || 1) / (liveRates[p.from] || 1);
-            const fi = currencies.find((c) => c.code === p.from);
-            const ti = currencies.find((c) => c.code === p.to);
+            const fi = currencies.find(c => c.code === p.from);
+            const ti = currencies.find(c => c.code === p.to);
             return (
               <button key={`${p.from}-${p.to}`} className="p-3 bg-card border border-border/50 rounded-xl text-left hover:shadow-md transition-shadow" onClick={() => { setFromCurrency(p.from); setToCurrency(p.to); }}>
                 <p className="text-xs text-muted-foreground">{fi?.flag} {p.from} → {ti?.flag} {p.to}</p>
@@ -328,13 +564,8 @@ function CurrencyTab() {
 
 /* ==================== WEATHER TAB ==================== */
 interface WeatherInfo {
-  city: string;
-  temp: number;
-  feelsLike: number;
-  humidity: number;
-  wind: number;
-  visibility: number;
-  condition: string;
+  city: string; temp: number; feelsLike: number; humidity: number;
+  wind: number; visibility: number; condition: string;
   forecast: { day: string; high: number; low: number; condition: string }[];
 }
 
@@ -371,26 +602,20 @@ function WeatherTab() {
         const forecast = data.weather?.slice(0, 3) || [];
         if (current) {
           setLiveWeather({
-            city,
-            temp: parseInt(current.temp_C),
-            feelsLike: parseInt(current.FeelsLikeC),
-            humidity: parseInt(current.humidity),
-            wind: parseInt(current.windspeedKmph),
+            city, temp: parseInt(current.temp_C), feelsLike: parseInt(current.FeelsLikeC),
+            humidity: parseInt(current.humidity), wind: parseInt(current.windspeedKmph),
             visibility: parseInt(current.visibility),
             condition: current.weatherDesc?.[0]?.value || "Unknown",
             forecast: forecast.map((f: any, i: number) => ({
               day: i === 0 ? "今天" : i === 1 ? "明天" : "後天",
-              high: parseInt(f.maxtempC),
-              low: parseInt(f.mintempC),
+              high: parseInt(f.maxtempC), low: parseInt(f.mintempC),
               condition: f.hourly?.[4]?.weatherDesc?.[0]?.value || "Unknown",
             })),
           });
           toast.success(`已取得 ${city} 的即時天氣`);
         }
       } else { throw new Error(); }
-    } catch {
-      toast.error("無法取得天氣資料，請確認城市名稱");
-    }
+    } catch { toast.error("無法取得天氣資料，請確認城市名稱"); }
     setLiveLoading(false);
   };
 
@@ -399,7 +624,7 @@ function WeatherTab() {
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="搜尋城市即時天氣..." value={searchCity} onChange={(e) => setSearchCity(e.target.value)} onKeyDown={(e) => e.key === "Enter" && fetchLiveWeather(searchCity)} className="pl-10 rounded-xl" />
+          <Input placeholder="搜尋城市即時天氣..." value={searchCity} onChange={e => setSearchCity(e.target.value)} onKeyDown={e => e.key === "Enter" && fetchLiveWeather(searchCity)} className="pl-10 rounded-xl" />
         </div>
         <Button className="rounded-xl" onClick={() => fetchLiveWeather(searchCity)} disabled={liveLoading}>
           {liveLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "查詢"}
@@ -426,7 +651,7 @@ function WeatherTab() {
               <div className="text-center p-2 bg-secondary/50 rounded-lg"><Eye className="w-4 h-4 mx-auto text-purple-400 mb-1" /><p className="text-xs text-muted-foreground">能見度</p><p className="text-sm font-semibold">{liveWeather.visibility}km</p></div>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              {liveWeather.forecast.map((f) => (
+              {liveWeather.forecast.map(f => (
                 <div key={f.day} className="text-center p-2 bg-secondary/30 rounded-lg">
                   <p className="text-xs text-muted-foreground">{f.day}</p>
                   <p className="text-xs mt-1">{f.condition}</p>
@@ -441,7 +666,7 @@ function WeatherTab() {
       <div>
         <h3 className="text-sm font-bold mb-3">熱門景點天氣</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {popularSpotWeather.map((w) => (
+          {popularSpotWeather.map(w => (
             <Card key={w.city} className="border-border/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedWeather(selectedWeather?.city === w.city ? null : w)}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -459,7 +684,7 @@ function WeatherTab() {
                       <div><p className="text-muted-foreground">體感</p><p className="font-semibold">{w.feelsLike}°C</p></div>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
-                      {w.forecast.map((f) => (
+                      {w.forecast.map(f => (
                         <div key={f.day} className="text-center p-2 bg-secondary/30 rounded-lg">
                           <p className="text-xs text-muted-foreground">{f.day}</p>
                           <p className="text-xs">{f.condition}</p>
@@ -498,7 +723,7 @@ function NavigationTab() {
     if (!navigator.geolocation) { toast.error("瀏覽器不支援定位"); return; }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      pos => {
         const { latitude, longitude } = pos.coords;
         const map = mapRef.current;
         if (map) {
@@ -508,11 +733,8 @@ function NavigationTab() {
           new google.maps.Marker({ map, position: loc, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: "#3b82f6", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 3 } });
           const geocoder = new google.maps.Geocoder();
           geocoder.geocode({ location: loc }, (results, status) => {
-            if (status === "OK" && results?.[0]) {
-              setOrigin(results[0].formatted_address);
-            } else {
-              setOrigin(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
-            }
+            if (status === "OK" && results?.[0]) setOrigin(results[0].formatted_address);
+            else setOrigin(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
           });
         }
         setLocating(false);
@@ -536,9 +758,7 @@ function NavigationTab() {
         const leg = result.routes[0]?.legs[0];
         if (leg) setRouteInfo({ distance: leg.distance?.text || "", duration: leg.duration?.text || "" });
         toast.success("路線已規劃");
-      } else {
-        toast.error("無法規劃路線，請檢查地址");
-      }
+      } else { toast.error("無法規劃路線，請檢查地址"); }
     });
   };
 
@@ -548,7 +768,7 @@ function NavigationTab() {
         <div>
           <Label className="text-xs text-muted-foreground mb-1 block">起點</Label>
           <div className="flex gap-2">
-            <Input placeholder="輸入起點地址..." value={origin} onChange={(e) => setOrigin(e.target.value)} className="rounded-xl" />
+            <Input placeholder="輸入起點地址..." value={origin} onChange={e => setOrigin(e.target.value)} className="rounded-xl" />
             <Button variant="outline" size="sm" className="rounded-xl shrink-0" onClick={locateMe} disabled={locating}>
               {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Locate className="w-4 h-4" />}
             </Button>
@@ -556,10 +776,10 @@ function NavigationTab() {
         </div>
         <div>
           <Label className="text-xs text-muted-foreground mb-1 block">終點</Label>
-          <Input placeholder="輸入目的地..." value={destination} onChange={(e) => setDestination(e.target.value)} className="rounded-xl" />
+          <Input placeholder="輸入目的地..." value={destination} onChange={e => setDestination(e.target.value)} className="rounded-xl" />
         </div>
         <div className="flex gap-2">
-          {(["DRIVING", "WALKING", "TRANSIT"] as const).map((m) => (
+          {(["DRIVING", "WALKING", "TRANSIT"] as const).map(m => (
             <Button key={m} variant={travelMode === m ? "default" : "outline"} size="sm" className="rounded-full flex-1 text-xs" onClick={() => setTravelMode(m)}>
               {m === "DRIVING" ? "🚗 開車" : m === "WALKING" ? "🚶 步行" : "🚌 大眾運輸"}
             </Button>
@@ -594,7 +814,7 @@ export default function Tools() {
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>旅行工具箱</h1>
-            <p className="text-muted-foreground">翻譯、匯率、天氣、導航 — 旅途中的好幫手</p>
+            <p className="text-muted-foreground">AI 翻譯、匯率、天氣、導航 — 旅途中的智慧幫手</p>
           </motion.div>
         </div>
       </section>
@@ -603,7 +823,7 @@ export default function Tools() {
         <div className="container max-w-3xl">
           <Tabs defaultValue="translate" className="space-y-6">
             <TabsList className="grid grid-cols-4 h-12 rounded-xl bg-secondary/50 p-1">
-              <TabsTrigger value="translate" className="rounded-lg gap-1.5 text-xs sm:text-sm data-[state=active]:bg-background"><Languages className="w-4 h-4" /><span className="hidden sm:inline">翻譯</span></TabsTrigger>
+              <TabsTrigger value="translate" className="rounded-lg gap-1.5 text-xs sm:text-sm data-[state=active]:bg-background"><Sparkles className="w-4 h-4" /><span className="hidden sm:inline">翻譯</span></TabsTrigger>
               <TabsTrigger value="currency" className="rounded-lg gap-1.5 text-xs sm:text-sm data-[state=active]:bg-background"><DollarSign className="w-4 h-4" /><span className="hidden sm:inline">匯率</span></TabsTrigger>
               <TabsTrigger value="weather" className="rounded-lg gap-1.5 text-xs sm:text-sm data-[state=active]:bg-background"><Cloud className="w-4 h-4" /><span className="hidden sm:inline">天氣</span></TabsTrigger>
               <TabsTrigger value="navigation" className="rounded-lg gap-1.5 text-xs sm:text-sm data-[state=active]:bg-background"><Navigation className="w-4 h-4" /><span className="hidden sm:inline">導航</span></TabsTrigger>

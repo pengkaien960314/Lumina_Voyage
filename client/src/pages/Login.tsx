@@ -273,7 +273,7 @@ export default function Login() {
                   <button
                     type="button"
                     className="text-xs text-primary hover:underline"
-                    onClick={() => toast.info("功能開發中")}
+                    onClick={() => navigate("/forgot-password")}
                   >
                     忘記密碼？
                   </button>

@@ -52,8 +52,10 @@ interface FlightResult {
   stops: number; cabinClass: string;
 }
 
-const generateFlights = (from: string, to: string): FlightResult[] => {
+const generateFlights = (from: string, to: string, cabin: string): FlightResult[] => {
   const times = ["06:30", "08:15", "10:00", "12:30", "14:45", "16:20", "18:00", "20:30"];
+  const cabinMultiplier = cabin === "first" ? 4.2 : cabin === "business" ? 2.5 : 1;
+  const cabinLabel = cabin === "first" ? "頭等艙" : cabin === "business" ? "商務艙" : "經濟艙";
   return airlines.slice(0, 6).map((al, i) => {
     const dept = times[i % times.length];
     const dh = parseInt(dept.split(":")[0]);
@@ -61,12 +63,13 @@ const generateFlights = (from: string, to: string): FlightResult[] => {
     const dur = 2 + Math.floor(Math.random() * 4);
     const ah = (dh + dur) % 24;
     const am = (dm + Math.floor(Math.random() * 50)) % 60;
+    const basePrice = 3000 + Math.floor(Math.random() * 15000);
     return {
       id: i + 1, airline: al, flightCode: `${al.code}-${100 + Math.floor(Math.random() * 900)}`,
       from, to, departTime: dept, arriveTime: `${String(ah).padStart(2, "0")}:${String(am).padStart(2, "0")}`,
       duration: `${dur}h ${Math.floor(Math.random() * 50 + 5)}m`,
-      price: 3000 + Math.floor(Math.random() * 15000), stops: i === 4 ? 1 : 0,
-      cabinClass: "經濟艙",
+      price: Math.round(basePrice * cabinMultiplier), stops: i === 4 ? 1 : 0,
+      cabinClass: cabinLabel,
     };
   });
 };
@@ -101,7 +104,7 @@ export default function Flights() {
   const handleSearch = () => {
     const f = tripType === "multicity" ? multiCities[0].from : fromCity;
     const t = tripType === "multicity" ? multiCities[0].to : toCity;
-    setFlights(generateFlights(f, t));
+    setFlights(generateFlights(f, t, cabinClass));
     setSearched(true);
     toast.success("已找到最佳航班");
   };
@@ -130,25 +133,37 @@ export default function Flights() {
 
   const getCityName = (code: string) => popularCities.find((c) => c.code === code)?.name || code;
 
-  const CityPicker = ({ value, onChange, show, setShow, label }: { value: string; onChange: (v: string) => void; show: boolean; setShow: (v: boolean) => void; label: string }) => (
-    <div className="space-y-2 relative">
-      <Label className="text-sm">{label}</Label>
-      <button className="w-full h-11 rounded-xl border border-input bg-background px-3 text-left text-sm flex items-center justify-between hover:border-primary/50 transition-colors" onClick={() => setShow(!show)}>
-        <span>{getCityName(value)} ({value})</span>
-        <Plane className="w-4 h-4 text-muted-foreground" />
-      </button>
-      {show && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border border-border rounded-xl shadow-lg p-2 max-h-60 overflow-y-auto">
-          {popularCities.map((c) => (
-            <button key={c.code} className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-accent transition-colors flex items-center justify-between ${value === c.code ? "bg-primary/10 text-primary" : ""}`} onClick={() => { onChange(c.code); setShow(false); }}>
-              <span>{c.name} ({c.code})</span>
-              <span className="text-xs text-muted-foreground">{c.country}</span>
-            </button>
-          ))}
+  const [citySearch, setCitySearch] = useState("");
+
+  const CityPicker = ({ value, onChange, show, setShow, label }: { value: string; onChange: (v: string) => void; show: boolean; setShow: (v: boolean) => void; label: string }) => {
+    const filteredCities = citySearch ? popularCities.filter(c => c.name.includes(citySearch) || c.code.toLowerCase().includes(citySearch.toLowerCase()) || c.country.includes(citySearch)) : popularCities;
+    return (
+      <div className="space-y-2 relative">
+        <Label className="text-sm">{label}</Label>
+        <div className="relative">
+          <Input
+            className="h-11 rounded-xl pr-10"
+            placeholder="輸入或選擇城市..."
+            value={show ? citySearch : `${getCityName(value)} (${value})`}
+            onChange={(e) => { setCitySearch(e.target.value); if (!show) setShow(true); }}
+            onFocus={() => { setShow(true); setCitySearch(""); }}
+          />
+          <Plane className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         </div>
-      )}
-    </div>
-  );
+        {show && (
+          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border border-border rounded-xl shadow-lg p-2 max-h-60 overflow-y-auto">
+            {filteredCities.map((c) => (
+              <button key={c.code} className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-accent transition-colors flex items-center justify-between ${value === c.code ? "bg-primary/10 text-primary" : ""}`} onClick={() => { onChange(c.code); setShow(false); setCitySearch(""); }}>
+                <span>{c.name} ({c.code})</span>
+                <span className="text-xs text-muted-foreground">{c.country}</span>
+              </button>
+            ))}
+            {filteredCities.length === 0 && <p className="text-sm text-muted-foreground text-center py-2">找不到符合的城市</p>}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -237,12 +252,12 @@ export default function Flights() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <Users className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">乘客：</span>
-                    {[1, 2, 3, 4, 5, 6].map((n) => (
+                    {[1, 2, 3, 4, 5].map((n) => (
                       <Button key={n} variant={passengers === n && !customPassengers ? "default" : "outline"} size="sm" className="rounded-full w-8 h-8 p-0 text-xs" onClick={() => { setPassengers(n); setCustomPassengers(""); }}>{n}</Button>
                     ))}
                     <div className="flex items-center gap-1 ml-2 border-l border-border/50 pl-2">
                       <Button variant="outline" size="sm" className="rounded-full w-7 h-7 p-0" onClick={() => { const cur = parseInt(customPassengers) || passengers; const v = Math.max(1, cur - 1); setCustomPassengers(String(v)); }}><Minus className="w-3 h-3" /></Button>
-                      <Input type="number" value={customPassengers || String(passengers)} onChange={(e) => { const v = e.target.value; setCustomPassengers(v); if (v && parseInt(v) >= 1) setPassengers(parseInt(v)); }} className="w-14 h-7 rounded-lg text-center text-xs" min={1} />
+                      <Input type="text" inputMode="numeric" value={customPassengers !== "" ? customPassengers : String(passengers)} onChange={(e) => { const v = e.target.value.replace(/[^0-9]/g, ""); setCustomPassengers(v); if (v !== "" && parseInt(v) >= 1) setPassengers(parseInt(v)); }} className="w-14 h-7 rounded-lg text-center text-xs" />
                       <Button variant="outline" size="sm" className="rounded-full w-7 h-7 p-0" onClick={() => { const cur = parseInt(customPassengers) || passengers; setCustomPassengers(String(cur + 1)); }}><Plus className="w-3 h-3" /></Button>
                     </div>
                   </div>

@@ -1,39 +1,38 @@
 /*
  * Design: Organic Naturalism
  * - Glass morphism navbar with subtle earth-tone accents
+ * - Milestone entry in avatar popover
+ * - Multi-language support via useLanguage
  */
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Compass, Map, BookOpen, Hotel, Plane, Languages, Settings, LogOut, User, Menu, X, Leaf, CalendarCheck, Users, Sparkles,
+  Compass, Map, BookOpen, Hotel, Plane, Languages, Settings, LogOut, User, Menu, X, Leaf, CalendarCheck, Users, Trophy,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const navItems = [
-  { path: "/", label: "首頁", icon: Compass },
-  { path: "/spots", label: "景點", icon: Map },
-  { path: "/planner", label: "行程", icon: BookOpen },
-  { path: "/diary", label: "日記", icon: BookOpen },
-  { path: "/hotels", label: "旅館", icon: Hotel },
-  { path: "/flights", label: "機票", icon: Plane },
-  { path: "/tools", label: "工具", icon: Languages },
-];
-
-const aiItems = [
-  { path: "/ai-planner", label: "AI 行程", icon: Sparkles },
-  { path: "/ai-translate", label: "AI 翻譯", icon: Languages },
-];
 
 export default function Navbar() {
   const [location] = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
+  const { t } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navItems = [
+    { path: "/", label: t("nav.home"), icon: Compass },
+    { path: "/spots", label: t("nav.spots"), icon: Map },
+    { path: "/planner", label: t("nav.planner"), icon: BookOpen },
+    { path: "/diary", label: t("nav.diary"), icon: BookOpen },
+    { path: "/hotels", label: t("nav.hotels"), icon: Hotel },
+    { path: "/flights", label: t("nav.flights"), icon: Plane },
+    { path: "/tools", label: t("nav.tools"), icon: Languages },
+  ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
@@ -58,26 +57,6 @@ export default function Navbar() {
                 </Link>
               );
             })}
-            {/* AI Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${location.startsWith("/ai-") ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent"}`} style={{ fontFamily: "var(--font-sans)" }}>
-                  <Sparkles className="w-4 h-4" />AI
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-40">
-                {aiItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link key={item.path} href={item.path}>
-                      <DropdownMenuItem>
-                        <Icon className="mr-2 h-4 w-4" />{item.label}
-                      </DropdownMenuItem>
-                    </Link>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
 
           <div className="flex items-center gap-2">
@@ -97,17 +76,18 @@ export default function Navbar() {
                     <p className="text-xs text-muted-foreground">{user?.email}</p>
                   </div>
                   <DropdownMenuSeparator />
-                  <Link href="/profile"><DropdownMenuItem><User className="mr-2 h-4 w-4" />個人資料</DropdownMenuItem></Link>
-                  <Link href="/friends"><DropdownMenuItem><Users className="mr-2 h-4 w-4" />好友</DropdownMenuItem></Link>
-                  <Link href="/my-bookings"><DropdownMenuItem><CalendarCheck className="mr-2 h-4 w-4" />我的預訂</DropdownMenuItem></Link>
-                  <Link href="/settings"><DropdownMenuItem><Settings className="mr-2 h-4 w-4" />設定</DropdownMenuItem></Link>
+                  <Link href="/profile"><DropdownMenuItem><User className="mr-2 h-4 w-4" />{t("nav.profile")}</DropdownMenuItem></Link>
+                  <Link href="/friends"><DropdownMenuItem><Users className="mr-2 h-4 w-4" />{t("nav.friends")}</DropdownMenuItem></Link>
+                  <Link href="/milestones"><DropdownMenuItem><Trophy className="mr-2 h-4 w-4" />{t("nav.milestones")}</DropdownMenuItem></Link>
+                  <Link href="/my-bookings"><DropdownMenuItem><CalendarCheck className="mr-2 h-4 w-4" />{t("nav.bookings")}</DropdownMenuItem></Link>
+                  <Link href="/settings"><DropdownMenuItem><Settings className="mr-2 h-4 w-4" />{t("nav.settings")}</DropdownMenuItem></Link>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout}><LogOut className="mr-2 h-4 w-4" />登出</DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}><LogOut className="mr-2 h-4 w-4" />{t("nav.logout")}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Link href="/login">
-                <Button variant="default" size="sm" className="rounded-full px-5" style={{ fontFamily: "var(--font-sans)" }}>登入</Button>
+                <Button variant="default" size="sm" className="rounded-full px-5" style={{ fontFamily: "var(--font-sans)" }}>{t("nav.login")}</Button>
               </Link>
             )}
             <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -132,20 +112,6 @@ export default function Navbar() {
                   </Link>
                 );
               })}
-              <div className="pt-2 mt-2 border-t border-border/30">
-                <p className="px-4 py-1 text-xs text-muted-foreground font-medium">AI 功能</p>
-                {aiItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location === item.path;
-                  return (
-                    <Link key={item.path} href={item.path}>
-                      <span onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent"}`} style={{ fontFamily: "var(--font-sans)" }}>
-                        <Icon className="w-5 h-5" />{item.label}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
             </div>
           </motion.div>
         )}

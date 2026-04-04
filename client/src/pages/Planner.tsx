@@ -1,5 +1,7 @@
-/*
+/**
  * Design: Organic Naturalism — Trip Planner
+ * - AI itinerary generation with Gemini API
+ * - Historical itineraries
  * - Date change, auto-increment when adding days
  * - Long-press activity to enlarge & edit (time, location, image, delete inside edit)
  * - Activity type icons
@@ -15,17 +17,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Plus, MapPin, Clock, Calendar, ChevronDown, ChevronUp,
   Plane, Hotel, Camera, Coffee, UtensilsCrossed, Edit3, Trash2,
   ShoppingBag, Music, Bus, Train, Ship, Bike, Footprints, Ticket,
-  X, Image as ImageIcon, Save,
+  Image as ImageIcon, Save, Sparkles, Loader2, History, Archive,
+  Download, X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useBooking } from "@/contexts/BookingContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
+const GEMINI_API_KEY = "AIzaSyB_tEx6ILOy6U7NOwtYmclHwLWqNXyRQmQ";
 
 interface Activity {
   id: string;
@@ -43,6 +49,15 @@ interface TripDay {
   title: string;
   activities: Activity[];
   expanded: boolean;
+}
+
+interface SavedTrip {
+  id: string;
+  name: string;
+  startDate: string;
+  days: TripDay[];
+  createdAt: string;
+  isAiGenerated?: boolean;
 }
 
 const activityTypes = [
@@ -91,6 +106,7 @@ const sampleTrip: TripDay[] = [
 
 export default function Planner() {
   const { flightBookings, hotelBookings } = useBooking();
+  const [activeTab, setActiveTab] = useState("current");
   const [days, setDays] = useState<TripDay[]>(sampleTrip);
   const [tripName, setTripName] = useState("東京五日遊");
   const [startDate, setStartDate] = useState("2026-05-01");
@@ -112,21 +128,43 @@ export default function Planner() {
   // Add booking dialog
   const [showAddBooking, setShowAddBooking] = useState<string | null>(null);
 
+  // AI Planner state
+  const [aiDest, setAiDest] = useState("");
+  const [aiDays, setAiDays] = useState("3");
+  const [aiBudget, setAiBudget] = useState("medium");
+  const [aiStyle, setAiStyle] = useState("balanced");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState<TripDay[] | null>(null);
+
+  // History state
+  const [savedTrips, setSavedTrips] = useState<SavedTrip[]>([]);
+
+  // Load saved trips from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("lumina_saved_trips");
+      if (saved) setSavedTrips(JSON.parse(saved));
+    } catch { /* ignore */ }
+  }, []);
+
+  const saveTripsToStorage = (trips: SavedTrip[]) => {
+    setSavedTrips(trips);
+    localStorage.setItem("lumina_saved_trips", JSON.stringify(trips));
+  };
+
   // Update dates when start date changes
   const updateDates = useCallback((newStart: string) => {
     setStartDate(newStart);
     const base = new Date(newStart);
-    setDays((prev) =>
-      prev.map((d, i) => {
-        const nd = new Date(base);
-        nd.setDate(nd.getDate() + i);
-        return { ...d, date: nd.toISOString().split("T")[0] };
-      })
-    );
+    setDays(prev => prev.map((d, i) => {
+      const nd = new Date(base);
+      nd.setDate(nd.getDate() + i);
+      return { ...d, date: nd.toISOString().split("T")[0] };
+    }));
   }, []);
 
   const toggleDay = (dayId: string) => {
-    setDays((prev) => prev.map((d) => (d.id === dayId ? { ...d, expanded: !d.expanded } : d)));
+    setDays(prev => prev.map(d => d.id === dayId ? { ...d, expanded: !d.expanded } : d));
   };
 
   const addActivity = (dayId: string) => {
@@ -136,7 +174,7 @@ export default function Planner() {
       location: newActivity.location || "", type: newActivity.type || "sightseeing",
       notes: newActivity.notes || "", image: newActivity.image || "",
     };
-    setDays((prev) => prev.map((d) => d.id === dayId ? { ...d, activities: [...d.activities, activity].sort((a, b) => a.time.localeCompare(b.time)) } : d));
+    setDays(prev => prev.map(d => d.id === dayId ? { ...d, activities: [...d.activities, activity].sort((a, b) => a.time.localeCompare(b.time)) } : d));
     setNewActivity({}); setAddingToDay(null);
     toast.success("已新增活動");
   };
@@ -152,7 +190,7 @@ export default function Planner() {
     toast.success("已新增一天行程");
   };
 
-  // Long press handlers for activity
+  // Long press handlers
   const handleActPointerDown = (dayId: string, act: Activity) => {
     longPressTimer.current = setTimeout(() => {
       setEditingAct({ dayId, activity: act });
@@ -161,7 +199,6 @@ export default function Planner() {
   };
   const handleActPointerUp = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
 
-  // Long press handlers for day
   const handleDayPointerDown = (day: TripDay) => {
     longPressDayTimer.current = setTimeout(() => {
       setEditingDay(day);
@@ -170,45 +207,38 @@ export default function Planner() {
   };
   const handleDayPointerUp = () => { if (longPressDayTimer.current) clearTimeout(longPressDayTimer.current); };
 
-  // Save edited activity
   const saveEditedAct = () => {
     if (!editingAct) return;
-    setDays((prev) => prev.map((d) =>
-      d.id === editingAct.dayId ? {
-        ...d, activities: d.activities.map((a) => a.id === editingAct.activity.id ? { ...a, ...editForm } as Activity : a).sort((a, b) => a.time.localeCompare(b.time))
-      } : d
+    setDays(prev => prev.map(d =>
+      d.id === editingAct.dayId ? { ...d, activities: d.activities.map(a => a.id === editingAct.activity.id ? { ...a, ...editForm } as Activity : a).sort((a, b) => a.time.localeCompare(b.time)) } : d
     ));
     setEditingAct(null);
     toast.success("已更新活動");
   };
 
-  // Delete activity from edit dialog
   const deleteActFromEdit = () => {
     if (!editingAct) return;
-    setDays((prev) => prev.map((d) =>
-      d.id === editingAct.dayId ? { ...d, activities: d.activities.filter((a) => a.id !== editingAct.activity.id) } : d
+    setDays(prev => prev.map(d =>
+      d.id === editingAct.dayId ? { ...d, activities: d.activities.filter(a => a.id !== editingAct.activity.id) } : d
     ));
     setEditingAct(null);
     toast.success("已刪除活動");
   };
 
-  // Save edited day
   const saveEditedDay = () => {
     if (!editingDay) return;
-    setDays((prev) => prev.map((d) => d.id === editingDay.id ? { ...d, title: editDayForm.title, date: editDayForm.date } : d));
+    setDays(prev => prev.map(d => d.id === editingDay.id ? { ...d, title: editDayForm.title, date: editDayForm.date } : d));
     setEditingDay(null);
     toast.success("已更新行程日");
   };
 
-  // Delete day
   const deleteDay = () => {
     if (!editingDay) return;
-    setDays((prev) => prev.filter((d) => d.id !== editingDay.id));
+    setDays(prev => prev.filter(d => d.id !== editingDay.id));
     setEditingDay(null);
     toast.success("已刪除整日行程");
   };
 
-  // Add booking to day
   const addBookingToDay = (dayId: string, type: "flight" | "hotel", idx: number) => {
     let act: Activity;
     if (type === "flight") {
@@ -218,13 +248,13 @@ export default function Planner() {
       const hb = hotelBookings[idx];
       act = { id: `ab${Date.now()}`, time: "15:00", title: hb.hotelName, location: hb.location, type: "hotel", notes: `${hb.checkIn} ~ ${hb.checkOut} | ${hb.guests}人` };
     }
-    setDays((prev) => prev.map((d) => d.id === dayId ? { ...d, activities: [...d.activities, act].sort((a, b) => a.time.localeCompare(b.time)) } : d));
+    setDays(prev => prev.map(d => d.id === dayId ? { ...d, activities: [...d.activities, act].sort((a, b) => a.time.localeCompare(b.time)) } : d));
     setShowAddBooking(null);
     toast.success("已加入預訂項目");
   };
 
   const getTypeIcon = (type: string) => {
-    const found = activityTypes.find((t) => t.value === type);
+    const found = activityTypes.find(t => t.value === type);
     return found ? found.icon : Camera;
   };
 
@@ -247,6 +277,114 @@ export default function Planner() {
     return colors[type] || "bg-gray-100 text-gray-700";
   };
 
+  // Save current trip to history
+  const saveCurrentTrip = () => {
+    const trip: SavedTrip = {
+      id: `trip_${Date.now()}`, name: tripName, startDate, days,
+      createdAt: new Date().toISOString(), isAiGenerated: false,
+    };
+    const updated = [trip, ...savedTrips].slice(0, 50);
+    saveTripsToStorage(updated);
+    toast.success("行程已儲存到歷史紀錄");
+  };
+
+  // Load trip from history
+  const loadTrip = (trip: SavedTrip) => {
+    setTripName(trip.name);
+    setStartDate(trip.startDate);
+    setDays(trip.days.map(d => ({ ...d, expanded: false })));
+    setActiveTab("current");
+    toast.success(`已載入行程：${trip.name}`);
+  };
+
+  // Delete trip from history
+  const deleteTrip = (tripId: string) => {
+    const updated = savedTrips.filter(t => t.id !== tripId);
+    saveTripsToStorage(updated);
+    toast.success("已刪除歷史行程");
+  };
+
+  // AI Generate Itinerary
+  const aiGenerateItinerary = async () => {
+    if (!aiDest.trim()) { toast.error("請輸入目的地"); return; }
+    setAiLoading(true);
+    setAiResult(null);
+    const budgetMap: Record<string, string> = { low: "經濟實惠", medium: "中等預算", high: "高級奢華" };
+    const styleMap: Record<string, string> = { culture: "文化歷史", nature: "自然風景", food: "美食探索", adventure: "冒險刺激", balanced: "均衡多元" };
+    const numDays = parseInt(aiDays) || 3;
+    const prompt = `你是專業旅行規劃師。請為「${aiDest}」規劃 ${numDays} 天的旅行行程。
+預算偏好：${budgetMap[aiBudget] || "中等"}
+旅行風格：${styleMap[aiStyle] || "均衡"}
+
+請以 JSON 格式回覆（不要加 markdown 代碼塊標記），格式如下：
+[{"title":"第1天 — 標題","activities":[{"time":"09:00","title":"活動名稱","location":"地點","type":"sightseeing","notes":"說明"}]}]
+
+type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainment, bus, train, ferry, cycling, walking, ticket
+每天安排 4-6 個活動，時間從早到晚排列。`;
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
+          }),
+        }
+      );
+      if (!response.ok) throw new Error(`API 錯誤: ${response.status}`);
+      const data = await response.json();
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      let jsonStr = raw;
+      const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (m) jsonStr = m[1];
+      const bs = jsonStr.indexOf("[");
+      const be = jsonStr.lastIndexOf("]");
+      if (bs !== -1 && be !== -1) jsonStr = jsonStr.substring(bs, be + 1);
+      const parsed = JSON.parse(jsonStr);
+      const baseDate = new Date();
+      baseDate.setDate(baseDate.getDate() + 7);
+      const tripDays: TripDay[] = parsed.map((day: any, i: number) => {
+        const d = new Date(baseDate);
+        d.setDate(d.getDate() + i);
+        return {
+          id: `ai_d${i}`, date: d.toISOString().split("T")[0], title: day.title || `第${i + 1}天`,
+          expanded: i === 0,
+          activities: (day.activities || []).map((a: any, j: number) => ({
+            id: `ai_a${i}_${j}`, time: a.time || "12:00", title: a.title || "",
+            location: a.location || "", type: a.type || "sightseeing", notes: a.notes || "",
+          })),
+        };
+      });
+      setAiResult(tripDays);
+      toast.success("AI 行程已生成！");
+    } catch {
+      toast.error("AI 生成失敗，請重試");
+    }
+    setAiLoading(false);
+  };
+
+  // Apply AI result to current trip
+  const applyAiResult = () => {
+    if (!aiResult) return;
+    setDays(aiResult);
+    setTripName(`${aiDest} ${aiDays}日遊`);
+    setStartDate(aiResult[0]?.date || new Date().toISOString().split("T")[0]);
+    // Save to history as AI-generated
+    const trip: SavedTrip = {
+      id: `trip_${Date.now()}`, name: `${aiDest} ${aiDays}日遊（AI）`,
+      startDate: aiResult[0]?.date || "", days: aiResult,
+      createdAt: new Date().toISOString(), isAiGenerated: true,
+    };
+    const updated = [trip, ...savedTrips].slice(0, 50);
+    saveTripsToStorage(updated);
+    setActiveTab("current");
+    setAiResult(null);
+    toast.success("AI 行程已套用！");
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -258,160 +396,309 @@ export default function Planner() {
               <Calendar className="w-6 h-6 text-primary" />
               <h1 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: "var(--font-display)" }}>行程規劃</h1>
             </div>
-            <p className="text-muted-foreground">規劃你的完美旅程，安排每一天的精彩行程</p>
+            <p className="text-muted-foreground">規劃你的完美旅程，或讓 AI 為你量身打造</p>
           </motion.div>
         </div>
       </section>
 
       <section className="py-8 flex-1">
         <div className="container max-w-4xl">
-          {/* Trip Header */}
-          <Card className="mb-6 border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <Input value={tripName} onChange={(e) => setTripName(e.target.value)} className="text-xl font-bold border-0 p-0 h-auto focus-visible:ring-0 bg-transparent" style={{ fontFamily: "var(--font-display)" }} />
-                  </div>
-                  <Button variant="outline" className="rounded-full gap-2" onClick={addDay}><Plus className="w-4 h-4" />新增一天</Button>
-                </div>
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Label className="text-sm text-muted-foreground">起始日期</Label>
-                    <Input type="date" value={startDate} onChange={(e) => updateDates(e.target.value)} className="w-44 h-9 rounded-xl text-sm" />
-                  </div>
-                  <span className="text-sm text-muted-foreground">{days.length} 天行程</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid grid-cols-3 h-12 rounded-xl bg-secondary/50 p-1">
+              <TabsTrigger value="current" className="rounded-lg gap-1.5 data-[state=active]:bg-background"><Calendar className="w-4 h-4" />目前行程</TabsTrigger>
+              <TabsTrigger value="ai" className="rounded-lg gap-1.5 data-[state=active]:bg-background"><Sparkles className="w-4 h-4" />AI 規劃</TabsTrigger>
+              <TabsTrigger value="history" className="rounded-lg gap-1.5 data-[state=active]:bg-background"><History className="w-4 h-4" />歷史行程</TabsTrigger>
+            </TabsList>
 
-          {/* Days */}
-          <div className="space-y-4">
-            {days.map((day, dayIndex) => (
-              <motion.div key={day.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: dayIndex * 0.1 }}>
-                <Card className="overflow-hidden">
-                  <button
-                    className="w-full flex items-center justify-between p-5 hover:bg-accent/50 transition-colors text-left select-none"
-                    onClick={() => toggleDay(day.id)}
-                    onPointerDown={() => handleDayPointerDown(day)}
-                    onPointerUp={handleDayPointerUp}
-                    onPointerLeave={handleDayPointerUp}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <span className="text-sm font-bold text-primary">{dayIndex + 1}</span>
+            {/* Current Trip Tab */}
+            <TabsContent value="current">
+              {/* Trip Header */}
+              <Card className="mb-6 border-primary/20">
+                <CardContent className="p-6">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <Input value={tripName} onChange={e => setTripName(e.target.value)} className="text-xl font-bold border-0 p-0 h-auto focus-visible:ring-0 bg-transparent" style={{ fontFamily: "var(--font-display)" }} />
                       </div>
-                      <div>
-                        <h3 className="font-semibold" style={{ fontFamily: "var(--font-display)" }}>{day.title}</h3>
-                        <p className="text-xs text-muted-foreground">{day.date} · {day.activities.length} 個活動</p>
+                      <div className="flex gap-2">
+                        <Button variant="outline" className="rounded-full gap-2" onClick={saveCurrentTrip}><Save className="w-4 h-4" />儲存</Button>
+                        <Button variant="outline" className="rounded-full gap-2" onClick={addDay}><Plus className="w-4 h-4" />新增一天</Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Edit3 className="w-3.5 h-3.5 text-muted-foreground/50" />
-                      {day.expanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm text-muted-foreground">起始日期</Label>
+                        <Input type="date" value={startDate} onChange={e => updateDates(e.target.value)} className="w-44 h-9 rounded-xl text-sm" />
+                      </div>
+                      <span className="text-sm text-muted-foreground">{days.length} 天行程</span>
                     </div>
-                  </button>
+                  </div>
+                </CardContent>
+              </Card>
 
-                  <AnimatePresence>
-                    {day.expanded && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }}>
-                        <CardContent className="pt-0 pb-5 px-5">
-                          <div className="space-y-3 ml-5 border-l-2 border-border pl-6">
-                            {day.activities.map((act) => {
-                              const TypeIcon = getTypeIcon(act.type);
-                              return (
-                                <div key={act.id} className="relative group select-none"
-                                  onPointerDown={() => handleActPointerDown(day.id, act)}
-                                  onPointerUp={handleActPointerUp}
-                                  onPointerLeave={handleActPointerUp}
-                                >
-                                  <div className="absolute -left-[31px] top-3 w-3 h-3 rounded-full bg-primary/30 border-2 border-primary" />
-                                  <div className="p-4 rounded-xl bg-accent/30 hover:bg-accent/50 transition-colors cursor-pointer">
-                                    <div className="flex items-start gap-3">
-                                      <Badge className={`rounded-lg px-2 py-1 ${getTypeColor(act.type)}`}>
-                                        <TypeIcon className="w-3.5 h-3.5" />
-                                      </Badge>
-                                      <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                          <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                                          <span className="text-xs text-muted-foreground font-medium">{act.time}</span>
-                                          <span className="text-[10px] text-muted-foreground/50 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">長按編輯</span>
+              {/* Days */}
+              <div className="space-y-4">
+                {days.map((day, dayIndex) => (
+                  <motion.div key={day.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: dayIndex * 0.05 }}>
+                    <Card className="overflow-hidden">
+                      <button
+                        className="w-full flex items-center justify-between p-5 hover:bg-accent/50 transition-colors text-left select-none"
+                        onClick={() => toggleDay(day.id)}
+                        onPointerDown={() => handleDayPointerDown(day)}
+                        onPointerUp={handleDayPointerUp}
+                        onPointerLeave={handleDayPointerUp}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <span className="text-sm font-bold text-primary">{dayIndex + 1}</span>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold" style={{ fontFamily: "var(--font-display)" }}>{day.title}</h3>
+                            <p className="text-xs text-muted-foreground">{day.date} · {day.activities.length} 個活動</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Edit3 className="w-3.5 h-3.5 text-muted-foreground/50" />
+                          {day.expanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+                        </div>
+                      </button>
+
+                      <AnimatePresence>
+                        {day.expanded && (
+                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }}>
+                            <CardContent className="pt-0 pb-5 px-5">
+                              <div className="space-y-3 ml-5 border-l-2 border-border pl-6">
+                                {day.activities.map(act => {
+                                  const TypeIcon = getTypeIcon(act.type);
+                                  return (
+                                    <div key={act.id} className="relative group select-none"
+                                      onPointerDown={() => handleActPointerDown(day.id, act)}
+                                      onPointerUp={handleActPointerUp}
+                                      onPointerLeave={handleActPointerUp}
+                                    >
+                                      <div className="absolute -left-[31px] top-3 w-3 h-3 rounded-full bg-primary/30 border-2 border-primary" />
+                                      <div className="p-4 rounded-xl bg-accent/30 hover:bg-accent/50 transition-colors cursor-pointer">
+                                        <div className="flex items-start gap-3">
+                                          <Badge className={`rounded-lg px-2 py-1 ${getTypeColor(act.type)}`}>
+                                            <TypeIcon className="w-3.5 h-3.5" />
+                                          </Badge>
+                                          <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                                              <span className="text-xs text-muted-foreground font-medium">{act.time}</span>
+                                              <span className="text-[10px] text-muted-foreground/50 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">長按編輯</span>
+                                            </div>
+                                            <h4 className="font-semibold text-sm">{act.title}</h4>
+                                            {act.location && <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1"><MapPin className="w-3 h-3" />{act.location}</div>}
+                                            {act.notes && <p className="text-xs text-muted-foreground mt-2 italic">{act.notes}</p>}
+                                            {act.image && <img src={act.image} alt="" className="mt-2 rounded-lg w-full h-24 object-cover" />}
+                                          </div>
                                         </div>
-                                        <h4 className="font-semibold text-sm">{act.title}</h4>
-                                        {act.location && <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1"><MapPin className="w-3 h-3" />{act.location}</div>}
-                                        {act.notes && <p className="text-xs text-muted-foreground mt-2 italic">{act.notes}</p>}
-                                        {act.image && <img src={act.image} alt="" className="mt-2 rounded-lg w-full h-24 object-cover" />}
                                       </div>
                                     </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
+                                  );
+                                })}
+                              </div>
 
-                          {/* Add buttons */}
-                          <div className="flex gap-2 mt-4 ml-11">
-                            <Dialog open={addingToDay === day.id} onOpenChange={(open) => setAddingToDay(open ? day.id : null)}>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm" className="rounded-full gap-2 border-dashed"><Plus className="w-3.5 h-3.5" />新增活動</Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>新增活動</DialogTitle></DialogHeader>
-                                <div className="space-y-4 mt-4">
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2"><Label>時間</Label><Input type="time" value={newActivity.time || ""} onChange={(e) => setNewActivity({ ...newActivity, time: e.target.value })} /></div>
-                                    <div className="space-y-2">
-                                      <Label>類型</Label>
-                                      <Select value={newActivity.type || "sightseeing"} onValueChange={(v) => setNewActivity({ ...newActivity, type: v })}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                        <SelectContent>{activityTypes.map((t) => { const TI = t.icon; return <SelectItem key={t.value} value={t.value}><span className="flex items-center gap-2"><TI className="w-3.5 h-3.5" />{t.label}</span></SelectItem>; })}</SelectContent>
-                                      </Select>
+                              <div className="flex gap-2 mt-4 ml-11">
+                                <Dialog open={addingToDay === day.id} onOpenChange={open => setAddingToDay(open ? day.id : null)}>
+                                  <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm" className="rounded-full gap-2 border-dashed"><Plus className="w-3.5 h-3.5" />新增活動</Button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>新增活動</DialogTitle></DialogHeader>
+                                    <div className="space-y-4 mt-4">
+                                      <div className="space-y-2"><Label>時間</Label><Input type="time" value={newActivity.time || ""} onChange={e => setNewActivity({ ...newActivity, time: e.target.value })} /></div>
+                                      <div className="space-y-2">
+                                        <Label>類型</Label>
+                                        <Select value={newActivity.type || "sightseeing"} onValueChange={v => setNewActivity({ ...newActivity, type: v })}>
+                                          <SelectTrigger><SelectValue /></SelectTrigger>
+                                          <SelectContent>{activityTypes.map(t => { const TI = t.icon; return <SelectItem key={t.value} value={t.value}><span className="flex items-center gap-2"><TI className="w-3.5 h-3.5" />{t.label}</span></SelectItem>; })}</SelectContent>
+                                        </Select>
+                                      </div>
+                                      <div className="space-y-2"><Label>活動名稱</Label><Input placeholder="例：參觀東京鐵塔" value={newActivity.title || ""} onChange={e => setNewActivity({ ...newActivity, title: e.target.value })} /></div>
+                                      <div className="space-y-2"><Label>地點</Label><Input placeholder="例：東京都港區" value={newActivity.location || ""} onChange={e => setNewActivity({ ...newActivity, location: e.target.value })} /></div>
+                                      <div className="space-y-2"><Label>圖片 URL</Label><Input placeholder="https://..." value={newActivity.image || ""} onChange={e => setNewActivity({ ...newActivity, image: e.target.value })} /></div>
+                                      <div className="space-y-2"><Label>備註</Label><Textarea placeholder="任何補充說明..." value={newActivity.notes || ""} onChange={e => setNewActivity({ ...newActivity, notes: e.target.value })} rows={3} /></div>
+                                      <Button className="w-full rounded-xl" onClick={() => addActivity(day.id)}>新增</Button>
                                     </div>
-                                  </div>
-                                  <div className="space-y-2"><Label>活動名稱</Label><Input placeholder="例：參觀東京鐵塔" value={newActivity.title || ""} onChange={(e) => setNewActivity({ ...newActivity, title: e.target.value })} /></div>
-                                  <div className="space-y-2"><Label>地點</Label><Input placeholder="例：東京都港區" value={newActivity.location || ""} onChange={(e) => setNewActivity({ ...newActivity, location: e.target.value })} /></div>
-                                  <div className="space-y-2"><Label>圖片 URL</Label><Input placeholder="https://..." value={newActivity.image || ""} onChange={(e) => setNewActivity({ ...newActivity, image: e.target.value })} /></div>
-                                  <div className="space-y-2"><Label>備註</Label><Textarea placeholder="任何補充說明..." value={newActivity.notes || ""} onChange={(e) => setNewActivity({ ...newActivity, notes: e.target.value })} rows={3} /></div>
-                                  <Button className="w-full rounded-xl" onClick={() => addActivity(day.id)}>新增</Button>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
+                                  </DialogContent>
+                                </Dialog>
 
-                            {(flightBookings.length > 0 || hotelBookings.length > 0) && (
-                              <Dialog open={showAddBooking === day.id} onOpenChange={(open) => setShowAddBooking(open ? day.id : null)}>
-                                <DialogTrigger asChild>
-                                  <Button variant="outline" size="sm" className="rounded-full gap-2 border-dashed"><Ticket className="w-3.5 h-3.5" />加入預訂</Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>加入已預訂項目</DialogTitle></DialogHeader>
-                                  <div className="space-y-3 mt-4 max-h-60 overflow-y-auto">
-                                    {flightBookings.filter((f) => f.status === "confirmed").map((fb, i) => (
-                                      <button key={fb.id} className="w-full text-left p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors" onClick={() => addBookingToDay(day.id, "flight", i)}>
-                                        <div className="flex items-center gap-2"><Plane className="w-4 h-4 text-primary" /><span className="text-sm font-medium">{fb.airline} {fb.code}</span></div>
-                                        <p className="text-xs text-muted-foreground mt-1">{fb.from} → {fb.to} | {fb.date}</p>
-                                      </button>
-                                    ))}
-                                    {hotelBookings.filter((h) => h.status === "confirmed").map((hb, i) => (
-                                      <button key={hb.id} className="w-full text-left p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors" onClick={() => addBookingToDay(day.id, "hotel", i)}>
-                                        <div className="flex items-center gap-2"><Hotel className="w-4 h-4 text-primary" /><span className="text-sm font-medium">{hb.hotelName}</span></div>
-                                        <p className="text-xs text-muted-foreground mt-1">{hb.checkIn} ~ {hb.checkOut}</p>
-                                      </button>
-                                    ))}
-                                    {flightBookings.length === 0 && hotelBookings.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">尚無已預訂的項目</p>}
+                                {(flightBookings.length > 0 || hotelBookings.length > 0) && (
+                                  <Dialog open={showAddBooking === day.id} onOpenChange={open => setShowAddBooking(open ? day.id : null)}>
+                                    <DialogTrigger asChild>
+                                      <Button variant="outline" size="sm" className="rounded-full gap-2 border-dashed"><Ticket className="w-3.5 h-3.5" />加入預訂</Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                      <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>加入已預訂項目</DialogTitle></DialogHeader>
+                                      <div className="space-y-3 mt-4 max-h-60 overflow-y-auto">
+                                        {flightBookings.filter(f => f.status === "confirmed").map((fb, i) => (
+                                          <button key={fb.id} className="w-full text-left p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors" onClick={() => addBookingToDay(day.id, "flight", i)}>
+                                            <div className="flex items-center gap-2"><Plane className="w-4 h-4 text-primary" /><span className="text-sm font-medium">{fb.airline} {fb.code}</span></div>
+                                            <p className="text-xs text-muted-foreground mt-1">{fb.from} → {fb.to} | {fb.date}</p>
+                                          </button>
+                                        ))}
+                                        {hotelBookings.filter(h => h.status === "confirmed").map((hb, i) => (
+                                          <button key={hb.id} className="w-full text-left p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors" onClick={() => addBookingToDay(day.id, "hotel", i)}>
+                                            <div className="flex items-center gap-2"><Hotel className="w-4 h-4 text-primary" /><span className="text-sm font-medium">{hb.hotelName}</span></div>
+                                            <p className="text-xs text-muted-foreground mt-1">{hb.checkIn} ~ {hb.checkOut}</p>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                )}
+                              </div>
+                            </CardContent>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* AI Planner Tab */}
+            <TabsContent value="ai">
+              <Card className="border-primary/20">
+                <CardContent className="p-6 space-y-5">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h2 className="font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>AI 智慧行程規劃</h2>
+                      <p className="text-xs text-muted-foreground">告訴 AI 你的旅行偏好，自動生成完整行程</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>目的地</Label>
+                    <Input placeholder="例：北海道、東京、巴黎..." value={aiDest} onChange={e => setAiDest(e.target.value)} className="rounded-xl" />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>天數</Label>
+                      <Input type="text" inputMode="numeric" value={aiDays} onChange={e => { const v = e.target.value.replace(/[^0-9]/g, ""); setAiDays(v); }} placeholder="3" className="rounded-xl" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>預算</Label>
+                      <Select value={aiBudget} onValueChange={setAiBudget}>
+                        <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">💰 經濟</SelectItem>
+                          <SelectItem value="medium">💎 中等</SelectItem>
+                          <SelectItem value="high">👑 奢華</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>風格</Label>
+                      <Select value={aiStyle} onValueChange={setAiStyle}>
+                        <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="culture">🏛️ 文化</SelectItem>
+                          <SelectItem value="nature">🌿 自然</SelectItem>
+                          <SelectItem value="food">🍜 美食</SelectItem>
+                          <SelectItem value="adventure">🏔️ 冒險</SelectItem>
+                          <SelectItem value="balanced">⚖️ 均衡</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <Button className="w-full rounded-xl h-12 gap-2 text-base" onClick={aiGenerateItinerary} disabled={aiLoading}>
+                    {aiLoading ? <><Loader2 className="w-5 h-5 animate-spin" />AI 正在規劃中...</> : <><Sparkles className="w-5 h-5" />生成 AI 行程</>}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* AI Result Preview */}
+              {aiResult && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>AI 生成結果</h3>
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="rounded-full gap-2" onClick={() => setAiResult(null)}><X className="w-4 h-4" />取消</Button>
+                      <Button className="rounded-full gap-2" onClick={applyAiResult}><Download className="w-4 h-4" />套用行程</Button>
+                    </div>
+                  </div>
+
+                  {aiResult.map((day, i) => (
+                    <Card key={day.id} className="overflow-hidden border-primary/10">
+                      <div className="p-4 bg-primary/5">
+                        <h4 className="font-semibold" style={{ fontFamily: "var(--font-display)" }}>{day.title}</h4>
+                        <p className="text-xs text-muted-foreground">{day.date}</p>
+                      </div>
+                      <CardContent className="p-4">
+                        <div className="space-y-2">
+                          {day.activities.map(act => {
+                            const TypeIcon = getTypeIcon(act.type);
+                            return (
+                              <div key={act.id} className="flex items-start gap-3 p-3 rounded-lg bg-accent/20">
+                                <Badge className={`rounded-lg px-2 py-1 shrink-0 ${getTypeColor(act.type)}`}><TypeIcon className="w-3.5 h-3.5" /></Badge>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-muted-foreground">{act.time}</span>
+                                    <span className="font-medium text-sm">{act.title}</span>
                                   </div>
-                                </DialogContent>
-                              </Dialog>
-                            )}
-                          </div>
-                        </CardContent>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                                  {act.location && <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{act.location}</p>}
+                                  {act.notes && <p className="text-xs text-muted-foreground mt-1 italic">{act.notes}</p>}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </motion.div>
+              )}
+            </TabsContent>
+
+            {/* History Tab */}
+            <TabsContent value="history">
+              {savedTrips.length === 0 ? (
+                <Card className="border-dashed">
+                  <CardContent className="p-12 text-center">
+                    <Archive className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                    <h3 className="font-semibold text-lg mb-2" style={{ fontFamily: "var(--font-display)" }}>尚無歷史行程</h3>
+                    <p className="text-sm text-muted-foreground">儲存目前行程或使用 AI 生成行程後，會自動出現在這裡</p>
+                  </CardContent>
                 </Card>
-              </motion.div>
-            ))}
-          </div>
+              ) : (
+                <div className="space-y-3">
+                  {savedTrips.map(trip => (
+                    <Card key={trip.id} className="hover:shadow-md transition-shadow">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold truncate">{trip.name}</h3>
+                              {trip.isAiGenerated && <Badge className="bg-primary/10 text-primary border-0 rounded-full text-[10px]"><Sparkles className="w-2.5 h-2.5 mr-0.5" />AI</Badge>}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {trip.startDate} · {trip.days.length} 天 · {trip.days.reduce((s, d) => s + d.activities.length, 0)} 個活動
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              建立於 {new Date(trip.createdAt).toLocaleDateString("zh-TW")}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" className="rounded-full" onClick={() => loadTrip(trip)}>載入</Button>
+                            <Button variant="ghost" size="sm" className="rounded-full text-destructive" onClick={() => deleteTrip(trip.id)}><Trash2 className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </section>
 
@@ -421,19 +708,19 @@ export default function Planner() {
           <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>編輯活動</DialogTitle></DialogHeader>
           {editingAct && (
             <div className="space-y-4 mt-2">
-              <div className="space-y-2"><Label>時間</Label><Input type="time" value={editForm.time || ""} onChange={(e) => setEditForm({ ...editForm, time: e.target.value })} /></div>
+              <div className="space-y-2"><Label>時間</Label><Input type="time" value={editForm.time || ""} onChange={e => setEditForm({ ...editForm, time: e.target.value })} /></div>
               <div className="space-y-2">
                 <Label>類型</Label>
-                <Select value={editForm.type || "sightseeing"} onValueChange={(v) => setEditForm({ ...editForm, type: v })}>
+                <Select value={editForm.type || "sightseeing"} onValueChange={v => setEditForm({ ...editForm, type: v })}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                  <SelectContent>{activityTypes.map((t) => { const TI = t.icon; return <SelectItem key={t.value} value={t.value}><span className="flex items-center gap-2"><TI className="w-3.5 h-3.5" />{t.label}</span></SelectItem>; })}</SelectContent>
+                  <SelectContent>{activityTypes.map(t => { const TI = t.icon; return <SelectItem key={t.value} value={t.value}><span className="flex items-center gap-2"><TI className="w-3.5 h-3.5" />{t.label}</span></SelectItem>; })}</SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2"><Label>活動名稱</Label><Input value={editForm.title || ""} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} /></div>
-              <div className="space-y-2"><Label>地點</Label><Input value={editForm.location || ""} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} /></div>
-              <div className="space-y-2"><Label>圖片 URL</Label><Input value={editForm.image || ""} onChange={(e) => setEditForm({ ...editForm, image: e.target.value })} placeholder="https://..." /></div>
+              <div className="space-y-2"><Label>活動名稱</Label><Input value={editForm.title || ""} onChange={e => setEditForm({ ...editForm, title: e.target.value })} /></div>
+              <div className="space-y-2"><Label>地點</Label><Input value={editForm.location || ""} onChange={e => setEditForm({ ...editForm, location: e.target.value })} /></div>
+              <div className="space-y-2"><Label>圖片 URL</Label><Input value={editForm.image || ""} onChange={e => setEditForm({ ...editForm, image: e.target.value })} placeholder="https://..." /></div>
               {editForm.image && <img src={editForm.image} alt="" className="rounded-xl w-full h-32 object-cover" />}
-              <div className="space-y-2"><Label>備註</Label><Textarea value={editForm.notes || ""} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} rows={3} /></div>
+              <div className="space-y-2"><Label>備註</Label><Textarea value={editForm.notes || ""} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={3} /></div>
               <div className="flex gap-2">
                 <Button className="flex-1 rounded-xl gap-2" onClick={saveEditedAct}><Save className="w-4 h-4" />儲存</Button>
                 <Button variant="destructive" className="rounded-xl gap-2" onClick={deleteActFromEdit}><Trash2 className="w-4 h-4" />刪除</Button>
@@ -449,8 +736,8 @@ export default function Planner() {
           <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>編輯行程日</DialogTitle></DialogHeader>
           {editingDay && (
             <div className="space-y-4 mt-2">
-              <div className="space-y-2"><Label>標題</Label><Input value={editDayForm.title} onChange={(e) => setEditDayForm({ ...editDayForm, title: e.target.value })} /></div>
-              <div className="space-y-2"><Label>日期</Label><Input type="date" value={editDayForm.date} onChange={(e) => setEditDayForm({ ...editDayForm, date: e.target.value })} /></div>
+              <div className="space-y-2"><Label>標題</Label><Input value={editDayForm.title} onChange={e => setEditDayForm({ ...editDayForm, title: e.target.value })} /></div>
+              <div className="space-y-2"><Label>日期</Label><Input type="date" value={editDayForm.date} onChange={e => setEditDayForm({ ...editDayForm, date: e.target.value })} /></div>
               <div className="flex gap-2">
                 <Button className="flex-1 rounded-xl gap-2" onClick={saveEditedDay}><Save className="w-4 h-4" />儲存</Button>
                 <Button variant="destructive" className="rounded-xl gap-2" onClick={deleteDay}><Trash2 className="w-4 h-4" />刪除</Button>

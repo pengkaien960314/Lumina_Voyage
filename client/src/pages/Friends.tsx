@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useFriends } from "@/contexts/FriendContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -126,11 +126,29 @@ export default function Friends() {
                     </div>
                   )}
 
-                  {/* 4-digit Number */}
+                  {/* 4-digit Number with custom numpad */}
                   {addMethod === "number" && (
                     <div className="space-y-4">
                       <p className="text-sm text-muted-foreground text-center">雙方同時輸入相同的4位數字即可配對成為好友</p>
-                      <Input placeholder="輸入4位數字" value={numberInput} onChange={(e) => setNumberInput(e.target.value.replace(/\D/g, "").slice(0, 4))} className="rounded-xl text-center text-2xl tracking-[0.5em] font-mono" maxLength={4} />
+                      {/* Display */}
+                      <div className="flex justify-center gap-3">
+                        {[0,1,2,3].map(i => (
+                          <div key={i} className={`w-14 h-16 rounded-xl border-2 flex items-center justify-center text-2xl font-bold font-mono transition-all ${
+                            numberInput.length === i ? "border-primary bg-primary/5 scale-105" : numberInput[i] ? "border-primary/50 bg-primary/10" : "border-border bg-secondary/30"
+                          }`}>
+                            {numberInput[i] || ""}
+                          </div>
+                        ))}
+                      </div>
+                      {/* Custom Numpad */}
+                      <div className="grid grid-cols-3 gap-2 max-w-[280px] mx-auto">
+                        {[1,2,3,4,5,6,7,8,9].map(n => (
+                          <button key={n} className="h-14 rounded-xl bg-secondary hover:bg-secondary/80 active:bg-primary/20 active:scale-95 transition-all text-xl font-semibold" onClick={() => { if (numberInput.length < 4) setNumberInput(prev => prev + n); }}>{n}</button>
+                        ))}
+                        <button className="h-14 rounded-xl bg-destructive/10 hover:bg-destructive/20 active:scale-95 transition-all text-sm font-medium text-destructive" onClick={() => setNumberInput("")}>清除</button>
+                        <button className="h-14 rounded-xl bg-secondary hover:bg-secondary/80 active:bg-primary/20 active:scale-95 transition-all text-xl font-semibold" onClick={() => { if (numberInput.length < 4) setNumberInput(prev => prev + "0"); }}>0</button>
+                        <button className="h-14 rounded-xl bg-secondary hover:bg-secondary/80 active:scale-95 transition-all text-sm font-medium" onClick={() => setNumberInput(prev => prev.slice(0, -1))}>刪除</button>
+                      </div>
                       <Button className="w-full rounded-xl" onClick={handleAddByNumber} disabled={numberInput.length !== 4}>開始配對</Button>
                     </div>
                   )}
