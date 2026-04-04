@@ -1,4 +1,4 @@
-# Lumina Voyage 旅行探索 — 設計腦力激盪
+# Wanderlust 旅行探索 — 設計腦力激盪
 
 ## 需求摘要
 - 旅行 App（資管系專題）

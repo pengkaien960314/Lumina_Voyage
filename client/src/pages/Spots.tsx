@@ -509,7 +509,7 @@ export default function Spots() {
               >
                 {/* Header image */}
                 <div className="relative h-52 overflow-hidden">
-                  <img src={flippedSpot.image} alt={flippedSpot.name} className="w-full h-full object-cover" loading="lazy" />
+                  <img src={flippedSpot.image} alt={flippedSpot.name} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm rounded-full mb-2 gap-1">

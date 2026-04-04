@@ -50,8 +50,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   const [hotelBookings, setHotelBookings] = useState<HotelBooking[]>([]);
 
   useEffect(() => {
-    const fb = localStorage.getItem("lumina_flights");
-    const hb = localStorage.getItem("lumina_hotels");
+    const fb = localStorage.getItem("wanderlust_flights");
+    const hb = localStorage.getItem("wanderlust_hotels");
     if (fb) setFlightBookings(JSON.parse(fb));
     if (hb) setHotelBookings(JSON.parse(hb));
   }, []);
@@ -61,25 +61,25 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   const addFlightBooking = (b: FlightBooking) => {
     const next = [...flightBookings, b];
     setFlightBookings(next);
-    save("lumina_flights", next);
+    save("wanderlust_flights", next);
   };
 
   const addHotelBooking = (b: HotelBooking) => {
     const next = [...hotelBookings, b];
     setHotelBookings(next);
-    save("lumina_hotels", next);
+    save("wanderlust_hotels", next);
   };
 
   const cancelFlightBooking = (id: string) => {
     const next = flightBookings.map((f) => f.id === id ? { ...f, status: "cancelled" as const } : f);
     setFlightBookings(next);
-    save("lumina_flights", next);
+    save("wanderlust_flights", next);
   };
 
   const cancelHotelBooking = (id: string) => {
     const next = hotelBookings.map((h) => h.id === id ? { ...h, status: "cancelled" as const } : h);
     setHotelBookings(next);
-    save("lumina_hotels", next);
+    save("wanderlust_hotels", next);
   };
 
   return (

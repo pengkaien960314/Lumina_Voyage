@@ -509,7 +509,7 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
                                               <h4 className="font-semibold text-sm">{act.title}</h4>
                                               {act.location && <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1"><MapPin className="w-3 h-3" />{act.location}</div>}
                                               {act.notes && <p className="text-xs text-muted-foreground mt-2 italic">{act.notes}</p>}
-                                              {act.image && <img src={act.image} alt={act.title || "活動照片"} className="mt-2 rounded-lg w-full h-24 object-cover" loading="lazy" />}
+                                              {act.image && <img src={act.image} alt="" className="mt-2 rounded-lg w-full h-24 object-cover" />}
                                             </div>
                                           </div>
                                         </div>
@@ -764,7 +764,7 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
                   }}><ImageIcon className="w-4 h-4" aria-label="上傳圖片" /></Button>
                 </div>
               </div>
-              {editForm.image && <img src={editForm.image} alt={editForm.title || "活動照片"} className="rounded-xl w-full h-32 object-cover" loading="lazy" />}
+              {editForm.image && <img src={editForm.image} alt="" className="rounded-xl w-full h-32 object-cover" />}
               <div className="space-y-2"><Label>備註</Label><Textarea value={editForm.notes || ""} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={3} /></div>
               <div className="flex gap-2">
                 <Button className="flex-1 rounded-xl gap-2" onClick={saveEditedAct}><Save className="w-4 h-4" />儲存</Button>

@@ -82,7 +82,7 @@ export default function About() {
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
                 <Card className="border-border/50 text-center organic-card">
                   <CardContent className="p-6">
-                    <img src={t.avatar} alt={t.name} className="w-20 h-20 rounded-full mx-auto mb-4 bg-secondary" loading="lazy" />
+                    <img src={t.avatar} alt={t.name} className="w-20 h-20 rounded-full mx-auto mb-4 bg-secondary" />
                     <h3 className="font-bold">{t.name}</h3>
                     <p className="text-sm text-primary mb-2">{t.role}</p>
                     <p className="text-xs text-muted-foreground">{t.desc}</p>

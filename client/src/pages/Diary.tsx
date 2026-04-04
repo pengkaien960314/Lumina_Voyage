@@ -148,7 +148,7 @@ export default function Diary() {
   useEffect(() => {
     const userId = user?.id;
     if (!userId) return;
-    const stored = localStorage.getItem(`lumina_user_diaries_${userId}`);
+    const stored = localStorage.getItem(`wanderlust_user_diaries_${userId}`);
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
@@ -201,7 +201,7 @@ export default function Diary() {
     const newEntries = [entry, ...entries];
     setEntries(newEntries);
     const userEntries = newEntries.filter(e => (e as any).userId === userId);
-    localStorage.setItem(`lumina_user_diaries_${userId}`, JSON.stringify(userEntries));
+    localStorage.setItem(`wanderlust_user_diaries_${userId}`, JSON.stringify(userEntries));
     setNewTitle(""); setNewContent(""); setNewLocation(""); setNewImage(""); setNewVisibility("public");
     setDialogOpen(false);
     toast.success("日記已發布！");
@@ -275,7 +275,7 @@ export default function Diary() {
                   </div>
                   <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageUpload} />
                   <Button variant="outline" className="w-full rounded-xl gap-2 border-dashed h-20" onClick={() => fileInputRef.current?.click()}>
-                    {newImage ? <img src={newImage} alt="日記照片預覽" className="w-10 h-10 rounded-lg object-cover" loading="lazy" /> : <ImagePlus className="w-5 h-5" />}
+                    {newImage ? <img src={newImage} alt="preview" className="w-10 h-10 rounded-lg object-cover" /> : <ImagePlus className="w-5 h-5" />}
                     {newImage ? "更換照片" : "上傳照片"}
                   </Button>
                   <Button className="w-full rounded-xl" onClick={handleCreate}>發布日記</Button>
@@ -327,7 +327,7 @@ export default function Diary() {
 
                   {/* Image */}
                   <div className="relative aspect-[16/9] overflow-hidden">
-                    <img src={entry.image} alt={entry.title} className="w-full h-full object-cover" loading="lazy" />
+                    <img src={entry.image} alt={entry.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                     <div className="absolute top-4 left-4"><span className="text-3xl">{entry.mood}</span></div>
                     <div className="absolute bottom-4 left-4 right-4">
