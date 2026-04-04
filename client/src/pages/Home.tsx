@@ -93,22 +93,14 @@ export default function Home() {
   const { isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
   const [flippedId, setFlippedId] = useState<number | null>(null);
-  const [expanded, setExpanded] = useState(false);
   const [zoomedFeature, setZoomedFeature] = useState<number | null>(null);
 
   const handleFlip = (id: number) => {
-    if (flippedId === id) {
-      setExpanded(false);
-      setTimeout(() => setFlippedId(null), 300);
-    } else {
-      setFlippedId(id);
-      setTimeout(() => setExpanded(true), 400);
-    }
+    setFlippedId(flippedId === id ? null : id);
   };
 
   const handleCloseFlip = () => {
-    setExpanded(false);
-    setTimeout(() => setFlippedId(null), 300);
+    setFlippedId(null);
   };
 
   const flippedSpot = featuredSpots.find((s) => s.id === flippedId);
@@ -271,10 +263,12 @@ export default function Home() {
                 custom={i}
                 className="cursor-pointer"
                 onClick={() => handleFlip(spot.id)}
+                whileHover={{ y: -6 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
               >
-                <div className="organic-card overflow-hidden bg-card border border-border/50 group hover:shadow-lg transition-shadow duration-300">
+                <div className="organic-card overflow-hidden bg-card border border-border/50 group hover:shadow-xl transition-shadow duration-500">
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <img src={spot.image} alt={spot.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                    <img src={spot.image} alt={spot.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     <Badge className="absolute top-3 left-3 rounded-full bg-white/80 text-stone-700 backdrop-blur-sm border-0 text-xs">{spot.category}</Badge>
                     <div className="absolute bottom-3 left-3 right-3">
@@ -304,7 +298,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Flip Modal for Featured Spots */}
+      {/* Smooth Modal for Featured Spots */}
       <AnimatePresence>
         {flippedSpot && (
           <motion.div
@@ -312,26 +306,33 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
             onClick={handleCloseFlip}
           >
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
             <motion.div
-              className="relative z-10"
-              initial={{ rotateY: 0, scale: 0.6 }}
-              animate={{ rotateY: 180, scale: expanded ? 1 : 0.75, width: expanded ? "100%" : "320px" }}
-              exit={{ rotateY: 0, scale: 0.5, opacity: 0 }}
-              transition={{
-                rotateY: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
-                scale: { duration: 0.4, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] },
-                width: { duration: 0.4, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] },
-              }}
-              style={{ perspective: "1200px", transformStyle: "preserve-3d", maxWidth: expanded ? "640px" : "320px" }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+            <motion.div
+              className="relative z-10 w-full max-w-xl"
+              initial={{ opacity: 0, scale: 0.92, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-card rounded-2xl overflow-hidden shadow-2xl border border-border/50" style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
+              <div className="bg-card rounded-2xl overflow-hidden shadow-2xl border border-border/50">
                 <div className="relative h-52 overflow-hidden">
-                  <img src={flippedSpot.image} alt={flippedSpot.name} className="w-full h-full object-cover" />
+                  <motion.img
+                    src={flippedSpot.image}
+                    alt={flippedSpot.name}
+                    className="w-full h-full object-cover"
+                    initial={{ scale: 1.1 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm rounded-full mb-2">{flippedSpot.category}</Badge>
@@ -342,7 +343,12 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div className="p-5 space-y-4 max-h-[55vh] overflow-y-auto">
+                <motion.div
+                  className="p-5 space-y-4 max-h-[55vh] overflow-y-auto"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.15 }}
+                >
                   <p className="text-sm leading-relaxed text-muted-foreground">{flippedSpot.backDesc}</p>
                   <div>
                     <h3 className="text-sm font-bold mb-2 flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-500" />亮點特色</h3>
@@ -375,7 +381,7 @@ export default function Home() {
                   <Button className="w-full rounded-xl" variant="outline" onClick={handleCloseFlip}>
                     <ChevronLeft className="w-4 h-4 mr-1" />返回
                   </Button>
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           </motion.div>

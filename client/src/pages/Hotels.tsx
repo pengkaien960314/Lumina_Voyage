@@ -6,7 +6,7 @@
  * - Price range slider, guests up to 6 + custom input
  */
 import { useState } from "react";
-import { Link } from "wouter";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Star, MapPin, Wifi, Car, Coffee, Waves, Users, Calendar, Navigation, Phone, Globe, Dumbbell, Utensils, Bath, Minus, Plus as PlusIcon, ChevronLeft, ChevronRight, Languages, DollarSign, Cloud } from "lucide-react";
+import { Search, Star, MapPin, Wifi, Car, Coffee, Waves, Users, Calendar, Navigation, Phone, Globe, Dumbbell, Utensils, Bath, Minus, Plus as PlusIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useBooking } from "@/contexts/BookingContext";
@@ -267,21 +267,6 @@ export default function Hotels() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>旅館預訂</h1>
             <p className="text-muted-foreground mb-4">精選全球優質住宿，為你的旅程找到完美落腳處</p>
-
-            <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
-              <Link href="/tools">
-                <Button variant="outline" size="sm" className="rounded-full gap-1.5 shrink-0 text-xs"><Languages className="w-3.5 h-3.5" />翻譯</Button>
-              </Link>
-              <Link href="/tools">
-                <Button variant="outline" size="sm" className="rounded-full gap-1.5 shrink-0 text-xs"><DollarSign className="w-3.5 h-3.5" />匯率</Button>
-              </Link>
-              <Link href="/tools">
-                <Button variant="outline" size="sm" className="rounded-full gap-1.5 shrink-0 text-xs"><Cloud className="w-3.5 h-3.5" />天氣</Button>
-              </Link>
-              <Link href="/tools">
-                <Button variant="outline" size="sm" className="rounded-full gap-1.5 shrink-0 text-xs"><Navigation className="w-3.5 h-3.5" />導航</Button>
-              </Link>
-            </div>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <div className="relative flex-1">

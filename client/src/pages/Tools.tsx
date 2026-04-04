@@ -57,11 +57,15 @@ const langOptions = [
 ];
 
 const travelPhrases = [
-  { category: "基本問候", phrases: ["你好", "謝謝", "不好意思", "再見", "請問"] },
-  { category: "交通", phrases: ["請問車站在哪裡？", "我要搭計程車", "這班車到哪裡？", "多少錢？"] },
-  { category: "餐廳", phrases: ["請給我菜單", "我要點餐", "結帳", "好吃", "不辣"] },
-  { category: "住宿", phrases: ["我有預訂", "幾點退房？", "Wi-Fi 密碼是什麼？", "可以寄放行李嗎？"] },
-  { category: "緊急", phrases: ["請幫幫我", "我迷路了", "請叫救護車", "我的護照不見了"] },
+  { category: "基本問候", phrases: ["你好", "謝謝", "不好意思", "再見", "請問", "早安", "晚安", "對不起", "沒關係", "很高興認識你"] },
+  { category: "交通", phrases: ["請問車站在哪裡？", "我要搭計程車", "這班車到哪裡？", "多少錢？", "請問最近的地鐵站怎麼走？", "我要到機場", "可以幫我叫Uber嗎？", "請在這裡停車", "末班車幾點？", "要轉乘嗎？"] },
+  { category: "餐廳", phrases: ["請給我菜單", "我要點餐", "結帳", "好吃", "不辣", "有素食嗎？", "推薦什麼？", "我對花生過敏", "可以打包嗎？", "請給我水", "有英文菜單嗎？", "我要預約座位"] },
+  { category: "住宿", phrases: ["我有預訂", "幾點退房？", "Wi-Fi 密碼是什麼？", "可以寄放行李嗎？", "請問早餐幾點？", "房間冷氣壞了", "可以多給一條毛巾嗎？", "附近有便利商店嗎？", "可以延遲退房嗎？", "請幫我叫計程車"] },
+  { category: "購物", phrases: ["多少錢？", "可以便宜一點嗎？", "有其他顏色嗎？", "可以試穿嗎？", "可以刷卡嗎？", "可以退稅嗎？", "有折扣嗎？", "請幫我包裝", "有大一號的嗎？", "這是免稅品嗎？"] },
+  { category: "問路", phrases: ["請問這裡是哪裡？", "怎麼去這個地方？", "走路大概幾分鐘？", "可以幫我在地圖上指嗎？", "我迷路了", "最近的廁所在哪裡？", "這條路對嗎？", "前面左轉還是右轉？"] },
+  { category: "緊急", phrases: ["請幫幫我", "我迷路了", "請叫救護車", "我的護照不見了", "我需要看醫生", "請報警", "我的行李被偷了", "最近的醫院在哪裡？", "我不舒服", "可以幫我打電話嗎？"] },
+  { category: "社交", phrases: ["你叫什麼名字？", "你是哪裡人？", "可以一起拍照嗎？", "這裡很漂亮", "旅途愉快！", "我來自台灣", "我在這裡玩三天", "你推薦去哪裡？", "可以加好友嗎？"] },
+  { category: "數字與時間", phrases: ["現在幾點？", "今天星期幾？", "一、二、三、四、五", "六、七、八、九、十", "一百", "一千", "早上", "下午", "晚上", "明天"] },
 ];
 
 const callGemini = async (prompt: string): Promise<string> => {
@@ -704,20 +708,40 @@ function WeatherTab() {
 }
 
 /* ==================== NAVIGATION TAB ==================== */
+const popularDestinations = [
+  { name: "東京車站", value: "東京車站, 日本" },
+  { name: "札幌車站", value: "札幌車站, 日本" },
+  { name: "大阪城", value: "大阪城, 日本" },
+  { name: "首爾明洞", value: "明洞, 首爾, 韓國" },
+  { name: "曼谷大皇宮", value: "大皇宮, 曼谷, 泰國" },
+  { name: "台北101", value: "台北101, 台灣" },
+];
+
 function NavigationTab() {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [travelMode, setTravelMode] = useState<"DRIVING" | "WALKING" | "TRANSIT">("DRIVING");
-  const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
+  const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string; steps?: string[] } | null>(null);
   const [locating, setLocating] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [routing, setRouting] = useState(false);
   const directionsRendererRef = useRef<google.maps.DirectionsRenderer | null>(null);
+  const originMarkerRef = useRef<google.maps.Marker | null>(null);
 
   const handleMapReady = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
-    map.setCenter({ lat: 43.0618, lng: 141.3545 });
+    map.setCenter({ lat: 25.0330, lng: 121.5654 });
     map.setZoom(12);
+    setMapLoaded(true);
   }, []);
+
+  const clearOriginMarker = () => {
+    if (originMarkerRef.current) {
+      originMarkerRef.current.setMap(null);
+      originMarkerRef.current = null;
+    }
+  };
 
   const locateMe = () => {
     if (!navigator.geolocation) { toast.error("瀏覽器不支援定位"); return; }
@@ -730,7 +754,8 @@ function NavigationTab() {
           const loc = { lat: latitude, lng: longitude };
           map.setCenter(loc);
           map.setZoom(15);
-          new google.maps.Marker({ map, position: loc, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: "#3b82f6", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 3 } });
+          clearOriginMarker();
+          originMarkerRef.current = new google.maps.Marker({ map, position: loc, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: "#3b82f6", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 3 } });
           const geocoder = new google.maps.Geocoder();
           geocoder.geocode({ location: loc }, (results, status) => {
             if (status === "OK" && results?.[0]) setOrigin(results[0].formatted_address);
@@ -744,39 +769,110 @@ function NavigationTab() {
     );
   };
 
-  const navigate = () => {
+  const geocodeAndCenter = useCallback((address: string, isOrigin: boolean) => {
+    const map = mapRef.current;
+    if (!map || !window.google) return;
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address }, (results, status) => {
+      if (status === "OK" && results?.[0]) {
+        const loc = results[0].geometry.location;
+        map.setCenter(loc);
+        map.setZoom(14);
+        if (isOrigin) {
+          clearOriginMarker();
+          originMarkerRef.current = new google.maps.Marker({
+            map, position: loc,
+            icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: "#3b82f6", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 3 }
+          });
+        }
+      }
+    });
+  }, []);
+
+  const navigateRoute = () => {
     if (!origin || !destination) { toast.error("請輸入起點和終點"); return; }
     const map = mapRef.current;
-    if (!map) return;
+    if (!map) { toast.error("地圖尚未載入"); return; }
+    setRouting(true);
+    clearOriginMarker();
     const ds = new google.maps.DirectionsService();
     if (directionsRendererRef.current) directionsRendererRef.current.setMap(null);
     const dr = new google.maps.DirectionsRenderer({ map, suppressMarkers: false, polylineOptions: { strokeColor: "#8B7355", strokeWeight: 5 } });
     directionsRendererRef.current = dr;
     ds.route({ origin, destination, travelMode: google.maps.TravelMode[travelMode] }, (result, status) => {
+      setRouting(false);
       if (status === "OK" && result) {
         dr.setDirections(result);
         const leg = result.routes[0]?.legs[0];
-        if (leg) setRouteInfo({ distance: leg.distance?.text || "", duration: leg.duration?.text || "" });
+        if (leg) {
+          const steps = leg.steps?.slice(0, 8).map(s => s.instructions?.replace(/<[^>]*>/g, "") || "") || [];
+          setRouteInfo({ distance: leg.distance?.text || "", duration: leg.duration?.text || "", steps });
+        }
         toast.success("路線已規劃");
       } else { toast.error("無法規劃路線，請檢查地址"); }
     });
   };
 
+  const clearRoute = () => {
+    if (directionsRendererRef.current) {
+      directionsRendererRef.current.setMap(null);
+      directionsRendererRef.current = null;
+    }
+    setRouteInfo(null);
+    setOrigin("");
+    setDestination("");
+    const map = mapRef.current;
+    if (map) { map.setCenter({ lat: 25.0330, lng: 121.5654 }); map.setZoom(12); }
+  };
+
+  const openInGoogleMaps = () => {
+    if (!origin || !destination) return;
+    const mode = travelMode === "DRIVING" ? "driving" : travelMode === "WALKING" ? "walking" : "transit";
+    window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=${mode}`, "_blank");
+  };
+
   return (
     <div className="space-y-4">
+      <div className="rounded-xl overflow-hidden border border-border/50 h-[300px] sm:h-[350px] relative">
+        <MapView onMapReady={handleMapReady} initialCenter={{ lat: 25.0330, lng: 121.5654 }} />
+        {!mapLoaded && (
+          <div className="absolute inset-0 bg-secondary/80 flex items-center justify-center">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">載入地圖中...</p>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="space-y-3">
         <div>
-          <Label className="text-xs text-muted-foreground mb-1 block">起點</Label>
+          <Label className="text-xs text-muted-foreground mb-1 block">起點（可自行輸入任意地址）</Label>
           <div className="flex gap-2">
-            <Input placeholder="輸入起點地址..." value={origin} onChange={e => setOrigin(e.target.value)} className="rounded-xl" />
-            <Button variant="outline" size="sm" className="rounded-xl shrink-0" onClick={locateMe} disabled={locating}>
+            <Input
+              placeholder="輸入起點地址，例如：台北車站..."
+              value={origin}
+              onChange={e => setOrigin(e.target.value)}
+              onBlur={() => { if (origin.trim()) geocodeAndCenter(origin, true); }}
+              className="rounded-xl"
+            />
+            <Button variant="outline" size="sm" className="rounded-xl shrink-0 gap-1" onClick={locateMe} disabled={locating} aria-label="使用目前位置">
               {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Locate className="w-4 h-4" />}
+              <span className="hidden sm:inline text-xs">定位</span>
             </Button>
           </div>
         </div>
         <div>
           <Label className="text-xs text-muted-foreground mb-1 block">終點</Label>
-          <Input placeholder="輸入目的地..." value={destination} onChange={e => setDestination(e.target.value)} className="rounded-xl" />
+          <Input placeholder="輸入目的地，例如：東京車站..." value={destination} onChange={e => setDestination(e.target.value)} className="rounded-xl" />
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <span className="text-xs text-muted-foreground self-center mr-1">熱門：</span>
+          {popularDestinations.map(d => (
+            <Button key={d.name} variant="outline" size="sm" className="rounded-full text-xs h-7 px-2.5" onClick={() => setDestination(d.value)}>
+              {d.name}
+            </Button>
+          ))}
         </div>
         <div className="flex gap-2">
           {(["DRIVING", "WALKING", "TRANSIT"] as const).map(m => (
@@ -785,22 +881,50 @@ function NavigationTab() {
             </Button>
           ))}
         </div>
-        <Button className="w-full rounded-xl" onClick={navigate}><Navigation className="w-4 h-4 mr-2" />開始導航</Button>
+        <div className="flex gap-2">
+          <Button className="flex-1 rounded-xl" onClick={navigateRoute} disabled={routing || !mapLoaded}>
+            {routing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Navigation className="w-4 h-4 mr-2" />}
+            開始導航
+          </Button>
+          {routeInfo && (
+            <Button variant="outline" className="rounded-xl gap-1" onClick={openInGoogleMaps}>
+              <MapPin className="w-4 h-4" />Google Maps
+            </Button>
+          )}
+          {routeInfo && (
+            <Button variant="ghost" size="sm" className="rounded-xl" onClick={clearRoute}>
+              <RotateCcw className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {routeInfo && (
         <Card className="border-primary/30">
-          <CardContent className="p-4 flex items-center justify-around">
-            <div className="text-center"><p className="text-xs text-muted-foreground">距離</p><p className="font-bold text-primary">{routeInfo.distance}</p></div>
-            <div className="w-px h-8 bg-border" />
-            <div className="text-center"><p className="text-xs text-muted-foreground">預計時間</p><p className="font-bold text-primary">{routeInfo.duration}</p></div>
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center justify-around">
+              <div className="text-center"><p className="text-xs text-muted-foreground">距離</p><p className="font-bold text-primary">{routeInfo.distance}</p></div>
+              <div className="w-px h-8 bg-border" />
+              <div className="text-center"><p className="text-xs text-muted-foreground">預計時間</p><p className="font-bold text-primary">{routeInfo.duration}</p></div>
+              <div className="w-px h-8 bg-border" />
+              <div className="text-center"><p className="text-xs text-muted-foreground">方式</p><p className="font-bold text-primary">{travelMode === "DRIVING" ? "🚗" : travelMode === "WALKING" ? "🚶" : "🚌"}</p></div>
+            </div>
+            {routeInfo.steps && routeInfo.steps.length > 0 && (
+              <div className="border-t pt-3">
+                <p className="text-xs font-semibold mb-2">路線步驟</p>
+                <ol className="space-y-1">
+                  {routeInfo.steps.map((step, i) => (
+                    <li key={i} className="text-xs text-muted-foreground flex gap-2">
+                      <span className="text-primary font-medium shrink-0">{i + 1}.</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
-
-      <div className="rounded-xl overflow-hidden border border-border/50 h-[350px]">
-        <MapView onMapReady={handleMapReady} />
-      </div>
     </div>
   );
 }
