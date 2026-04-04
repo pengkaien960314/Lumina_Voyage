@@ -5,6 +5,8 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { BookingProvider } from "./contexts/BookingContext";
+import { FriendProvider } from "./contexts/FriendContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Spots from "./pages/Spots";
@@ -15,6 +17,11 @@ import Flights from "./pages/Flights";
 import Tools from "./pages/Tools";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
+import MyBookings from "./pages/MyBookings";
+import About from "./pages/About";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Friends from "./pages/Friends";
 
 function Router() {
   return (
@@ -29,6 +36,11 @@ function Router() {
       <Route path="/tools" component={Tools} />
       <Route path="/settings" component={Settings} />
       <Route path="/profile" component={Profile} />
+      <Route path="/my-bookings" component={MyBookings} />
+      <Route path="/about" component={About} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/friends" component={Friends} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -40,10 +52,14 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light" switchable>
         <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
+          <BookingProvider>
+            <FriendProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </FriendProvider>
+          </BookingProvider>
         </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
