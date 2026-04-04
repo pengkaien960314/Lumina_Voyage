@@ -3,7 +3,8 @@
  * - Like (heart) with animation, comments, visibility settings
  * - Date-based entries with friend/best-friend/public visibility
  */
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -41,6 +42,7 @@ interface DiaryEntry {
   comments: Comment[];
   author: string;
   authorAvatar: string;
+  userId?: string;
 }
 
 const mockComments: Comment[][] = [
@@ -130,6 +132,7 @@ const historyEntries: DiaryEntry[] = [
 ];
 
 export default function Diary() {
+  const { user } = useAuth();
   const [entries, setEntries] = useState<DiaryEntry[]>(sampleEntries);
   const [expandedComments, setExpandedComments] = useState<string[]>([]);
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
@@ -137,8 +140,22 @@ export default function Diary() {
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [newLocation, setNewLocation] = useState("");
+  const [newImage, setNewImage] = useState("");
   const [newVisibility, setNewVisibility] = useState<"public" | "friends" | "bestFriends">("public");
   const [activeTab, setActiveTab] = useState<"current" | "history">("current");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const userId = user?.id;
+    if (!userId) return;
+    const stored = localStorage.getItem(`wanderlust_user_diaries_${userId}`);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setEntries([...parsed, ...sampleEntries]);
+      } catch { /* ignore */ }
+    }
+  }, [user?.id]);
 
   const toggleLike = (id: string) => {
     setEntries((prev) => prev.map((d) => d.id === id ? { ...d, liked: !d.liked, likes: d.liked ? d.likes - 1 : d.likes + 1 } : d));
@@ -157,17 +174,35 @@ export default function Diary() {
     toast.success("留言已發送");
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("圖片大小不能超過 5MB"); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setNewImage(ev.target?.result as string);
+      toast.success("圖片已上傳");
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleCreate = () => {
     if (!newTitle.trim() || !newContent.trim()) { toast.error("請填寫標題與內容"); return; }
+    const authorName = user?.name || "我";
+    const authorAv = user?.avatar || "https://api.dicebear.com/7.x/adventurer/svg?seed=me";
+    const userId = user?.id || "anonymous";
     const entry: DiaryEntry = {
       id: `e${Date.now()}`, title: newTitle, date: new Date().toISOString().split("T")[0],
       location: newLocation || "未知地點", content: newContent,
-      image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80",
+      image: newImage || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80",
       likes: 0, liked: false, mood: "✈️", visibility: newVisibility, comments: [],
-      author: "我", authorAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=me",
+      author: authorName, authorAvatar: authorAv, userId,
     };
-    setEntries([entry, ...entries]);
-    setNewTitle(""); setNewContent(""); setNewLocation(""); setNewVisibility("public");
+    const newEntries = [entry, ...entries];
+    setEntries(newEntries);
+    const userEntries = newEntries.filter(e => (e as any).userId === userId);
+    localStorage.setItem(`wanderlust_user_diaries_${userId}`, JSON.stringify(userEntries));
+    setNewTitle(""); setNewContent(""); setNewLocation(""); setNewImage(""); setNewVisibility("public");
     setDialogOpen(false);
     toast.success("日記已發布！");
   };
@@ -238,7 +273,11 @@ export default function Diary() {
                     <Label>內容</Label>
                     <Textarea placeholder="寫下你的旅行故事..." value={newContent} onChange={(e) => setNewContent(e.target.value)} rows={6} className="rounded-xl" />
                   </div>
-                  <Button variant="outline" className="w-full rounded-xl gap-2 border-dashed h-20" onClick={() => toast.info("圖片上傳功能開發中")}><ImagePlus className="w-5 h-5" />上傳照片</Button>
+                  <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageUpload} />
+                  <Button variant="outline" className="w-full rounded-xl gap-2 border-dashed h-20" onClick={() => fileInputRef.current?.click()}>
+                    {newImage ? <img src={newImage} alt="preview" className="w-10 h-10 rounded-lg object-cover" /> : <ImagePlus className="w-5 h-5" />}
+                    {newImage ? "更換照片" : "上傳照片"}
+                  </Button>
                   <Button className="w-full rounded-xl" onClick={handleCreate}>發布日記</Button>
                 </div>
               </DialogContent>
@@ -253,12 +292,18 @@ export default function Diary() {
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-4">
                 <Clock className="w-5 h-5 text-muted-foreground" />
-                <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)" }}>過往旅行回憶</h2>
+                <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)" }}>
+                  {user ? `${user.name} 的旅行回憶` : "過往旅行回憶"}
+                </h2>
               </div>
             </div>
           )}
           <div className="space-y-6">
-            {(activeTab === "current" ? entries : historyEntries).map((entry, i) => (
+            {(activeTab === "current" ? entries : (() => {
+              const userId = user?.id;
+              const userPublished = userId ? entries.filter(e => (e as any).userId === userId) : [];
+              return [...userPublished, ...historyEntries];
+            })()).map((entry, i) => (
               <motion.div key={entry.id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: i * 0.1 }}>
                 <Card className="overflow-hidden organic-card border-border/50">
                   {/* Author Header */}

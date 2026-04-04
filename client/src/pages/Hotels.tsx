@@ -6,6 +6,7 @@
  * - Price range slider, guests up to 6 + custom input
  */
 import { useState } from "react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Star, MapPin, Wifi, Car, Coffee, Waves, Users, Calendar, Navigation, Phone, Globe, Dumbbell, Utensils, Bath, Minus, Plus as PlusIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Star, MapPin, Wifi, Car, Coffee, Waves, Users, Calendar, Navigation, Phone, Globe, Dumbbell, Utensils, Bath, Minus, Plus as PlusIcon, ChevronLeft, ChevronRight, Languages, DollarSign, Cloud } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useBooking } from "@/contexts/BookingContext";
@@ -168,6 +169,48 @@ const hotels: Hotel[] = [
       { author: "奢旅達人", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=luxtravel", rating: 5, text: "不愧是亞洲最好的酒店之一，服務無可挑剔。", date: "2025-12-10" },
     ],
   },
+  {
+    id: 12, name: "奈良萬葉若草之宿三笠", location: "日本奈良", address: "奈良市春日野町45", phone: "+81-742-22-3011", website: "https://www.mikasa.co.jp", rating: 4.6, price: 11800, currency: "TWD",
+    images: ["https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=800&q=80", "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80"],
+    amenities: ["wifi", "breakfast", "spa", "restaurant"], type: "溫泉旅館", rooms: 30,
+    description: "坐落於若草山麓的傳統日式旅館，可眺望奈良盆地的夜景。提供精緻的懷石料理和天然溫泉，是體驗日本傳統旅館文化的絕佳選擇。",
+    highlights: ["若草山夜景", "精緻懷石料理", "天然溫泉", "近東大寺春日大社"],
+    reviews: [
+      { author: "文化探索者", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=culture", rating: 5, text: "從房間看奈良夜景太美了，懷石料理很精緻。", date: "2026-01-10" },
+    ],
+  },
+  {
+    id: 13, name: "新加坡濱海灣金沙酒店", location: "新加坡", address: "10 Bayfront Avenue, Singapore 018956", phone: "+65-6688-8868", website: "https://www.marinabaysands.com", rating: 4.7, price: 10500, currency: "TWD",
+    images: ["https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=800&q=80", "https://images.unsplash.com/photo-1506351421178-63b52a2d2562?w=800&q=80"],
+    amenities: ["wifi", "pool", "gym", "spa", "restaurant", "breakfast"], type: "豪華", rooms: 2561,
+    description: "新加坡地標性建築，頂樓的無邊際泳池是全球最著名的酒店設施之一。三棟高塔由船形空中花園連接，設有賭場、購物中心、藝術科學博物館等豐富設施。",
+    highlights: ["無邊際空中泳池", "濱海灣全景", "世界級購物中心", "藝術科學博物館"],
+    reviews: [
+      { author: "打卡達人", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=instagrammer", rating: 5, text: "空中泳池的景色真的太驚人了，一輩子要來一次！", date: "2026-02-05" },
+      { author: "家庭旅遊", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=familytrip", rating: 4, text: "設施豐富，帶小孩也很方便，但價格偏高。", date: "2026-01-25" },
+    ],
+  },
+  {
+    id: 14, name: "峇里島四季度假村", location: "印尼峇里島", address: "Jimbaran, Bali 80361, Indonesia", phone: "+62-361-701010", website: "https://www.fourseasons.com/bali", rating: 4.9, price: 15800, currency: "TWD",
+    images: ["https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80", "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&q=80"],
+    amenities: ["wifi", "pool", "spa", "gym", "restaurant", "breakfast", "parking"], type: "度假村", rooms: 147,
+    description: "坐落於金巴蘭灣的頂級度假村，每間別墅都擁有私人泳池和無敵海景。提供頂級的峇里式水療、瑜伽課程和文化體驗活動，是蜜月和奢華度假的夢幻選擇。",
+    highlights: ["私人泳池別墅", "金巴蘭灣日落", "頂級峇里式水療", "文化體驗活動"],
+    reviews: [
+      { author: "蜜月旅人", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=honeymoon", rating: 5, text: "蜜月選這裡太完美了！私人泳池看日落，終身難忘。", date: "2025-10-15" },
+    ],
+  },
+  {
+    id: 15, name: "河口湖風之露台KUKUNA", location: "日本山梨縣", address: "山梨縣南都留郡富士河口湖町淺川70", phone: "+81-555-83-3333", website: "https://kukuna.jp", rating: 4.7, price: 9500, currency: "TWD",
+    images: ["https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?w=800&q=80", "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&q=80"],
+    amenities: ["wifi", "spa", "restaurant", "breakfast", "parking"], type: "度假村", rooms: 30,
+    description: "面朝河口湖與富士山的度假酒店，以南法普羅旺斯風格的開放式露台著稱。露天溫泉和客房都能正面欣賞富士山，是河口湖地區人氣最高的酒店之一。",
+    highlights: ["正面富士山景觀", "開放式露台", "露天溫泉", "法式與日式融合料理"],
+    reviews: [
+      { author: "富士山迷", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=fuji", rating: 5, text: "從房間看富士山的日出，感動到說不出話來。早餐也超棒！", date: "2026-03-20" },
+      { author: "溫泉控", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=hotspring", rating: 5, text: "露天溫泉看富士山是此生最棒的溫泉體驗。", date: "2026-02-15" },
+    ],
+  },
 ];
 
 const amenityIcons: Record<string, { icon: typeof Wifi; label: string }> = {
@@ -223,7 +266,22 @@ export default function Hotels() {
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>旅館預訂</h1>
-            <p className="text-muted-foreground mb-6">精選全球優質住宿，為你的旅程找到完美落腳處</p>
+            <p className="text-muted-foreground mb-4">精選全球優質住宿，為你的旅程找到完美落腳處</p>
+
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+              <Link href="/tools">
+                <Button variant="outline" size="sm" className="rounded-full gap-1.5 shrink-0 text-xs"><Languages className="w-3.5 h-3.5" />翻譯</Button>
+              </Link>
+              <Link href="/tools">
+                <Button variant="outline" size="sm" className="rounded-full gap-1.5 shrink-0 text-xs"><DollarSign className="w-3.5 h-3.5" />匯率</Button>
+              </Link>
+              <Link href="/tools">
+                <Button variant="outline" size="sm" className="rounded-full gap-1.5 shrink-0 text-xs"><Cloud className="w-3.5 h-3.5" />天氣</Button>
+              </Link>
+              <Link href="/tools">
+                <Button variant="outline" size="sm" className="rounded-full gap-1.5 shrink-0 text-xs"><Navigation className="w-3.5 h-3.5" />導航</Button>
+              </Link>
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <div className="relative flex-1">

@@ -807,6 +807,15 @@ function NavigationTab() {
 
 /* ==================== MAIN TOOLS PAGE ==================== */
 export default function Tools() {
+  const [activeTab, setActiveTab] = useState("translate");
+
+  const toolTabs = [
+    { value: "translate", label: "翻譯", icon: Sparkles, color: "text-violet-500" },
+    { value: "currency", label: "匯率", icon: DollarSign, color: "text-teal-500" },
+    { value: "weather", label: "天氣", icon: Cloud, color: "text-cyan-500" },
+    { value: "navigation", label: "導航", icon: Navigation, color: "text-orange-500" },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -819,14 +828,15 @@ export default function Tools() {
         </div>
       </section>
 
-      <section className="py-8 flex-1">
+      <section className="py-8 flex-1 pb-24 sm:pb-8">
         <div className="container max-w-3xl">
-          <Tabs defaultValue="translate" className="space-y-6">
-            <TabsList className="grid grid-cols-4 h-12 rounded-xl bg-secondary/50 p-1">
-              <TabsTrigger value="translate" className="rounded-lg gap-1.5 text-xs sm:text-sm data-[state=active]:bg-background"><Sparkles className="w-4 h-4" /><span className="hidden sm:inline">翻譯</span></TabsTrigger>
-              <TabsTrigger value="currency" className="rounded-lg gap-1.5 text-xs sm:text-sm data-[state=active]:bg-background"><DollarSign className="w-4 h-4" /><span className="hidden sm:inline">匯率</span></TabsTrigger>
-              <TabsTrigger value="weather" className="rounded-lg gap-1.5 text-xs sm:text-sm data-[state=active]:bg-background"><Cloud className="w-4 h-4" /><span className="hidden sm:inline">天氣</span></TabsTrigger>
-              <TabsTrigger value="navigation" className="rounded-lg gap-1.5 text-xs sm:text-sm data-[state=active]:bg-background"><Navigation className="w-4 h-4" /><span className="hidden sm:inline">導航</span></TabsTrigger>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="hidden sm:grid grid-cols-4 h-12 rounded-xl bg-secondary/50 p-1">
+              {toolTabs.map(t => (
+                <TabsTrigger key={t.value} value={t.value} className="rounded-lg gap-1.5 text-sm data-[state=active]:bg-background">
+                  <t.icon className="w-4 h-4" />{t.label}
+                </TabsTrigger>
+              ))}
             </TabsList>
 
             <TabsContent value="translate"><TranslatorTab /></TabsContent>
@@ -836,7 +846,26 @@ export default function Tools() {
           </Tabs>
         </div>
       </section>
-      <Footer />
+
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border/50 px-2 py-1.5 safe-area-bottom">
+        <div className="grid grid-cols-4 gap-1">
+          {toolTabs.map(t => {
+            const isActive = activeTab === t.value;
+            return (
+              <button
+                key={t.value}
+                onClick={() => setActiveTab(t.value)}
+                className={`flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl transition-all ${isActive ? "bg-primary/10" : "hover:bg-accent/50"}`}
+              >
+                <t.icon className={`w-5 h-5 ${isActive ? t.color : "text-muted-foreground"}`} />
+                <span className={`text-[10px] font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{t.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="hidden sm:block"><Footer /></div>
     </div>
   );
 }

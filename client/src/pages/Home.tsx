@@ -7,6 +7,7 @@
  */
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -89,6 +90,7 @@ const fadeUp = {
 };
 
 export default function Home() {
+  const { isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
   const [flippedId, setFlippedId] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -215,16 +217,17 @@ export default function Home() {
                   <motion.div
                     className={`group p-5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 hover:shadow-lg transition-all duration-400 text-center ${isZoomed ? "z-[200]" : ""}`}
                     animate={isZoomed ? {
-                      scale: 8,
+                      scale: 1.15,
                       opacity: 0,
+                      y: -10,
                       zIndex: 200,
                     } : {
                       scale: 1,
                       opacity: 1,
+                      y: 0,
                       zIndex: 1,
                     }}
-                    transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    style={isZoomed ? { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)" } : {}}
+                    transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                   >
                     <div className={`w-12 h-12 rounded-xl ${f.bg} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
                       <Icon className={`w-6 h-6 ${f.color}`} />
@@ -379,63 +382,61 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Fullscreen zoom overlay for features */}
       <AnimatePresence>
         {zoomedFeature !== null && (
           <motion.div
-            className="fixed inset-0 z-[150] flex items-center justify-center"
+            className="fixed inset-0 z-[150] flex items-center justify-center pointer-events-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.35 }}
           >
             <motion.div
-              className={`w-32 h-32 rounded-3xl ${features[zoomedFeature].bg} flex items-center justify-center`}
-              initial={{ scale: 1 }}
-              animate={{ scale: 15, opacity: 0.3 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-            >
-              {(() => { const Icon = features[zoomedFeature].icon; return <Icon className={`w-16 h-16 ${features[zoomedFeature].color}`} />; })()}
-            </motion.div>
+              className={`rounded-full ${features[zoomedFeature].bg}`}
+              initial={{ width: 64, height: 64, opacity: 0.7 }}
+              animate={{ width: "200vmax", height: "200vmax", opacity: 0.25 }}
+              transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="container">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="relative rounded-3xl overflow-hidden"
-          >
-            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hero-bg-g7PvFnkctds2rCztknx8gW.webp" alt="CTA" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="relative z-10 py-16 px-8 md:px-16 text-center">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4" style={{ fontFamily: "var(--font-display)" }}>
-                準備好出發了嗎？
-              </h2>
-              <p className="text-white/80 mb-8 max-w-lg mx-auto">
-                加入 Lumina Voyage，與數千位旅人一起探索世界的每一個角落
-              </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <Link href="/login">
-                  <Button size="lg" className="rounded-full px-8 bg-white text-stone-800 hover:bg-white/90" style={{ fontFamily: "var(--font-sans)" }}>
-                    免費加入
-                  </Button>
-                </Link>
-                <Link href="/spots">
-                  <Button size="lg" variant="outline" className="rounded-full px-8 border-white/40 text-white hover:bg-white/10 bg-transparent" style={{ fontFamily: "var(--font-sans)" }}>
-                    瀏覽景點
-                  </Button>
-                </Link>
+      {!isAuthenticated && (
+        <section className="py-20">
+          <div className="container">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative rounded-3xl overflow-hidden"
+            >
+              <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hero-bg-g7PvFnkctds2rCztknx8gW.webp" alt="CTA" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/50" />
+              <div className="relative z-10 py-16 px-8 md:px-16 text-center">
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4" style={{ fontFamily: "var(--font-display)" }}>
+                  準備好出發了嗎？
+                </h2>
+                <p className="text-white/80 mb-8 max-w-lg mx-auto">
+                  加入 Lumina Voyage，與數千位旅人一起探索世界的每一個角落
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Link href="/login">
+                    <Button size="lg" className="rounded-full px-8 bg-white text-stone-800 hover:bg-white/90" style={{ fontFamily: "var(--font-sans)" }}>
+                      免費加入
+                    </Button>
+                  </Link>
+                  <Link href="/spots">
+                    <Button size="lg" variant="outline" className="rounded-full px-8 border-white/40 text-white hover:bg-white/10 bg-transparent" style={{ fontFamily: "var(--font-sans)" }}>
+                      瀏覽景點
+                    </Button>
+                  </Link>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       <Footer />
     </div>

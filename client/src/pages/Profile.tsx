@@ -5,7 +5,7 @@
  * - Third-party account linking management
  * - Stats & recent activities
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   MapPin, Calendar, BookOpen, Heart, Edit2, Camera, Save, Lock,
   Eye, EyeOff, Link2, Unlink, Shield, CheckCircle2, User, Phone,
-  Mail, Globe, FileText, Loader2,
+  Mail, Globe, FileText, Loader2, Upload,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -48,9 +48,9 @@ export default function Profile() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Avatar change
   const [showAvatarDialog, setShowAvatarDialog] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
+  const avatarFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -94,11 +94,24 @@ export default function Profile() {
   };
 
   const handleChangeAvatar = () => {
-    if (!avatarUrl.trim()) { toast.error("請輸入圖片 URL"); return; }
+    if (!avatarUrl.trim()) { toast.error("請輸入圖片 URL 或上傳圖片"); return; }
     updateAvatar(avatarUrl);
     setShowAvatarDialog(false);
     setAvatarUrl("");
     toast.success("頭像已更新！");
+  };
+
+  const handleAvatarFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("圖片大小不能超過 5MB"); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setAvatarUrl(dataUrl);
+      toast.success("圖片已載入，點擊「更新頭像」確認");
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleLinkProvider = (provider: "google" | "facebook" | "apple" | "line" | "twitter") => {
@@ -347,8 +360,13 @@ export default function Profile() {
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>更換頭像</DialogTitle></DialogHeader>
           <div className="space-y-4 mt-2">
+            <input type="file" ref={avatarFileRef} accept="image/*" className="hidden" onChange={handleAvatarFileUpload} />
+            <Button variant="outline" className="w-full rounded-xl gap-2 border-dashed h-14" onClick={() => avatarFileRef.current?.click()}>
+              <Upload className="w-4 h-4" />
+              從裝置上傳照片
+            </Button>
             <div className="space-y-2">
-              <Label>圖片 URL</Label>
+              <Label className="text-xs text-muted-foreground">或輸入圖片 URL</Label>
               <Input value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} placeholder="https://..." className="rounded-xl" />
             </div>
             {avatarUrl && (

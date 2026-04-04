@@ -267,6 +267,61 @@ const allSpots: Spot[] = [
     backDesc: "四季彩之丘是美瑛最大的花田觀光農園，佔地約15公頃，種植了超過30種花卉。夏季時，薰衣草、向日葵、大波斯菊等花卉形成七彩條紋的壯觀花田，背景是雄偉的十勝岳連峰和大雪山。園內還有可愛的羊駝牧場，可以近距離餵食和拍照。花田卡丁車和拖拉機巴士是遊覽花田的有趣方式。冬季則變身為雪上摩托車和雪鞋健行的場地。",
     tips: "花田面積很大，建議搭乘拖拉機巴士遊覽。夏季花卉最盛期為7月中旬至8月下旬。"
   },
+  {
+    id: 21, name: "清水寺", location: "日本京都", rating: 4.8, reviews: 32100, category: "文化",
+    image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80",
+    gallery: [],
+    description: "世界文化遺產，京都最具代表性的古寺",
+    priceJPY: "¥400", priceTWD: "約NT$86",
+    highlights: ["清水舞台", "音羽の滝", "三年坂二年坂", "秋季紅葉", "春季櫻花"],
+    access: "京都站巴士206/100號至清水道", hours: "6:00-18:00（季節性延長）", bestSeason: "春秋（3-4月/11月）",
+    backDesc: "清水寺建於778年，是京都最古老的寺院之一。最著名的清水舞台由139根木柱支撐，懸空於崖壁之上，不用一根釘子。站在舞台上可俯瞰京都市區全景，春季櫻花環繞、秋季紅葉如火的景色令人震撼。寺院內的音羽之滝分為三道泉水，分別代表學業、戀愛和長壽。沿途的三年坂、二年坂老街充滿京都風情。",
+    tips: "建議清晨6點開門時前往避開人潮。秋季夜間特別拜觀的燈光效果非常夢幻。"
+  },
+  {
+    id: 22, name: "河口湖", location: "日本山梨縣", rating: 4.9, reviews: 28500, category: "自然",
+    image: "https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?w=800&q=80",
+    gallery: [],
+    description: "富士五湖之一，眺望富士山的絕佳位置",
+    priceJPY: "免費", priceTWD: "免費",
+    highlights: ["逆富士", "天上山公園", "大石公園", "遊覽船", "紅葉回廊"],
+    access: "新宿巴士直達約2小時", hours: "全天開放", bestSeason: "全年（11月紅葉最美）",
+    backDesc: "河口湖是富士五湖中最受歡迎的湖泊，從湖畔到處都能欣賞到富士山的壯麗景色。天氣晴朗時，湖面會映照出完美的「逆富士」倒影，是攝影愛好者夢寐以求的畫面。天上山公園的纜車可以從高處同時俯瞰富士山和河口湖。秋季的紅葉回廊和大石公園的波斯菊花海更是錦上添花。",
+    tips: "逆富士最佳拍攝時間為清晨無風時。冬季空氣清澈，看到富士山的機率最高。"
+  },
+  {
+    id: 23, name: "明洞商圈", location: "韓國首爾", rating: 4.5, reviews: 19800, category: "購物",
+    image: "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=800&q=80",
+    gallery: [],
+    description: "首爾最熱鬧的購物天堂，美妝與街頭美食聚集地",
+    priceJPY: "免費", priceTWD: "免費",
+    highlights: ["韓國美妝旗艦店", "街頭美食", "樂天免稅店", "南山塔夜景", "韓服體驗"],
+    access: "地鐵4號線明洞站", hours: "10:00-22:00（各店不同）", bestSeason: "全年",
+    backDesc: "明洞是首爾最具代表性的購物區，聚集了超過2,000家商店和100多家餐廳。這裡是韓國美妝品牌的一級戰區，幾乎所有知名品牌都在此設有旗艦店，價格比免稅店更優惠。街頭美食攤位林立，蛋中蛋、烤魷魚、辣炒年糕等小吃讓人目不暇給。從明洞步行即可到達南山塔，搭乘纜車上去欣賞首爾夜景。",
+    tips: "韓國美妝品牌常有買一送一活動，建議多比較幾家。退稅門檻為3萬韓元以上。"
+  },
+  {
+    id: 24, name: "長灘島白沙灘", location: "菲律賓長灘島", rating: 4.7, reviews: 15600, category: "海島",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
+    gallery: [],
+    description: "世界十大最美沙灘，潔白細沙與碧藍海水的天堂",
+    priceJPY: "免費", priceTWD: "免費",
+    highlights: ["白沙灘日落", "水上活動", "D'Mall購物", "跳島行程", "海鮮BBQ"],
+    access: "卡利博機場轉車+船約2小時", hours: "全天開放", bestSeason: "乾季（11-5月）",
+    backDesc: "長灘島的白沙灘全長約4公里，以潔白如粉的珊瑚沙和清澈見底的海水聞名世界。沙灘分為S1（寧靜高檔區）、S2（商業中心）和S3（寧靜經濟區）三段。日落時分的天空色彩絕美，是享受雞尾酒和現場音樂的最佳時刻。豐富的水上活動包括風帆、潛水、拖曳傘等，跳島行程可以探訪附近的魔幻島和鱷魚島。",
+    tips: "雨季（6-10月）部分水上活動暫停但住宿便宜許多。S1區域的D'Talipapa市場可以買海鮮請店家代烹。"
+  },
+  {
+    id: 25, name: "東京迪士尼海洋", location: "日本千葉縣", rating: 4.8, reviews: 42300, category: "親子",
+    image: "https://images.unsplash.com/photo-1624601573012-efb68931cc8f?w=800&q=80",
+    gallery: [],
+    description: "全球唯一的迪士尼海洋主題樂園，浪漫與冒險兼具",
+    priceJPY: "¥7,900~¥10,900", priceTWD: "約NT$1,700~2,350",
+    highlights: ["驚魂古塔", "玩具總動員瘋狂遊戲屋", "地心探險之旅", "夜間水上秀", "達菲熊商品"],
+    access: "JR舞浜站步行即達", hours: "8:00-21:00", bestSeason: "全年（聖誕節/萬聖節特別活動）",
+    backDesc: "東京迪士尼海洋是全球獨一無二的海洋主題迪士尼樂園，以七大港口為主題區域，融合冒險、奇幻和浪漫元素。園區的建築和造景精緻到令人歎為觀止，無論是地中海港灣、神秘島還是美國海濱，每個角落都是拍照勝地。人氣設施包括驚魂古塔、地心探險之旅和玩具總動員瘋狂遊戲屋。達菲熊及其朋友們是園區限定角色，相關商品非常搶手。",
+    tips: "建議使用迪士尼APP預約等候。平日入園人潮較少。園區內的火山餐廳氛圍獨特，建議預約。"
+  },
 ];
 
 const categories = ["全部", "文化", "自然", "海島", "城市", "親子", "運動", "購物"];
@@ -433,28 +488,24 @@ export default function Spots() {
           >
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-            {/* Phase 1: Flip animation */}
             <motion.div
-              className="relative z-10"
-              initial={{ rotateY: 0, scale: 0.6 }}
+              className="relative z-10 w-full"
+              initial={{ opacity: 0, scale: 0.85, y: 30 }}
               animate={{
-                rotateY: 180,
-                scale: expanded ? 1 : 0.75,
-                width: expanded ? "100%" : "320px",
+                opacity: 1,
+                scale: 1,
+                y: 0,
               }}
-              exit={{ rotateY: 0, scale: 0.5, opacity: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{
-                rotateY: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
-                scale: { duration: 0.4, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] },
-                width: { duration: 0.4, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] },
+                duration: 0.35,
+                ease: [0.4, 0, 0.2, 1],
               }}
-              style={{ perspective: "1200px", transformStyle: "preserve-3d", maxWidth: expanded ? "640px" : "320px" }}
+              style={{ maxWidth: "640px" }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Back face (shown after flip) */}
               <div
                 className="bg-card rounded-2xl overflow-hidden shadow-2xl border border-border/50"
-                style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}
               >
                 {/* Header image */}
                 <div className="relative h-52 overflow-hidden">

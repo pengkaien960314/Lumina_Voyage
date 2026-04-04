@@ -468,30 +468,49 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
                           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }}>
                             <CardContent className="pt-0 pb-5 px-5">
                               <div className="space-y-3 ml-5 border-l-2 border-border pl-6">
-                                {day.activities.map(act => {
+                                {day.activities.map((act, actIdx) => {
                                   const TypeIcon = getTypeIcon(act.type);
+                                  const prevAct = actIdx > 0 ? day.activities[actIdx - 1] : null;
+                                  let travelMinutes = 0;
+                                  if (prevAct) {
+                                    const [ph, pm] = prevAct.time.split(":").map(Number);
+                                    const [ch, cm] = act.time.split(":").map(Number);
+                                    travelMinutes = (ch * 60 + cm) - (ph * 60 + pm);
+                                    if (travelMinutes < 0) travelMinutes += 24 * 60;
+                                  }
                                   return (
-                                    <div key={act.id} className="relative group select-none"
-                                      onPointerDown={() => handleActPointerDown(day.id, act)}
-                                      onPointerUp={handleActPointerUp}
-                                      onPointerLeave={handleActPointerUp}
-                                    >
-                                      <div className="absolute -left-[31px] top-3 w-3 h-3 rounded-full bg-primary/30 border-2 border-primary" />
-                                      <div className="p-4 rounded-xl bg-accent/30 hover:bg-accent/50 transition-colors cursor-pointer">
-                                        <div className="flex items-start gap-3">
-                                          <Badge className={`rounded-lg px-2 py-1 ${getTypeColor(act.type)}`}>
-                                            <TypeIcon className="w-3.5 h-3.5" />
-                                          </Badge>
-                                          <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                                              <span className="text-xs text-muted-foreground font-medium">{act.time}</span>
-                                              <span className="text-[10px] text-muted-foreground/50 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">長按編輯</span>
+                                    <div key={act.id}>
+                                      {prevAct && travelMinutes > 0 && (
+                                        <div className="flex items-center gap-2 py-1.5 -ml-1">
+                                          <div className="w-px h-3 bg-border ml-[3px]" />
+                                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/50 text-[10px] text-muted-foreground">
+                                            <Clock className="w-2.5 h-2.5" />
+                                            <span>{travelMinutes >= 60 ? `${Math.floor(travelMinutes/60)}h${travelMinutes%60 > 0 ? `${travelMinutes%60}m` : ""}` : `${travelMinutes}分鐘`}</span>
+                                          </div>
+                                        </div>
+                                      )}
+                                      <div className="relative group select-none"
+                                        onPointerDown={() => handleActPointerDown(day.id, act)}
+                                        onPointerUp={handleActPointerUp}
+                                        onPointerLeave={handleActPointerUp}
+                                      >
+                                        <div className="absolute -left-[31px] top-3 w-3 h-3 rounded-full bg-primary/30 border-2 border-primary" />
+                                        <div className="p-4 rounded-xl bg-accent/30 hover:bg-accent/50 transition-colors cursor-pointer">
+                                          <div className="flex items-start gap-3">
+                                            <Badge className={`rounded-lg px-2 py-1 ${getTypeColor(act.type)}`}>
+                                              <TypeIcon className="w-3.5 h-3.5" />
+                                            </Badge>
+                                            <div className="flex-1">
+                                              <div className="flex items-center gap-2 mb-1">
+                                                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                                                <span className="text-xs text-muted-foreground font-medium">{act.time}</span>
+                                                <span className="text-[10px] text-muted-foreground/50 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">長按編輯</span>
+                                              </div>
+                                              <h4 className="font-semibold text-sm">{act.title}</h4>
+                                              {act.location && <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1"><MapPin className="w-3 h-3" />{act.location}</div>}
+                                              {act.notes && <p className="text-xs text-muted-foreground mt-2 italic">{act.notes}</p>}
+                                              {act.image && <img src={act.image} alt="" className="mt-2 rounded-lg w-full h-24 object-cover" />}
                                             </div>
-                                            <h4 className="font-semibold text-sm">{act.title}</h4>
-                                            {act.location && <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1"><MapPin className="w-3 h-3" />{act.location}</div>}
-                                            {act.notes && <p className="text-xs text-muted-foreground mt-2 italic">{act.notes}</p>}
-                                            {act.image && <img src={act.image} alt="" className="mt-2 rounded-lg w-full h-24 object-cover" />}
                                           </div>
                                         </div>
                                       </div>
@@ -518,7 +537,20 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
                                       </div>
                                       <div className="space-y-2"><Label>活動名稱</Label><Input placeholder="例：參觀東京鐵塔" value={newActivity.title || ""} onChange={e => setNewActivity({ ...newActivity, title: e.target.value })} /></div>
                                       <div className="space-y-2"><Label>地點</Label><Input placeholder="例：東京都港區" value={newActivity.location || ""} onChange={e => setNewActivity({ ...newActivity, location: e.target.value })} /></div>
-                                      <div className="space-y-2"><Label>圖片 URL</Label><Input placeholder="https://..." value={newActivity.image || ""} onChange={e => setNewActivity({ ...newActivity, image: e.target.value })} /></div>
+                                      <div className="space-y-2">
+                                        <Label>圖片</Label>
+                                        <div className="flex gap-2">
+                                          <Input placeholder="https://... 或上傳圖片" value={newActivity.image || ""} onChange={e => setNewActivity({ ...newActivity, image: e.target.value })} className="flex-1" />
+                                          <Button variant="outline" size="sm" className="shrink-0" onClick={() => {
+                                            const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
+                                            inp.onchange = (ev: any) => {
+                                              const f = ev.target.files?.[0]; if (!f) return;
+                                              if (f.size > 5*1024*1024) { toast.error("圖片不能超過 5MB"); return; }
+                                              const r = new FileReader(); r.onload = (e2) => setNewActivity(prev => ({ ...prev, image: e2.target?.result as string })); r.readAsDataURL(f);
+                                            }; inp.click();
+                                          }}><ImageIcon className="w-4 h-4" aria-label="上傳圖片" /></Button>
+                                        </div>
+                                      </div>
                                       <div className="space-y-2"><Label>備註</Label><Textarea placeholder="任何補充說明..." value={newActivity.notes || ""} onChange={e => setNewActivity({ ...newActivity, notes: e.target.value })} rows={3} /></div>
                                       <Button className="w-full rounded-xl" onClick={() => addActivity(day.id)}>新增</Button>
                                     </div>
@@ -718,7 +750,20 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
               </div>
               <div className="space-y-2"><Label>活動名稱</Label><Input value={editForm.title || ""} onChange={e => setEditForm({ ...editForm, title: e.target.value })} /></div>
               <div className="space-y-2"><Label>地點</Label><Input value={editForm.location || ""} onChange={e => setEditForm({ ...editForm, location: e.target.value })} /></div>
-              <div className="space-y-2"><Label>圖片 URL</Label><Input value={editForm.image || ""} onChange={e => setEditForm({ ...editForm, image: e.target.value })} placeholder="https://..." /></div>
+              <div className="space-y-2">
+                <Label>圖片</Label>
+                <div className="flex gap-2">
+                  <Input value={editForm.image || ""} onChange={e => setEditForm({ ...editForm, image: e.target.value })} placeholder="https://... 或上傳圖片" className="flex-1" />
+                  <Button variant="outline" size="sm" className="shrink-0" onClick={() => {
+                    const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
+                    inp.onchange = (ev: any) => {
+                      const f = ev.target.files?.[0]; if (!f) return;
+                      if (f.size > 5*1024*1024) { toast.error("圖片不能超過 5MB"); return; }
+                      const r = new FileReader(); r.onload = (e2) => setEditForm(prev => ({ ...prev, image: e2.target?.result as string })); r.readAsDataURL(f);
+                    }; inp.click();
+                  }}><ImageIcon className="w-4 h-4" aria-label="上傳圖片" /></Button>
+                </div>
+              </div>
               {editForm.image && <img src={editForm.image} alt="" className="rounded-xl w-full h-32 object-cover" />}
               <div className="space-y-2"><Label>備註</Label><Textarea value={editForm.notes || ""} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={3} /></div>
               <div className="flex gap-2">
