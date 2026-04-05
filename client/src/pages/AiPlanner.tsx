@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const GEMINI_API_KEY = "AIzaSyB_tEx6ILOy6U7NOwtYmclHwLWqNXyRQmQ";
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 interface AiActivity {
   time: string;
