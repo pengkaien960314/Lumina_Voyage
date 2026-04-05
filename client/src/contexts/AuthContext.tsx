@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (stored) {
       const parsed = JSON.parse(stored);
       if (!parsed.linkedProviders) parsed.linkedProviders = [];
-      if (!parsed.userId) parsed.userId = "WL" + Math.floor(1000 + Math.random() * 9000);
+      if (!parsed.userId) parsed.userId = "LV" + nanoid(8);
       setUser(parsed);
     }
     setIsLoading(false);
