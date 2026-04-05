@@ -84,9 +84,21 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     setHotelBookings(next);
     save("lumina_hotels", next);
   };
+  
+  const updateFlightBooking = (id: string, changes: Partial<FlightBooking>) => {
+    const next = flightBookings.map((f) => f.id === id ? { ...f, ...changes } : f);
+    setFlightBookings(next);
+    save("lumina_flights", next);
+  };
+
+  const updateHotelBooking = (id: string, changes: Partial<HotelBooking>) => {
+    const next = hotelBookings.map((h) => h.id === id ? { ...h, ...changes } : h);
+    setHotelBookings(next);
+    save("lumina_hotels", next);
+  };
 
   return (
-    <BookingContext.Provider value={{ flightBookings, hotelBookings, addFlightBooking, addHotelBooking, cancelFlightBooking, cancelHotelBooking }}>
+    <BookingContext.Provider value={{ flightBookings, hotelBookings, addFlightBooking, addHotelBooking, cancelFlightBooking, cancelHotelBooking,updateFlightBooking,updateHotelBooking,}}
       {children}
     </BookingContext.Provider>
   );
