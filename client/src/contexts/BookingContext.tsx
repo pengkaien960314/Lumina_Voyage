@@ -41,6 +41,9 @@ export interface BookingContextType {
   addHotelBooking: (b: HotelBooking) => void;
   cancelFlightBooking: (id: string) => void;
   cancelHotelBooking: (id: string) => void;
+  updateFlightBooking: (id: string, changes: Partial<FlightBooking>) => void;
+  updateHotelBooking: (id: string, changes: Partial<HotelBooking>) => void;
+
 }
 
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
