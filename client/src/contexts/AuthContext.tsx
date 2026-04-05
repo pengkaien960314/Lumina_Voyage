@@ -69,7 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     linkedProviders: overrides.linkedProviders || [],
   });
 
-  const login = async (email: string, _password: string) => {
+  const login = async (email: string, password: string) => {
+    if (!password || password.length < 6) throw new Error("密碼不得少於6碼");
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 800));
     persist(createUser({ name: email.split("@")[0], email, provider: "email", avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${email}` }));
