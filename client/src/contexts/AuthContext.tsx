@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("wanderlust_user");
+    const stored = localStorage.getItem("lumina_user");
     if (stored) {
       const parsed = JSON.parse(stored);
       if (!parsed.linkedProviders) parsed.linkedProviders = [];
