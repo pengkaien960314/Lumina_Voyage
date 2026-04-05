@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const persist = useCallback((u: User) => {
     setUser(u);
-    localStorage.setItem("wanderlust_user", JSON.stringify(u));
+    localStorage.setItem("lumina_user", JSON.stringify(u));
   }, []);
 
   const createUser = (overrides: Partial<User>): User => ({
@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
   };
 
-  const logout = () => { setUser(null); localStorage.removeItem("wanderlust_user"); };
+  const logout = () => { setUser(null); localStorage.removeItem("lumina_user"); };
 
   const updateName = (name: string) => { if (user) persist({ ...user, name }); };
   const updateAvatar = (avatar: string) => { if (user) persist({ ...user, avatar }); };
