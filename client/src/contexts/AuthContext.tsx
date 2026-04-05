@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 export interface LinkedProvider {
@@ -65,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     provider: overrides.provider || "email",
     avatar: overrides.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${Date.now()}`,
     phone: overrides.phone || "",
-    userId: "WL" + Math.floor(1000 + Math.random() * 9000),
+    userId: "LV" + nanoid(8),
     linkedProviders: overrides.linkedProviders || [],
   });
 
