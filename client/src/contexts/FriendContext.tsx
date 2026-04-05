@@ -47,8 +47,21 @@ const sampleRequests: FriendRequest[] = [
 export function FriendProvider({ children }: { children: React.ReactNode }) {
   const [friends, setFriends] = useState<Friend[]>(sampleFriends);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>(sampleRequests);
-  const [myCode] = useState(() => Math.random().toString(36).substring(2, 10).toUpperCase());
-  const [myId] = useState(() => "WL" + Math.floor(1000 + Math.random() * 9000));
+  const [myCode] = useState(() => {
+  const stored = localStorage.getItem("lumina_my_code");
+  if (stored) return stored;
+  const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+  localStorage.setItem("lumina_my_code", code);
+  return code;
+});
+  const [myId] = useState(() => {
+  const stored = localStorage.getItem("lumina_my_id");
+  if (stored) return stored;
+  const id = "LV" + Math.floor(10000 + Math.random() * 90000);
+  localStorage.setItem("lumina_my_id", id);
+  return id;
+});
+
 
   useEffect(() => {
     const stored = localStorage.getItem("lumina_friends");
