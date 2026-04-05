@@ -75,7 +75,11 @@ const popularDestinations = [
 export default function AiPlanner() {
   const [destination, setDestination] = useState("");
   const [days, setDays] = useState(3);
-  const [startDate, setStartDate] = useState("2026-05-01");
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split("T")[0];
+  });
   const [style, setStyle] = useState("balanced");
   const [budget, setBudget] = useState("medium");
   const [specialRequests, setSpecialRequests] = useState("");
