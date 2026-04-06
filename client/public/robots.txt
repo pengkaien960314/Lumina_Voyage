@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://stunning-funicular-pj7447rrqr6xf7667-3000.app.github.dev/sitemap.xml
