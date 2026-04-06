@@ -137,6 +137,8 @@ export default function Home() {
         <img
           src="https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hero-bg-g7PvFnkctds2rCztknx8gW.webp"
           alt="Hero"
+          fetchPriority="high"
+          loading="eager"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-transparent" />
