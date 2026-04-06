@@ -14,19 +14,10 @@ async function startServer() {
   const server = createServer(app);
 
   // 安全標頭
+  app.set("trust proxy", 1);
   app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "https:", "blob:"],
-        connectSrc: ["'self'", "https://generativelanguage.googleapis.com", "https://api.dicebear.com"],
-      },
-    },
+    contentSecurityPolicy: false,
   }));
-
   // CORS
   app.use(cors({
     origin: process.env.NODE_ENV === "production"
