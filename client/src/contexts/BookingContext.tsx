@@ -96,9 +96,19 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     setHotelBookings(next);
     save("lumina_hotels", next);
   };
-
-  return (
-    <BookingContext.Provider value={{ flightBookings, hotelBookings, addFlightBooking, addHotelBooking, cancelFlightBooking, cancelHotelBooking,updateFlightBooking,updateHotelBooking,}}
+      return (
+    <BookingContext.Provider
+      value={{
+        flightBookings,
+        hotelBookings,
+        addFlightBooking,
+        addHotelBooking,
+        cancelFlightBooking,
+        cancelHotelBooking,
+        updateFlightBooking,
+        updateHotelBooking,
+      }}
+    >
       {children}
     </BookingContext.Provider>
   );
