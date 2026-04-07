@@ -2,15 +2,9 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 import { defineConfig } from "vite";
-//import { VitePWA } from "vite-plugin-pwa";
-
-const plugins = [
-  react(),
-  tailwindcss(),
-];
 
 export default defineConfig({
-  plugins,
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -21,23 +15,8 @@ export default defineConfig({
   envDir: path.resolve(import.meta.dirname),
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist"),
+    outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    minify: false,
-    chunkSizeWarningLimit: 1000,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            if (id.includes("framer-motion")) return "motion";
-            if (id.includes("react-dom") || id.includes("react/")) return "react";
-            if (id.includes("@radix-ui")) return "radix";
-            if (id.includes("recharts") || id.includes("d3")) return "charts";
-            return "vendor";
-          }
-        },
-      },
-    },
   },
   server: {
     port: 5000,
