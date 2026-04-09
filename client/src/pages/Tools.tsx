@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
-  Languages, DollarSign, Cloud, Navigation, ArrowRightLeft, MapPin,
+  Languages, DollarSign, Cloud, Navigation, ArrowRightLeft, ArrowRight, MapPin,
   Thermometer, Wind, Droplets, Eye, Sun, Moon, CloudRain, CloudSnow,
   Loader2, Send, RotateCcw, Locate, Search, Sparkles, Copy, Volume2,
   BookOpen, ChevronDown, ChevronUp, History,
@@ -319,20 +319,86 @@ function TranslatorTab() {
       </div>
 
       {/* AI Translation Mode */}
+      {/* Basic Translation Mode */}
       {mode === "translate" && (
-        <div className="space-y-3">
-          <Textarea placeholder="輸入要翻譯的文字..." value={inputText} onChange={e => setInputText(e.target.value)} rows={3} className="rounded-xl resize-none" />
-          <Button className="w-full rounded-xl gap-2" onClick={basicTranslate} disabled={loading}>
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
-            翻譯
+        <div className="space-y-4">
+          {/* Input area */}
+          <Card className="border-border/50 overflow-hidden">
+            <div className="p-3 bg-secondary/30 border-b border-border/30 flex items-center gap-2">
+              <span className="text-sm">{langOptions.find(l => l.code === langA)?.flag}</span>
+              <span className="text-xs font-medium text-muted-foreground">{langOptions.find(l => l.code === langA)?.label}</span>
+            </div>
+            <CardContent className="p-0">
+              <Textarea
+                placeholder="輸入要翻譯的文字..."
+                value={inputText}
+                onChange={e => setInputText(e.target.value)}
+                rows={3}
+                className="border-0 rounded-none resize-none focus-visible:ring-0 text-base px-4 py-3"
+              />
+            </CardContent>
+          </Card>
+
+          {/* Translate button */}
+          <Button className="w-full rounded-xl h-12 gap-2 text-base" onClick={basicTranslate} disabled={loading}>
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRightLeft className="w-5 h-5" />}
+            {loading ? "翻譯中..." : "翻譯"}
           </Button>
-          {basicResult && (
-            <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl">
-              <p className="text-lg font-medium">{basicResult}</p>
-              <div className="flex gap-2 mt-2">
-                <Button variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => { navigator.clipboard.writeText(basicResult); toast.success("已複製"); }}><Copy className="w-3.5 h-3.5" /></Button>
-                <Button variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => { if (window.speechSynthesis) { const u = new SpeechSynthesisUtterance(basicResult); u.lang = langB; u.rate = 0.9; window.speechSynthesis.speak(u); } }}><Volume2 className="w-3.5 h-3.5" /></Button>
-              </div>
+
+          {/* Result area */}
+          <AnimatePresence>
+            {basicResult && (
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                <Card className="border-primary/30 overflow-hidden shadow-sm">
+                  <div className="p-3 bg-primary/5 border-b border-primary/20 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{langOptions.find(l => l.code === langB)?.flag}</span>
+                      <span className="text-xs font-medium text-primary">{langOptions.find(l => l.code === langB)?.label}</span>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" className="rounded-full h-7 w-7 p-0 hover:bg-primary/10" onClick={() => { navigator.clipboard.writeText(basicResult); toast.success("已複製到剪貼簿"); }}>
+                        <Copy className="w-3.5 h-3.5 text-primary" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="rounded-full h-7 w-7 p-0 hover:bg-primary/10" onClick={() => { if (window.speechSynthesis) { const u = new SpeechSynthesisUtterance(basicResult); u.lang = langB; u.rate = 0.85; window.speechSynthesis.speak(u); } }}>
+                        <Volume2 className="w-3.5 h-3.5 text-primary" />
+                      </Button>
+                    </div>
+                  </div>
+                  <CardContent className="p-4">
+                    <p className="text-xl font-semibold leading-relaxed">{basicResult}</p>
+                    <div className="mt-3 pt-3 border-t border-border/30 flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>{langOptions.find(l => l.code === langA)?.flag} {inputText.length > 30 ? inputText.slice(0, 30) + "..." : inputText}</span>
+                      <ArrowRight className="w-3 h-3" />
+                      <span>{langOptions.find(l => l.code === langB)?.flag} 翻譯結果</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* History */}
+          {aiHistory.length > 0 && (
+            <div>
+              <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-2" onClick={() => setShowHistory(!showHistory)}>
+                <History className="w-4 h-4" />{showHistory ? "隱藏" : "顯示"}翻譯紀錄 ({aiHistory.length})
+              </button>
+              <AnimatePresence>
+                {showHistory && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-2">
+                    {aiHistory.map((h, i) => (
+                      <div key={i} className="p-3 bg-secondary/30 rounded-xl flex items-center justify-between text-sm cursor-pointer hover:bg-secondary/50 transition-colors"
+                        onClick={() => { setInputText(h.source); setLangA(h.from); setLangB(h.to); setBasicResult(h.translated); }}>
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate font-medium">{h.source}</p>
+                          <p className="truncate text-muted-foreground text-xs">{langOptions.find(l => l.code === h.from)?.flag} → {langOptions.find(l => l.code === h.to)?.flag} {h.translated}</p>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground shrink-0 ml-2">{h.time}</span>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </div>
@@ -1017,7 +1083,7 @@ export default function Tools() {
         </div>
       </section>
 
-      <section className="py-8 flex-1 pb-24 sm:pb-8">
+      <section className="py-8 flex-1 pb-36 sm:pb-8">
         <div className="container max-w-3xl">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="hidden sm:grid grid-cols-4 h-12 rounded-xl bg-secondary/50 p-1">
@@ -1036,7 +1102,7 @@ export default function Tools() {
         </div>
       </section>
 
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border/50 px-2 py-1.5 safe-area-bottom">
+      <div className="sm:hidden fixed bottom-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border/50 px-2 py-1.5">
         <div className="grid grid-cols-4 gap-1">
           {toolTabs.map(t => {
             const isActive = activeTab === t.value;

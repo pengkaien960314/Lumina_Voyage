@@ -167,23 +167,25 @@ export default function Stories() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold flex items-center gap-1.5"><Play className="w-4 h-4 text-primary" />好友動態</h3>
-          {isAuthenticated && (
-            <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs h-7" onClick={() => fileRef.current?.click()}>
+          <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs h-7" onClick={() => {
+              if (!isAuthenticated) { toast.error("請先登入才能發布動態"); return; }
+              fileRef.current?.click();
+            }}>
               <Plus className="w-3.5 h-3.5" />發布動態
             </Button>
-          )}
         </div>
 
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
           {/* Add Story Card */}
-          {isAuthenticated && (
-            <button onClick={() => fileRef.current?.click()} className="shrink-0 w-28 h-44 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors flex flex-col items-center justify-center gap-2">
+          <button onClick={() => {
+              if (!isAuthenticated) { toast.error("請先登入才能發布動態"); return; }
+              fileRef.current?.click();
+            }} className="shrink-0 w-28 h-44 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors flex flex-col items-center justify-center gap-2">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <ImagePlus className="w-5 h-5 text-primary" />
               </div>
               <span className="text-[11px] text-primary font-medium">新增動態</span>
             </button>
-          )}
 
           {/* Story Preview Cards (Reels style) */}
           {visibleStories.map((story, i) => (
