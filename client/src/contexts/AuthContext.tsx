@@ -33,6 +33,7 @@ interface AuthContextType {
   updateName: (name: string) => void;
   updateAvatar: (avatar: string) => void;
   updatePhone: (phone: string) => void;
+  updateEmail: (email: string) => void;
   linkProvider: (p: LinkedProvider) => void;
   unlinkProvider: (provider: string) => void;
   isLoading: boolean;
@@ -226,6 +227,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateName = (name: string) => { if (user) persist({ ...user, name }); };
   const updateAvatar = (avatar: string) => { if (user) persist({ ...user, avatar }); };
   const updatePhone = (phone: string) => { if (user) persist({ ...user, phone }); };
+  const updateEmail = (email: string) => { if (user) persist({ ...user, email }); };
 
   const linkProvider = (p: LinkedProvider) => {
     if (user) {
@@ -239,7 +241,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, loginWithGoogle, loginWithFacebook, loginWithApple, loginWithLine, loginWithTwitter, register, logout, updateName, updateAvatar, updatePhone, linkProvider, unlinkProvider, isLoading }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, loginWithGoogle, loginWithFacebook, loginWithApple, loginWithLine, loginWithTwitter, register, logout, updateName, updateAvatar, updatePhone, updateEmail, linkProvider, unlinkProvider, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

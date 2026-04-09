@@ -29,12 +29,13 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export default function Profile() {
-  const { user, isAuthenticated, updateName, updateAvatar, updatePhone, linkProvider, unlinkProvider } = useAuth();
+  const { user, isAuthenticated, updateName, updateAvatar, updatePhone, updateEmail, linkProvider, unlinkProvider } = useAuth();
   const [, navigate] = useLocation();
 
   // Profile form state
   const [formName, setFormName] = useState("");
   const [formPhone, setFormPhone] = useState("");
+  const [formEmail, setFormEmail] = useState("");
   const [formCity, setFormCity] = useState("");
   const [formBio, setFormBio] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -66,6 +67,7 @@ export default function Profile() {
       initialized.current = true;
       setFormName(user.name);
       setFormPhone(user.phone || "");
+      setFormEmail(user.email || "");
       const extra = localStorage.getItem("lumina_profile_extra");
       if (extra) {
         try {
@@ -84,6 +86,7 @@ export default function Profile() {
     await new Promise(r => setTimeout(r, 600));
     updateName(formName);
     updatePhone(formPhone);
+    if (formEmail && formEmail !== user?.email) updateEmail(formEmail);
     // Save extra data
     localStorage.setItem("lumina_profile_extra", JSON.stringify({ city: formCity, bio: formBio }));
     setIsSaving(false);
@@ -211,7 +214,7 @@ export default function Profile() {
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" />電子郵件</Label>
-                    <Input value={user.email} className="rounded-xl" disabled />
+                    <Input value={formEmail} onChange={e => setFormEmail(e.target.value)} className="rounded-xl" placeholder="your@email.com" />
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" />電話</Label>
