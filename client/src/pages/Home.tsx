@@ -186,7 +186,7 @@ export default function Home() {
 
       {/* Features Section - Click to zoom fullscreen then navigate */}
       <section className="py-20 relative overflow-hidden">
-        <img src="/images/japan/blue_pond.webp" alt="" className="absolute inset-0 w-full h-full object-cover opacity-8" loading="lazy" />
+        <img src="/images/home/experience.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-8" loading="lazy" />
         <div className="absolute inset-0 bg-background/92 backdrop-blur-sm" />
         <div className="container relative z-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="text-center mb-14">
@@ -240,7 +240,7 @@ export default function Home() {
 
       {/* Featured Destinations - Flip Cards (same as Spots page) */}
       <section className="py-20 relative overflow-hidden">
-        <img src="/images/japan/otaru_canal.webp" alt="" className="absolute inset-0 w-full h-full object-cover opacity-6" loading="lazy" />
+        <img src="/images/home/destination.PNG" alt="" className="absolute inset-0 w-full h-full object-cover opacity-6" loading="lazy" />
         <div className="absolute inset-0 bg-background/93 backdrop-blur-sm" />
         <div className="container relative z-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="flex items-end justify-between mb-12">
