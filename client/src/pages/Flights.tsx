@@ -14,13 +14,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plane, ArrowRight, Clock, Search, ArrowLeftRight, Minus, Plus, X, Check, Users, Loader2, ExternalLink } from "lucide-react";
+import { Plane, ArrowRight, Clock, Search, ArrowLeftRight, Minus, Plus, X, Check, Users, Loader2, ExternalLink, Hotel } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useBooking } from "@/contexts/BookingContext";
 import { GEMINI_API_KEY } from "@/config";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SubNav from "@/components/SubNav";
 
 const popularCities = [
   { code: "TPE", name: "台北桃園", country: "台灣" },
@@ -198,20 +199,6 @@ export default function Flights() {
     toast.success("機票預訂成功！確認信已發送至您的信箱");
   };
 
-  const openKayak = () => {
-    const from = tripType === "multicity" ? multiCities[0].from : fromCity;
-    const to = tripType === "multicity" ? multiCities[0].to : toCity;
-    const url = `https://www.kayak.com.tw/flights/${from}-${to}/${departDate}${tripType === "roundtrip" ? `/${returnDate}` : ""}?sort=bestflight_a&fs=cabin=${cabinClass === "first" ? "f" : cabinClass === "business" ? "b" : "e"}&adults=${paxCount}`;
-    window.open(url, "_blank");
-  };
-
-  const openTrip = () => {
-    const from = tripType === "multicity" ? multiCities[0].from : fromCity;
-    const to = tripType === "multicity" ? multiCities[0].to : toCity;
-    const url = `https://www.trip.com/flights/${from.toLowerCase()}-to-${to.toLowerCase()}/tickets-${from.toLowerCase()}-${to.toLowerCase()}?dcity=${from}&acity=${to}&ddate=${departDate}${tripType === "roundtrip" ? `&rdate=${returnDate}` : ""}&class=${cabinClass === "first" ? "F" : cabinClass === "business" ? "C" : "Y"}&adult=${paxCount}`;
-    window.open(url, "_blank");
-  };
-
   const getCityName = (code: string) => popularCities.find((c) => c.code === code)?.name || code;
 
   const [citySearch, setCitySearch] = useState("");
@@ -255,9 +242,16 @@ export default function Flights() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <div className="flex items-center gap-3 mb-2">
               <Plane className="w-6 h-6 text-primary" />
-              <h1 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: "var(--font-display)" }}>機票查詢</h1>
+              <h1 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: "var(--font-display)" }}>訂購服務</h1>
             </div>
-            <p className="text-muted-foreground mb-6">搜尋最優惠的機票，輕鬆規劃你的旅程</p>
+            <p className="text-muted-foreground mb-4">搜尋最優惠的機票，輕鬆規劃你的旅程</p>
+
+            <SubNav items={[
+              { path: "/hotels", label: "旅館預訂", icon: <Hotel className="w-4 h-4" /> },
+              { path: "/flights", label: "機票查詢", icon: <Plane className="w-4 h-4" /> },
+            ]} />
+
+            <div className="mt-4" />
 
             <Card className="border-primary/20">
               <CardContent className="p-6">
@@ -354,28 +348,6 @@ export default function Flights() {
               </CardContent>
             </Card>
           </motion.div>
-        </div>
-      </section>
-
-      {/* 快速搜尋平台 */}
-      <section className="py-6">
-        <div className="container max-w-4xl">
-          <p className="text-sm font-semibold mb-3" style={{ fontFamily: "var(--font-display)" }}>在其他平台搜尋即時票價</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <Button variant="outline" className="h-16 rounded-xl flex-col gap-1 hover:border-primary/50" onClick={openGoogleFlights}>
-              <span className="text-lg">✈️</span><span className="text-xs font-medium">Google Flights</span>
-            </Button>
-            <Button variant="outline" className="h-16 rounded-xl flex-col gap-1 hover:border-primary/50" onClick={openSkyscanner}>
-              <span className="text-lg">🔍</span><span className="text-xs font-medium">Skyscanner</span>
-            </Button>
-            <Button variant="outline" className="h-16 rounded-xl flex-col gap-1 hover:border-primary/50" onClick={openKayak}>
-              <span className="text-lg">🛫</span><span className="text-xs font-medium">Kayak</span>
-            </Button>
-            <Button variant="outline" className="h-16 rounded-xl flex-col gap-1 hover:border-primary/50" onClick={openTrip}>
-              <span className="text-lg">🌏</span><span className="text-xs font-medium">Trip.com</span>
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">點擊會帶入你的搜尋條件，直接跳轉到對應平台查看即時票價</p>
         </div>
       </section>
 

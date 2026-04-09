@@ -81,38 +81,52 @@ export default function Settings() {
 
                 <Separator />
 
-                {/* Theme Preview */}
+                {/* Theme Preview - Liquid Glass Style */}
                 <div>
                   <Label className="font-medium mb-3 block">主題預覽</Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={() => { if (theme === "dark") toggleTheme?.(); }}
-                      className={`p-4 rounded-xl border-2 transition-all ${theme === "light" ? "border-primary" : "border-border hover:border-primary/50"}`}
+                      className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 overflow-hidden ${theme === "light" ? "border-primary shadow-lg shadow-primary/10" : "border-border hover:border-primary/40"}`}
                     >
-                      <div className="w-full h-20 rounded-lg bg-[#F7F5F0] mb-2 flex items-end p-2">
-                        <div className="flex gap-1">
-                          <div className="w-6 h-3 rounded bg-[#8B7355]" />
-                          <div className="w-8 h-3 rounded bg-[#6B8F71]" />
+                      {/* Glass effect background */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-amber-50/40 to-emerald-50/30 backdrop-blur-xl" />
+                      <div className="absolute top-0 left-0 w-24 h-24 rounded-full bg-amber-200/30 blur-2xl -translate-x-1/2 -translate-y-1/2" />
+                      <div className="absolute bottom-0 right-0 w-20 h-20 rounded-full bg-emerald-200/30 blur-2xl translate-x-1/3 translate-y-1/3" />
+                      <div className="relative">
+                        <div className="w-full h-24 rounded-xl bg-white/60 backdrop-blur-sm border border-white/50 shadow-inner mb-3 flex items-end p-3">
+                          <div className="flex gap-1.5">
+                            <div className="w-7 h-3.5 rounded-full bg-[#8B7355]/60 backdrop-blur-sm" />
+                            <div className="w-9 h-3.5 rounded-full bg-[#6B8F71]/60 backdrop-blur-sm" />
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Sun className="w-4 h-4" />
-                        <span className="text-sm font-medium">{t("settings.light")}</span>
+                        <div className="flex items-center gap-2">
+                          <Sun className="w-4 h-4" />
+                          <span className="text-sm font-medium">{t("settings.light")}</span>
+                        </div>
+                        {theme === "light" && <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center"><Check className="w-3 h-3 text-primary-foreground" /></div>}
                       </div>
                     </button>
                     <button
                       onClick={() => { if (theme === "light") toggleTheme?.(); }}
-                      className={`p-4 rounded-xl border-2 transition-all ${theme === "dark" ? "border-primary" : "border-border hover:border-primary/50"}`}
+                      className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 overflow-hidden ${theme === "dark" ? "border-primary shadow-lg shadow-primary/10" : "border-border hover:border-primary/40"}`}
                     >
-                      <div className="w-full h-20 rounded-lg bg-[#1A1A18] mb-2 flex items-end p-2">
-                        <div className="flex gap-1">
-                          <div className="w-6 h-3 rounded bg-[#D4A574]" />
-                          <div className="w-8 h-3 rounded bg-[#6B8F71]" />
+                      {/* Glass effect background */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 backdrop-blur-xl" />
+                      <div className="absolute top-0 right-0 w-20 h-20 rounded-full bg-violet-500/10 blur-2xl" />
+                      <div className="absolute bottom-0 left-0 w-16 h-16 rounded-full bg-sky-500/10 blur-2xl" />
+                      <div className="relative">
+                        <div className="w-full h-24 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 shadow-inner mb-3 flex items-end p-3">
+                          <div className="flex gap-1.5">
+                            <div className="w-7 h-3.5 rounded-full bg-[#D4A574]/50 backdrop-blur-sm" />
+                            <div className="w-9 h-3.5 rounded-full bg-[#6B8F71]/50 backdrop-blur-sm" />
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Moon className="w-4 h-4" />
-                        <span className="text-sm font-medium">{t("settings.dark")}</span>
+                        <div className="flex items-center gap-2 text-white">
+                          <Moon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{t("settings.dark")}</span>
+                        </div>
+                        {theme === "dark" && <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center"><Check className="w-3 h-3 text-primary-foreground" /></div>}
                       </div>
                     </button>
                   </div>

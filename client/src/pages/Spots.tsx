@@ -9,10 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Star, MapPin, Heart, Filter, Train, Clock, Ticket, ChevronLeft, Globe, Camera, Utensils, Mountain, ShoppingBag, Snowflake, TreePine } from "lucide-react";
+import { Search, Star, MapPin, Heart, Filter, Train, Clock, Ticket, ChevronLeft, Globe, Camera, Utensils, Mountain, ShoppingBag, Snowflake, TreePine, Map, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SubNav from "@/components/SubNav";
 
 interface Spot {
   id: number;
@@ -451,8 +452,14 @@ export default function Spots() {
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>探索景點</h1>
-            <p className="text-muted-foreground mb-6">發現世界各地令人驚嘆的旅遊目的地</p>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <p className="text-muted-foreground mb-4">發現世界各地令人驚嘆的旅遊目的地</p>
+
+            <SubNav items={[
+              { path: "/spots", label: "景點瀏覽", icon: <Map className="w-4 h-4" /> },
+              { path: "/planner", label: "行程規劃", icon: <BookOpen className="w-4 h-4" /> },
+            ]} />
+
+            <div className="flex flex-col sm:flex-row gap-3 mt-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input placeholder="搜尋景點名稱或地點..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 h-11 rounded-xl" />

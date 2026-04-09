@@ -17,12 +17,13 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Star, MapPin, Wifi, Car, Coffee, Waves, Users, Calendar, Navigation, Phone, Globe, Dumbbell, Utensils, Bath, Minus, Plus as PlusIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Star, MapPin, Wifi, Car, Coffee, Waves, Users, Calendar, Navigation, Phone, Globe, Dumbbell, Utensils, Bath, Minus, Plus as PlusIcon, ChevronLeft, ChevronRight, Hotel, Plane } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useBooking } from "@/contexts/BookingContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SubNav from "@/components/SubNav";
 
 interface Review {
   author: string;
@@ -315,10 +316,15 @@ export default function Hotels() {
       <section className="pt-24 pb-8 bg-secondary/30">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>旅館預訂</h1>
-            <p className="text-muted-foreground mb-4">精選全球優質住宿，為你的旅程找到完美落腳處</p>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>訂購服務</h1>
+            <p className="text-muted-foreground mb-4">精選全球優質住宿與機票，為你的旅程做好準備</p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <SubNav items={[
+              { path: "/hotels", label: "旅館預訂", icon: <Hotel className="w-4 h-4" /> },
+              { path: "/flights", label: "機票查詢", icon: <Plane className="w-4 h-4" /> },
+            ]} />
+
+            <div className="flex flex-col sm:flex-row gap-3 mb-4 mt-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input placeholder="搜尋旅館名稱或地點..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 h-11 rounded-xl" />

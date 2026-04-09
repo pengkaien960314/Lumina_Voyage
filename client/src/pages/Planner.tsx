@@ -23,7 +23,7 @@ import {
   Plane, Hotel, Camera, Coffee, UtensilsCrossed, Edit3, Trash2,
   ShoppingBag, Music, Bus, Train, Ship, Bike, Footprints, Ticket,
   Image as ImageIcon, Save, Sparkles, Loader2, History, Archive,
-  Download, X,
+  Download, X, Map, BookOpen,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -31,6 +31,7 @@ import { useBooking } from "@/contexts/BookingContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PlacesAutocomplete from "@/components/PlacesAutocomplete";
+import SubNav from "@/components/SubNav";
 
 import { GEMINI_API_KEY } from "@/config";
 
@@ -409,9 +410,14 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <div className="flex items-center gap-3 mb-2">
               <Calendar className="w-6 h-6 text-primary" />
-              <h1 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: "var(--font-display)" }}>行程規劃</h1>
+              <h1 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: "var(--font-display)" }}>探索旅程</h1>
             </div>
-            <p className="text-muted-foreground">規劃你的完美旅程，或讓 AI 為你量身打造</p>
+            <p className="text-muted-foreground mb-4">規劃你的完美旅程，或讓 AI 為你量身打造</p>
+
+            <SubNav items={[
+              { path: "/spots", label: "景點瀏覽", icon: <Map className="w-4 h-4" /> },
+              { path: "/planner", label: "行程規劃", icon: <BookOpen className="w-4 h-4" /> },
+            ]} />
           </motion.div>
         </div>
       </section>
@@ -540,27 +546,27 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
                                   <DialogTrigger asChild>
                                     <Button variant="outline" size="sm" className="rounded-full gap-2 border-dashed"><Plus className="w-3.5 h-3.5" />新增活動</Button>
                                   </DialogTrigger>
-                                  <DialogContent>
-                                    <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>新增活動</DialogTitle></DialogHeader>
-                                    <div className="space-y-4 mt-4">
+                                  <DialogContent className="max-w-md">
+                                    <DialogHeader><DialogTitle className="flex items-center gap-2" style={{ fontFamily: "var(--font-display)" }}><Plus className="w-5 h-5 text-primary" />新增活動</DialogTitle></DialogHeader>
+                                    <div className="space-y-4 mt-2">
                                       <div className="grid grid-cols-2 gap-3">
-                                        <div className="space-y-2"><Label>時間</Label><Input type="time" value={newActivity.time || ""} onChange={e => setNewActivity({ ...newActivity, time: e.target.value })} /></div>
-                                        <div className="space-y-2"><Label>停留（分鐘）</Label><Input type="number" min="0" step="15" placeholder="60" value={newActivity.duration || ""} onChange={e => setNewActivity({ ...newActivity, duration: parseInt(e.target.value) || undefined })} /></div>
+                                        <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">時間</Label><Input type="time" value={newActivity.time || ""} onChange={e => setNewActivity({ ...newActivity, time: e.target.value })} className="rounded-xl h-11" /></div>
+                                        <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">停留（分鐘）</Label><Input type="number" min="0" step="15" placeholder="60" value={newActivity.duration || ""} onChange={e => setNewActivity({ ...newActivity, duration: parseInt(e.target.value) || undefined })} className="rounded-xl h-11" /></div>
                                       </div>
-                                      <div className="space-y-2">
-                                        <Label>類型</Label>
+                                      <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">類型</Label>
                                         <Select value={newActivity.type || "sightseeing"} onValueChange={v => setNewActivity({ ...newActivity, type: v })}>
-                                          <SelectTrigger><SelectValue /></SelectTrigger>
-                                          <SelectContent>{activityTypes.map(t => { const TI = t.icon; return <SelectItem key={t.value} value={t.value}><span className="flex items-center gap-2"><TI className="w-3.5 h-3.5" />{t.label}</span></SelectItem>; })}</SelectContent>
+                                          <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+                                          <SelectContent>{activityTypes.map(t => { const TI = t.icon; return <SelectItem key={t.value} value={t.value}><span className="flex items-center gap-2"><TI className="w-4 h-4" />{t.label}</span></SelectItem>; })}</SelectContent>
                                         </Select>
                                       </div>
-                                      <div className="space-y-2"><Label>活動名稱</Label><Input placeholder="例：參觀東京鐵塔" value={newActivity.title || ""} onChange={e => setNewActivity({ ...newActivity, title: e.target.value })} /></div>
-                                      <div className="space-y-2"><Label>地點</Label><PlacesAutocomplete placeholder="例：東京都港區" value={newActivity.location || ""} onChange={v => setNewActivity({ ...newActivity, location: v })} /></div>
-                                      <div className="space-y-2">
-                                        <Label>圖片</Label>
+                                      <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">活動名稱</Label><Input placeholder="例：參觀東京鐵塔" value={newActivity.title || ""} onChange={e => setNewActivity({ ...newActivity, title: e.target.value })} className="rounded-xl h-11" /></div>
+                                      <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">地點</Label><PlacesAutocomplete placeholder="例：東京都港區" value={newActivity.location || ""} onChange={v => setNewActivity({ ...newActivity, location: v })} /></div>
+                                      <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">圖片</Label>
                                         <div className="flex gap-2">
-                                          <Input placeholder="https://... 或上傳圖片" value={newActivity.image || ""} onChange={e => setNewActivity({ ...newActivity, image: e.target.value })} className="flex-1" />
-                                          <Button variant="outline" size="sm" className="shrink-0" onClick={() => {
+                                          <Input placeholder="https://... 或上傳圖片" value={newActivity.image || ""} onChange={e => setNewActivity({ ...newActivity, image: e.target.value })} className="flex-1 rounded-xl h-11" />
+                                          <Button variant="outline" size="sm" className="shrink-0 rounded-xl h-11 w-11 p-0" onClick={() => {
                                             const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
                                             inp.onchange = (ev: any) => {
                                               const f = ev.target.files?.[0]; if (!f) return;
@@ -569,9 +575,10 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
                                             }; inp.click();
                                           }}><ImageIcon className="w-4 h-4" aria-label="上傳圖片" /></Button>
                                         </div>
+                                        {newActivity.image && <img src={newActivity.image} alt="" className="rounded-xl w-full h-28 object-cover mt-2 border border-border/50" />}
                                       </div>
-                                      <div className="space-y-2"><Label>備註</Label><Textarea placeholder="任何補充說明..." value={newActivity.notes || ""} onChange={e => setNewActivity({ ...newActivity, notes: e.target.value })} rows={3} /></div>
-                                      <Button className="w-full rounded-xl" onClick={() => addActivity(day.id)}>新增</Button>
+                                      <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">備註</Label><Textarea placeholder="任何補充說明..." value={newActivity.notes || ""} onChange={e => setNewActivity({ ...newActivity, notes: e.target.value })} rows={2} className="rounded-xl resize-none" /></div>
+                                      <Button className="w-full rounded-xl h-11 gap-2" onClick={() => addActivity(day.id)}><Plus className="w-4 h-4" />新增活動</Button>
                                     </div>
                                   </DialogContent>
                                 </Dialog>
@@ -756,27 +763,27 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
       {/* Edit Activity Dialog */}
       <Dialog open={!!editingAct} onOpenChange={() => setEditingAct(null)}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>編輯活動</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="flex items-center gap-2" style={{ fontFamily: "var(--font-display)" }}><Edit3 className="w-5 h-5 text-primary" />編輯活動</DialogTitle></DialogHeader>
           {editingAct && (
             <div className="space-y-4 mt-2">
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2"><Label>時間</Label><Input type="time" value={editForm.time || ""} onChange={e => setEditForm({ ...editForm, time: e.target.value })} /></div>
-                <div className="space-y-2"><Label>停留（分鐘）</Label><Input type="number" min="0" step="15" placeholder="60" value={editForm.duration || ""} onChange={e => setEditForm({ ...editForm, duration: parseInt(e.target.value) || undefined })} /></div>
+                <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">時間</Label><Input type="time" value={editForm.time || ""} onChange={e => setEditForm({ ...editForm, time: e.target.value })} className="rounded-xl h-11" /></div>
+                <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">停留（分鐘）</Label><Input type="number" min="0" step="15" placeholder="60" value={editForm.duration || ""} onChange={e => setEditForm({ ...editForm, duration: parseInt(e.target.value) || undefined })} className="rounded-xl h-11" /></div>
               </div>
-              <div className="space-y-2">
-                <Label>類型</Label>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">類型</Label>
                 <Select value={editForm.type || "sightseeing"} onValueChange={v => setEditForm({ ...editForm, type: v })}>
-                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                  <SelectContent>{activityTypes.map(t => { const TI = t.icon; return <SelectItem key={t.value} value={t.value}><span className="flex items-center gap-2"><TI className="w-3.5 h-3.5" />{t.label}</span></SelectItem>; })}</SelectContent>
+                  <SelectTrigger className="w-full rounded-xl h-11"><SelectValue /></SelectTrigger>
+                  <SelectContent>{activityTypes.map(t => { const TI = t.icon; return <SelectItem key={t.value} value={t.value}><span className="flex items-center gap-2"><TI className="w-4 h-4" />{t.label}</span></SelectItem>; })}</SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2"><Label>活動名稱</Label><Input value={editForm.title || ""} onChange={e => setEditForm({ ...editForm, title: e.target.value })} /></div>
-              <div className="space-y-2"><Label>地點</Label><PlacesAutocomplete value={editForm.location || ""} onChange={v => setEditForm({ ...editForm, location: v })} /></div>
-              <div className="space-y-2">
-                <Label>圖片</Label>
+              <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">活動名稱</Label><Input value={editForm.title || ""} onChange={e => setEditForm({ ...editForm, title: e.target.value })} className="rounded-xl h-11" /></div>
+              <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">地點</Label><PlacesAutocomplete value={editForm.location || ""} onChange={v => setEditForm({ ...editForm, location: v })} /></div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">圖片</Label>
                 <div className="flex gap-2">
-                  <Input value={editForm.image || ""} onChange={e => setEditForm({ ...editForm, image: e.target.value })} placeholder="https://... 或上傳圖片" className="flex-1" />
-                  <Button variant="outline" size="sm" className="shrink-0" onClick={() => {
+                  <Input value={editForm.image || ""} onChange={e => setEditForm({ ...editForm, image: e.target.value })} placeholder="https://... 或上傳圖片" className="flex-1 rounded-xl h-11" />
+                  <Button variant="outline" size="sm" className="shrink-0 rounded-xl h-11 w-11 p-0" onClick={() => {
                     const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
                     inp.onchange = (ev: any) => {
                       const f = ev.target.files?.[0]; if (!f) return;
@@ -786,11 +793,11 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
                   }}><ImageIcon className="w-4 h-4" aria-label="上傳圖片" /></Button>
                 </div>
               </div>
-              {editForm.image && <img src={editForm.image} alt="" className="rounded-xl w-full h-32 object-cover" />}
-              <div className="space-y-2"><Label>備註</Label><Textarea value={editForm.notes || ""} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={3} /></div>
+              {editForm.image && <img src={editForm.image} alt="" className="rounded-xl w-full h-28 object-cover border border-border/50" />}
+              <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">備註</Label><Textarea value={editForm.notes || ""} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={2} className="rounded-xl resize-none" /></div>
               <div className="flex gap-2">
-                <Button className="flex-1 rounded-xl gap-2" onClick={saveEditedAct}><Save className="w-4 h-4" />儲存</Button>
-                <Button variant="destructive" className="rounded-xl gap-2" onClick={deleteActFromEdit}><Trash2 className="w-4 h-4" />刪除</Button>
+                <Button className="flex-1 rounded-xl h-11 gap-2" onClick={saveEditedAct}><Save className="w-4 h-4" />儲存變更</Button>
+                <Button variant="destructive" className="rounded-xl h-11 gap-2" onClick={deleteActFromEdit}><Trash2 className="w-4 h-4" />刪除</Button>
               </div>
             </div>
           )}

@@ -12,9 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
-  Languages, DollarSign, Cloud, Navigation, ArrowRightLeft, ArrowRight, MapPin,
+  Languages, DollarSign, Cloud, Navigation, ArrowRightLeft, MapPin,
   Thermometer, Wind, Droplets, Eye, Sun, Moon, CloudRain, CloudSnow,
   Loader2, Send, RotateCcw, Locate, Search, Sparkles, Copy, Volume2,
   BookOpen, ChevronDown, ChevronUp, History,
@@ -68,58 +69,24 @@ const travelPhrases = [
 ];
 
 const callGemini = async (prompt: string): Promise<string> => {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("YOUR_")) {
-    throw new Error("請先在 config.ts 設定 Gemini API Key（到 https://aistudio.google.com/apikey 免費申請）");
-  }
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
-        }),
-      }
-    );
-    if (response.status === 403) throw new Error("API Key 無效或未啟用 Generative Language API。請到 Google Cloud Console → API & Services → 啟用「Generative Language API」");
-    if (response.status === 429) throw new Error("API 呼叫次數超過限制，請稍後再試");
-    if (!response.ok) throw new Error(`API 錯誤 ${response.status}：${response.statusText}`);
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error("AI 未回傳內容，請重試");
-    return text;
-  } catch (err: any) {
-    if (err.message?.includes("Failed to fetch") || err.message?.includes("NetworkError")) {
-      throw new Error("網路連線失敗，請確認你的網路連線正常，或檢查是否有 VPN/防火牆阻擋 API 請求");
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
+      }),
     }
-    throw err;
-  }
-};
-
-// Free translation (MyMemory API - no key needed)
-const freeTranslate = async (text: string, from: string, to: string): Promise<string> => {
-  // Map language codes for MyMemory
-  const langMap: Record<string, string> = {
-    "zh-TW": "zh-TW", "zh-CN": "zh-CN", "ja": "ja", "en": "en", "ko": "ko",
-    "th": "th", "fr": "fr", "es": "es", "de": "de", "it": "it", "pt": "pt",
-    "ru": "ru", "ar": "ar", "vi": "vi", "id": "id", "ms": "ms",
-  };
-  const fromCode = langMap[from] || from;
-  const toCode = langMap[to] || to;
-  const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${fromCode}|${toCode}`);
-  if (!res.ok) throw new Error("翻譯服務暫時無法使用");
-  const data = await res.json();
-  if (data.responseStatus === 200 && data.responseData?.translatedText) {
-    return data.responseData.translatedText;
-  }
-  throw new Error("翻譯失敗，請重試");
+  );
+  if (!response.ok) throw new Error(`API 錯誤: ${response.status}`);
+  const data = await response.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 };
 
 function TranslatorTab() {
-  const [useAi, setUseAi] = useState(false);
-  const [showConvo, setShowConvo] = useState(false);
+  const [mode, setMode] = useState<"ai" | "conversation" | "phrases">("ai");
   const [langA, setLangA] = useState("zh-TW");
   const [langB, setLangB] = useState("ja");
   const [inputText, setInputText] = useState("");
@@ -139,24 +106,7 @@ function TranslatorTab() {
     chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  // Basic translation (free, no API key)
-  const [basicResult, setBasicResult] = useState<string>("");
-  const basicTranslate = async () => {
-    if (!inputText.trim()) { toast.error("請輸入要翻譯的文字"); return; }
-    setLoading(true);
-    setBasicResult("");
-    try {
-      const result = await freeTranslate(inputText, langA, langB);
-      setBasicResult(result);
-      setAiHistory(prev => [{ source: inputText, translated: result, from: langA, to: langB, time: new Date().toLocaleTimeString() }, ...prev].slice(0, 20));
-      toast.success("翻譯完成");
-    } catch (err: any) {
-      toast.error(err.message || "翻譯失敗");
-    }
-    setLoading(false);
-  };
-
-  // AI Translation (advanced)
+  // AI Translation
   const aiTranslate = async () => {
     if (!inputText.trim()) { toast.error("請輸入要翻譯的文字"); return; }
     setLoading(true);
@@ -180,8 +130,8 @@ function TranslatorTab() {
       setAiResult(parsed);
       setAiHistory(prev => [{ source: inputText, translated: parsed.translated, from: langA, to: langB, time: new Date().toLocaleTimeString() }, ...prev].slice(0, 20));
       toast.success("翻譯完成");
-    } catch (err: any) {
-      toast.error(err.message || "翻譯失敗，請重試");
+    } catch {
+      toast.error("翻譯失敗，請重試");
     }
     setLoading(false);
   };
@@ -192,13 +142,16 @@ function TranslatorTab() {
     setLoading(true);
     const fromLang = currentTurn === "A" ? langA : langB;
     const toLang = currentTurn === "A" ? langB : langA;
+    const fromLabel = langOptions.find(l => l.code === fromLang)?.label || fromLang;
+    const toLabel = langOptions.find(l => l.code === toLang)?.label || toLang;
     try {
-      const translated = await freeTranslate(inputText, fromLang, toLang);
+      const prompt = `將以下${fromLabel}文字翻譯成${toLabel}，只回覆翻譯結果，不要加任何解釋：\n${inputText}`;
+      const translated = await callGemini(prompt);
       setMessages(prev => [...prev, { id: `m${Date.now()}`, from: currentTurn, text: inputText, translated: translated.trim(), lang: fromLang }]);
       setCurrentTurn(currentTurn === "A" ? "B" : "A");
       setInputText("");
-    } catch (err: any) {
-      toast.error(err.message || "翻譯失敗");
+    } catch {
+      toast.error("翻譯失敗");
     }
     setLoading(false);
   };
@@ -208,12 +161,15 @@ function TranslatorTab() {
     setLoading(true);
     const fromLang = currentTurn === "A" ? langA : langB;
     const toLang = currentTurn === "A" ? langB : langA;
+    const fromLabel = langOptions.find(l => l.code === fromLang)?.label || fromLang;
+    const toLabel = langOptions.find(l => l.code === toLang)?.label || toLang;
     try {
-      const translated = await freeTranslate(original, fromLang, toLang);
+      const prompt = `將以下${fromLabel}文字翻譯成${toLabel}，只回覆翻譯結果：\n${original}`;
+      const translated = await callGemini(prompt);
       setMessages(prev => [...prev, { id: `m${Date.now()}`, from: currentTurn, text: original, translated: translated.trim(), lang: fromLang }]);
       setCurrentTurn(currentTurn === "A" ? "B" : "A");
-    } catch (err: any) {
-      toast.error(err.message || "翻譯失敗");
+    } catch {
+      toast.error("翻譯失敗");
     }
     setLoading(false);
   };
@@ -247,10 +203,23 @@ function TranslatorTab() {
   }, [currentTurn, langA, langB, messages]);
 
   useEffect(() => {
-    if (showConvo) generateQuickReplies();
-  }, [showConvo, currentTurn, generateQuickReplies]);
+    if (mode === "conversation") generateQuickReplies();
+  }, [mode, currentTurn, generateQuickReplies]);
 
   // Phrase translation
+  const translatePhrase = async (phrase: string) => {
+    setPhraseLoading(phrase);
+    const toLabel = langOptions.find(l => l.code === langB)?.label || langB;
+    try {
+      const prompt = `將「${phrase}」翻譯成${toLabel}，並附上發音提示。格式：翻譯結果（發音）`;
+      const result = await callGemini(prompt);
+      toast.success(result.trim(), { duration: 5000 });
+    } catch {
+      toast.error("翻譯失敗");
+    }
+    setPhraseLoading(null);
+  };
+
   const speakText = (text: string, lang: string) => {
     if ("speechSynthesis" in window) {
       const u = new SpeechSynthesisUtterance(text);
@@ -269,166 +238,192 @@ function TranslatorTab() {
   const currentLangInfo = langOptions.find(l => l.code === speakerLang);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
+      {/* Mode Selector */}
+      <div className="flex gap-2">
+        <Button variant={mode === "ai" ? "default" : "outline"} size="sm" className="rounded-full gap-1.5 flex-1" onClick={() => setMode("ai")}>
+          <Sparkles className="w-3.5 h-3.5" />AI 翻譯
+        </Button>
+        <Button variant={mode === "phrases" ? "default" : "outline"} size="sm" className="rounded-full gap-1.5 flex-1" onClick={() => setMode("phrases")}>
+          <BookOpen className="w-3.5 h-3.5" />旅行用語
+        </Button>
+      </div>
+
       {/* Language Selectors */}
       <div className="flex items-center gap-3">
         <div className="flex-1">
+          <Label className="text-xs text-muted-foreground mb-1 block">{mode === "conversation" ? "A 的語言" : "來源語言"}</Label>
           <Select value={langA} onValueChange={setLangA}>
-            <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
             <SelectContent className="max-h-60">{langOptions.map(l => <SelectItem key={l.code} value={l.code}>{l.flag} {l.label}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <Button variant="ghost" size="sm" className="rounded-full w-10 h-10 p-0" onClick={() => { setLangA(langB); setLangB(langA); }}>
+        <Button variant="ghost" size="sm" className="rounded-full w-10 h-10 p-0 mt-5" onClick={() => { setLangA(langB); setLangB(langA); }}>
           <ArrowRightLeft className="w-4 h-4" />
         </Button>
         <div className="flex-1">
+          <Label className="text-xs text-muted-foreground mb-1 block">{mode === "conversation" ? "B 的語言" : "目標語言"}</Label>
           <Select value={langB} onValueChange={setLangB}>
-            <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
             <SelectContent className="max-h-60">{langOptions.map(l => <SelectItem key={l.code} value={l.code}>{l.flag} {l.label}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       </div>
 
-      {/* Input */}
-      <Card className="border-border/50 overflow-hidden">
-        <div className="p-2.5 bg-secondary/30 border-b border-border/30 flex items-center gap-2">
-          <span>{langOptions.find(l => l.code === langA)?.flag}</span>
-          <span className="text-xs font-medium text-muted-foreground">{langOptions.find(l => l.code === langA)?.label}</span>
-        </div>
-        <CardContent className="p-0">
-          <Textarea placeholder="輸入要翻譯的文字..." value={inputText} onChange={e => setInputText(e.target.value)} rows={3}
-            className="border-0 rounded-none resize-none focus-visible:ring-0 text-base px-4 py-3"
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); basicTranslate(); } }}
-          />
-        </CardContent>
-      </Card>
+      {/* AI Translation Mode */}
+      {mode === "ai" && (
+        <div className="space-y-4">
+          <Textarea placeholder="輸入要翻譯的文字..." value={inputText} onChange={e => setInputText(e.target.value)} rows={4} className="rounded-xl resize-none" />
 
-      {/* Buttons */}
-      <div className="flex gap-2">
-        <Button className="flex-1 rounded-xl h-11 gap-2" onClick={basicTranslate} disabled={loading}>
-          {loading && !useAi ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
-          即時翻譯
-        </Button>
-        <Button variant="outline" className="rounded-xl h-11 gap-2 px-5" onClick={() => { setUseAi(true); aiTranslate(); }} disabled={loading}>
-          {loading && useAi ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          AI
-        </Button>
-      </div>
+          {/* Quick Phrases */}
+          <div className="flex gap-2 flex-wrap">
+            {["你好，請問這裡怎麼走？", "多少錢？", "謝謝，很好吃！"].map((phrase) => (
+              <Button key={phrase} variant="outline" size="sm" className="rounded-full text-xs h-8" onClick={() => setInputText(phrase)}>
+                {phrase}
+              </Button>
+            ))}
+          </div>
 
-      {/* Basic Result */}
-      <AnimatePresence>
-        {basicResult && !aiResult && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="border-primary/30 overflow-hidden shadow-sm">
-              <div className="p-2.5 bg-primary/5 border-b border-primary/20 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span>{langOptions.find(l => l.code === langB)?.flag}</span>
-                  <span className="text-xs font-medium text-primary">{langOptions.find(l => l.code === langB)?.label}</span>
-                </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" className="rounded-full h-7 w-7 p-0" onClick={() => copyText(basicResult)}><Copy className="w-3.5 h-3.5 text-primary" /></Button>
-                  <Button variant="ghost" size="sm" className="rounded-full h-7 w-7 p-0" onClick={() => speakText(basicResult, langB)}><Volume2 className="w-3.5 h-3.5 text-primary" /></Button>
-                </div>
-              </div>
-              <CardContent className="p-4"><p className="text-xl font-semibold leading-relaxed">{basicResult}</p></CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <Button className="w-full rounded-xl h-11 gap-2" onClick={aiTranslate} disabled={loading}>
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            AI 翻譯
+          </Button>
 
-      {/* AI Result */}
-      <AnimatePresence>
-        {aiResult && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="border-primary/30 overflow-hidden shadow-sm">
-              <div className="p-2.5 bg-primary/5 border-b border-primary/20 flex items-center justify-between">
-                <Badge className="bg-primary/10 text-primary border-0 rounded-full text-xs"><Sparkles className="w-3 h-3 mr-1" />AI 翻譯</Badge>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" className="rounded-full h-7 w-7 p-0" onClick={() => copyText(aiResult.translated)}><Copy className="w-3.5 h-3.5" /></Button>
-                  <Button variant="ghost" size="sm" className="rounded-full h-7 w-7 p-0" onClick={() => speakText(aiResult.translated, langB)}><Volume2 className="w-3.5 h-3.5" /></Button>
-                </div>
-              </div>
-              <CardContent className="p-4 space-y-3">
-                <p className="text-xl font-semibold">{aiResult.translated}</p>
-                {aiResult.pronunciation && <p className="text-sm text-muted-foreground">📖 {aiResult.pronunciation}</p>}
-                {aiResult.alternatives && aiResult.alternatives.length > 0 && (
-                  <div className="flex flex-wrap gap-2">{aiResult.alternatives.map((a, i) => (
-                    <Badge key={i} variant="outline" className="rounded-full cursor-pointer hover:bg-accent" onClick={() => copyText(a)}>{a}</Badge>
-                  ))}</div>
-                )}
-                {aiResult.context && <p className="text-xs text-muted-foreground bg-secondary/50 p-2.5 rounded-lg">💡 {aiResult.context}</p>}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Conversation */}
-      <Card className="border-border/50">
-        <button className="w-full p-3 flex items-center justify-between" onClick={() => setShowConvo(!showConvo)}>
-          <span className="text-sm font-semibold flex items-center gap-2"><Send className="w-4 h-4 text-primary" />對話翻譯</span>
-          {showConvo ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </button>
-        <AnimatePresence>
-          {showConvo && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              <CardContent className="px-3 pb-3 pt-0 space-y-3">
-                <div ref={chatRef} className="max-h-[250px] overflow-y-auto space-y-2 pr-1">
-                  {messages.length === 0 && <p className="text-center text-muted-foreground text-xs py-4">A 和 B 交替輸入，即時翻譯對方語言</p>}
-                  {messages.map(msg => (
-                    <div key={msg.id} className={`flex ${msg.from === "A" ? "justify-start" : "justify-end"}`}>
-                      <div className={`max-w-[80%] rounded-2xl p-2.5 ${msg.from === "A" ? "bg-primary/10 rounded-tl-sm" : "bg-secondary rounded-tr-sm"}`}>
-                        <p className="text-[10px] font-medium text-primary">{msg.from} {langOptions.find(l => l.code === msg.lang)?.flag}</p>
-                        <p className="text-sm font-medium">{msg.text}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{msg.translated}</p>
-                      </div>
+          {aiResult && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="border-primary/30">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <Badge className="bg-primary/10 text-primary border-0 rounded-full mb-2"><Sparkles className="w-3 h-3 mr-1" />AI 翻譯結果</Badge>
+                      <p className="text-lg font-semibold">{aiResult.translated}</p>
                     </div>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <Badge variant="outline" className="shrink-0 rounded-full text-xs self-center">{currentTurn} {currentLangInfo?.flag}</Badge>
-                  <Input placeholder={`${currentTurn} 輸入...`} value={inputText} onChange={e => setInputText(e.target.value)} onKeyDown={e => e.key === "Enter" && handleConvoSend()} className="rounded-xl text-sm h-9" disabled={loading} />
-                  <Button size="sm" className="rounded-xl shrink-0 h-9" onClick={handleConvoSend} disabled={loading || !inputText.trim()}>
-                    {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                  </Button>
-                </div>
-              </CardContent>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => copyText(aiResult.translated)}><Copy className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => speakText(aiResult.translated, langB)}><Volume2 className="w-3.5 h-3.5" /></Button>
+                    </div>
+                  </div>
+                  {aiResult.pronunciation && (
+                    <p className="text-sm text-muted-foreground">📖 {aiResult.pronunciation}</p>
+                  )}
+                  {aiResult.alternatives && aiResult.alternatives.length > 0 && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">替代翻譯：</p>
+                      <div className="flex flex-wrap gap-2">{aiResult.alternatives.map((a, i) => (
+                        <Badge key={i} variant="outline" className="rounded-full cursor-pointer hover:bg-accent" onClick={() => copyText(a)}>{a}</Badge>
+                      ))}</div>
+                    </div>
+                  )}
+                  {aiResult.context && (
+                    <p className="text-xs text-muted-foreground italic">💡 {aiResult.context}</p>
+                  )}
+                </CardContent>
+              </Card>
             </motion.div>
           )}
-        </AnimatePresence>
-      </Card>
 
-      {/* Travel Phrases - Inline */}
-      <div>
-        <h3 className="text-sm font-semibold mb-2 flex items-center gap-2"><BookOpen className="w-4 h-4 text-primary" />旅行常用語 → {langOptions.find(l => l.code === langB)?.flag}</h3>
-        <div className="space-y-1.5">
+          {/* History */}
+          {aiHistory.length > 0 && (
+            <div>
+              <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => setShowHistory(!showHistory)}>
+                <History className="w-4 h-4" />翻譯紀錄 ({aiHistory.length})
+                {showHistory ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
+              <AnimatePresence>
+                {showHistory && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mt-2 space-y-2 max-h-60 overflow-y-auto">
+                    {aiHistory.map((h, i) => (
+                      <div key={i} className="p-3 bg-secondary/30 rounded-xl text-sm">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                          <span>{langOptions.find(l => l.code === h.from)?.flag} → {langOptions.find(l => l.code === h.to)?.flag}</span>
+                          <span className="ml-auto">{h.time}</span>
+                        </div>
+                        <p className="text-muted-foreground">{h.source}</p>
+                        <p className="font-medium">{h.translated}</p>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Conversation Mode */}
+      {mode === "conversation" && (
+        <div>
+          <Card className="border-border/50">
+            <CardContent className="p-0">
+              <div ref={chatRef} className="h-[300px] overflow-y-auto p-4 space-y-3">
+                {messages.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">開始 AI 對話翻譯吧！<br />A 輸入文字後 AI 即時翻譯給 B</p>}
+                {messages.map(msg => (
+                  <div key={msg.id} className={`flex ${msg.from === "A" ? "justify-start" : "justify-end"}`}>
+                    <div className={`max-w-[80%] rounded-2xl p-3 ${msg.from === "A" ? "bg-primary/10 rounded-tl-sm" : "bg-secondary rounded-tr-sm"}`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-xs font-medium text-primary">{msg.from} ({langOptions.find(l => l.code === msg.lang)?.flag})</p>
+                        <Button variant="ghost" size="sm" className="rounded-full w-5 h-5 p-0 ml-auto" onClick={() => speakText(msg.text, msg.lang)}><Volume2 className="w-3 h-3" /></Button>
+                      </div>
+                      <p className="text-sm font-medium">{msg.text}</p>
+                      <div className="mt-1.5 pt-1.5 border-t border-border/30">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm flex-1">{msg.translated}</p>
+                          <Button variant="ghost" size="sm" className="rounded-full w-5 h-5 p-0" onClick={() => speakText(msg.translated, msg.from === "A" ? langB : langA)}><Volume2 className="w-3 h-3" /></Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-border/50 p-3">
+                <p className="text-xs text-muted-foreground mb-2">{currentLangInfo?.flag} {currentTurn} 的 AI 快速回覆：</p>
+                <div className="flex gap-2 flex-wrap">
+                  {qrLoading ? (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" />AI 生成中...</div>
+                  ) : (
+                    quickReplies.map((qr, i) => (
+                      <Button key={i} variant="outline" size="sm" className="rounded-full text-xs h-7" onClick={() => handleQuickReply(qr)} disabled={loading}>{qr}</Button>
+                    ))
+                  )}
+                  <Button variant="ghost" size="sm" className="rounded-full text-xs h-7" onClick={generateQuickReplies} disabled={qrLoading}><RotateCcw className="w-3 h-3" /></Button>
+                </div>
+              </div>
+
+              <div className="border-t border-border/50 p-3 flex gap-2">
+                <Badge variant="outline" className="shrink-0 rounded-full">{currentTurn}</Badge>
+                <Input placeholder={`${currentTurn} 輸入 (${currentLangInfo?.label})...`} value={inputText} onChange={e => setInputText(e.target.value)} onKeyDown={e => e.key === "Enter" && handleConvoSend()} className="rounded-xl" disabled={loading} />
+                <Button size="sm" className="rounded-xl shrink-0" onClick={handleConvoSend} disabled={loading || !inputText.trim()}>
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Button variant="outline" className="w-full rounded-xl mt-3" onClick={() => { setMessages([]); setCurrentTurn("A"); }}>
+            <RotateCcw className="w-4 h-4 mr-2" />重新開始對話
+          </Button>
+        </div>
+      )}
+
+      {/* Travel Phrases Mode */}
+      {mode === "phrases" && (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">點擊旅行用語，AI 即時翻譯成 {langOptions.find(l => l.code === langB)?.flag} {langOptions.find(l => l.code === langB)?.label}</p>
           {travelPhrases.map(cat => (
-            <Card key={cat.category} className="border-border/50 overflow-hidden">
-              <button className="w-full text-left p-3 flex items-center justify-between hover:bg-accent/30 transition-colors" onClick={() => setExpandedPhrase(expandedPhrase === cat.category ? null : cat.category)}>
-                <span className="text-sm font-medium">{cat.category}</span>
-                <Badge variant="outline" className="rounded-full text-[10px]">{cat.phrases.length}</Badge>
+            <Card key={cat.category} className="border-border/50">
+              <button className="w-full text-left p-4 flex items-center justify-between" onClick={() => setExpandedPhrase(expandedPhrase === cat.category ? null : cat.category)}>
+                <span className="font-semibold text-sm">{cat.category}</span>
+                {expandedPhrase === cat.category ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
               <AnimatePresence>
                 {expandedPhrase === cat.category && (
-                  <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} className="overflow-hidden">
-                    <div className="px-3 pb-3 grid grid-cols-2 gap-1.5">
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                    <div className="px-4 pb-4 flex flex-wrap gap-2">
                       {cat.phrases.map(p => (
-                        <button key={p} className="text-left p-2 rounded-lg bg-secondary/40 hover:bg-primary/10 transition-colors text-xs"
-                          onClick={async () => {
-                            setPhraseLoading(p);
-                            try {
-                              const result = await freeTranslate(p, "zh-TW", langB);
-                              setPhraseLoading(null);
-                              setInputText(p);
-                              setBasicResult(result);
-                              setAiResult(null);
-                              speakText(result, langB);
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                            } catch { setPhraseLoading(null); toast.error("翻譯失敗"); }
-                          }}>
-                          {phraseLoading === p ? <Loader2 className="w-3 h-3 animate-spin inline mr-1" /> : null}
-                          {p}
-                        </button>
+                        <Button key={p} variant="outline" size="sm" className="rounded-full text-xs" onClick={() => translatePhrase(p)} disabled={phraseLoading === p}>
+                          {phraseLoading === p ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}{p}
+                        </Button>
                       ))}
                     </div>
                   </motion.div>
@@ -437,27 +432,7 @@ function TranslatorTab() {
             </Card>
           ))}
         </div>
-      </div>
-
-      {/* History */}
-      {aiHistory.length > 0 && (
-        <button className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground" onClick={() => setShowHistory(!showHistory)}>
-          <History className="w-3.5 h-3.5" />翻譯紀錄 ({aiHistory.length})
-        </button>
       )}
-      <AnimatePresence>
-        {showHistory && aiHistory.length > 0 && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-1.5">
-            {aiHistory.map((h, i) => (
-              <button key={i} className="w-full text-left p-2 bg-secondary/30 rounded-lg text-xs hover:bg-secondary/50"
-                onClick={() => { setInputText(h.source); setLangA(h.from); setLangB(h.to); setBasicResult(h.translated); setAiResult(null); }}>
-                <span className="font-medium">{h.source}</span>
-                <span className="text-muted-foreground ml-2">{langOptions.find(l => l.code === h.to)?.flag} {h.translated}</span>
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
@@ -506,6 +481,7 @@ function CurrencyTab() {
         const data = await res.json();
         setLiveRates(data.rates);
         setLastUpdate(new Date().toLocaleTimeString());
+        toast.success("匯率已更新");
       } else { throw new Error(); }
     } catch {
       const varied = { ...baseRates };
@@ -796,7 +772,7 @@ function NavigationTab() {
         setLocating(false);
         toast.success("已取得當前位置");
       },
-      () => { setLocating(false); toast.error("無法取得位置，請在瀏覽器允許定位權限（網址列左邊的鎖頭圖示）"); }
+      () => { setLocating(false); toast.error("無法取得位置，請允許定位權限"); }
     );
   };
 
@@ -831,7 +807,6 @@ function NavigationTab() {
     const dr = new google.maps.DirectionsRenderer({ map, suppressMarkers: false, polylineOptions: { strokeColor: "#8B7355", strokeWeight: 5 } });
     directionsRendererRef.current = dr;
     ds.route({ origin, destination, travelMode: google.maps.TravelMode[travelMode] }, (result, status) => {
-      if (status === "REQUEST_DENIED") { setRouting(false); toast.error("Directions API 未啟用，請到 Google Cloud Console → API & Services → 啟用「Directions API」"); return; }
       setRouting(false);
       if (status === "OK" && result) {
         dr.setDirections(result);
@@ -966,50 +941,54 @@ export default function Tools() {
   const [activeTab, setActiveTab] = useState("translate");
 
   const toolTabs = [
-    { value: "translate", label: "翻譯", icon: Sparkles, color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/30", desc: "即時翻譯 · AI · 旅行用語" },
-    { value: "currency", label: "匯率", icon: DollarSign, color: "text-teal-500", bg: "bg-teal-50 dark:bg-teal-950/30", desc: "即時匯率換算" },
-    { value: "weather", label: "天氣", icon: Cloud, color: "text-cyan-500", bg: "bg-cyan-50 dark:bg-cyan-950/30", desc: "全球天氣查詢" },
-    { value: "navigation", label: "導航", icon: Navigation, color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-950/30", desc: "路線規劃導航" },
+    { value: "translate", label: "翻譯", icon: Sparkles, color: "text-violet-500" },
+    { value: "currency", label: "匯率", icon: DollarSign, color: "text-teal-500" },
+    { value: "weather", label: "天氣", icon: Cloud, color: "text-cyan-500" },
+    { value: "navigation", label: "導航", icon: Navigation, color: "text-orange-500" },
   ];
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <section className="pt-24 pb-4 bg-secondary/30">
+      <section className="pt-24 pb-8 bg-secondary/30">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>旅行工具箱</h1>
-            <p className="text-muted-foreground text-sm">翻譯、匯率、天氣、導航 — 旅途中的智慧幫手</p>
+            <p className="text-muted-foreground">AI 翻譯、匯率、天氣、導航 — 旅途中的智慧幫手</p>
           </motion.div>
-          {/* Horizontal scroll tool selector */}
-          <div className="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-none">
-            {toolTabs.map(t => {
-              const isActive = activeTab === t.value;
-              return (
-                <button key={t.value} onClick={() => setActiveTab(t.value)}
-                  className={`shrink-0 flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${
-                    isActive ? "border-primary/40 bg-primary/10 text-foreground shadow-sm" : "border-transparent bg-background/60 text-muted-foreground hover:bg-accent"
-                  }`}>
-                  <div className={`w-8 h-8 rounded-lg ${t.bg} flex items-center justify-center`}>
-                    <t.icon className={`w-4 h-4 ${t.color}`} />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-semibold text-xs">{t.label}</p>
-                    <p className="text-[10px] text-muted-foreground hidden sm:block">{t.desc}</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
         </div>
       </section>
 
-      <section className="py-6 flex-1">
+      <section className="py-8 flex-1 pb-8">
         <div className="container max-w-3xl">
-          {activeTab === "translate" && <TranslatorTab />}
-          {activeTab === "currency" && <CurrencyTab />}
-          {activeTab === "weather" && <WeatherTab />}
-          {activeTab === "navigation" && <NavigationTab />}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <div className="grid grid-cols-4 gap-3">
+              {toolTabs.map(t => {
+                const isActive = activeTab === t.value;
+                return (
+                  <button
+                    key={t.value}
+                    onClick={() => setActiveTab(t.value)}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-200 ${
+                      isActive
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border/50 bg-card hover:border-primary/30 hover:bg-accent/30"
+                    }`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isActive ? "bg-primary/10" : "bg-secondary/50"}`}>
+                      <t.icon className={`w-5 h-5 ${isActive ? t.color : "text-muted-foreground"}`} />
+                    </div>
+                    <span className={`text-xs font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{t.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <TabsContent value="translate"><TranslatorTab /></TabsContent>
+            <TabsContent value="currency"><CurrencyTab /></TabsContent>
+            <TabsContent value="weather"><WeatherTab /></TabsContent>
+            <TabsContent value="navigation"><NavigationTab /></TabsContent>
+          </Tabs>
         </div>
       </section>
 

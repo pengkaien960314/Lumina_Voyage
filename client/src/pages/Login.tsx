@@ -146,8 +146,8 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Form First */}
+          <form onSubmit={handleSubmit} className="space-y-4 mb-6">
             {isRegister && (
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium" style={{ fontFamily: "var(--font-sans)" }}>
@@ -300,7 +300,7 @@ export default function Login() {
             </span>
           </div>
 
-          {/* Social Login */}
+          {/* Social Login - moved below */}
           <div className="space-y-3 mb-6">
             <Button
               variant="outline"
@@ -370,7 +370,7 @@ export default function Login() {
             </div>
           </div>
 
-                    {/* Switch */}
+          {/* Switch */}
           <p className="text-center text-sm text-muted-foreground mt-6">
             {isRegister ? "已經有帳號了？" : "還沒有帳號？"}{" "}
             <button

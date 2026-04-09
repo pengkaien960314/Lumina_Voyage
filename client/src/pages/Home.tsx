@@ -185,7 +185,9 @@ export default function Home() {
       </section>
 
       {/* Features Section - Click to zoom fullscreen then navigate */}
-      <section className="py-20 watercolor-wash">
+      <section className="py-20 relative overflow-hidden">
+        <img src="/images/japan/blue_pond.webp" alt="" className="absolute inset-0 w-full h-full object-cover opacity-8" loading="lazy" />
+        <div className="absolute inset-0 bg-background/92 backdrop-blur-sm" />
         <div className="container relative z-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="text-center mb-14">
             <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: "var(--font-display)" }}>
@@ -237,8 +239,10 @@ export default function Home() {
       </section>
 
       {/* Featured Destinations - Flip Cards (same as Spots page) */}
-      <section className="py-20 bg-secondary/30">
-        <div className="container">
+      <section className="py-20 relative overflow-hidden">
+        <img src="/images/japan/otaru_canal.webp" alt="" className="absolute inset-0 w-full h-full object-cover opacity-6" loading="lazy" />
+        <div className="absolute inset-0 bg-background/93 backdrop-blur-sm" />
+        <div className="container relative z-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="flex items-end justify-between mb-12">
             <div>
               <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-bold mb-3" style={{ fontFamily: "var(--font-display)" }}>

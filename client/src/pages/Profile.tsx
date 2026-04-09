@@ -7,6 +7,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFriends } from "@/contexts/FriendContext";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,13 +30,13 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export default function Profile() {
-  const { user, isAuthenticated, updateName, updateAvatar, updatePhone, updateEmail, linkProvider, unlinkProvider } = useAuth();
+  const { user, isAuthenticated, updateName, updateAvatar, updatePhone, linkProvider, unlinkProvider } = useAuth();
+  const { myId, myCode } = useFriends();
   const [, navigate] = useLocation();
 
   // Profile form state
   const [formName, setFormName] = useState("");
   const [formPhone, setFormPhone] = useState("");
-  const [formEmail, setFormEmail] = useState("");
   const [formCity, setFormCity] = useState("");
   const [formBio, setFormBio] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -60,14 +61,11 @@ export default function Profile() {
     }
   }, [isAuthenticated, navigate]);
 
-  // 初始化表單（只跑一次）
-  const initialized = useRef(false);
+  // 初始化表單 — 只在 user 首次出現時填入
   useEffect(() => {
-    if (user && !initialized.current) {
-      initialized.current = true;
+    if (user && !formName) {
       setFormName(user.name);
       setFormPhone(user.phone || "");
-      setFormEmail(user.email || "");
       const extra = localStorage.getItem("lumina_profile_extra");
       if (extra) {
         try {
@@ -86,7 +84,6 @@ export default function Profile() {
     await new Promise(r => setTimeout(r, 600));
     updateName(formName);
     updatePhone(formPhone);
-    if (formEmail && formEmail !== user?.email) updateEmail(formEmail);
     // Save extra data
     localStorage.setItem("lumina_profile_extra", JSON.stringify({ city: formCity, bio: formBio }));
     setIsSaving(false);
@@ -178,7 +175,8 @@ export default function Profile() {
               <Badge variant="outline" className="rounded-full">
                 {user.provider === "google" ? "Google 帳號" : user.provider === "facebook" ? "Facebook 帳號" : user.provider === "apple" ? "Apple 帳號" : user.provider === "line" ? "LINE 帳號" : user.provider === "twitter" ? "X 帳號" : "Email 帳號"}
               </Badge>
-              {user.userId && <Badge variant="outline" className="rounded-full text-xs">ID: {user.userId}</Badge>}
+              {user.userId && <Badge variant="outline" className="rounded-full text-xs font-mono">ID: {myId}</Badge>}
+              <Badge variant="outline" className="rounded-full text-xs font-mono">邀請碼: {myCode}</Badge>
             </div>
 
             {/* Stats */}
@@ -214,7 +212,7 @@ export default function Profile() {
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" />電子郵件</Label>
-                    <Input value={formEmail} onChange={e => setFormEmail(e.target.value)} className="rounded-xl" placeholder="your@email.com" />
+                    <Input value={user.email} className="rounded-xl" disabled />
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" />電話</Label>
