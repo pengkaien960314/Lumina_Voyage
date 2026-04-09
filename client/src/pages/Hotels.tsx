@@ -54,7 +54,7 @@ interface Hotel {
 const hotels: Hotel[] = [
   {
     id: 1, name: "札幌 JR Tower 日航酒店", location: "北海道札幌市", address: "北海道札幌市中央區北5條西2丁目5番地", phone: "+81-11-251-2222", website: "https://www.jrhotels.co.jp", rating: 4.7, price: 6800, currency: "TWD",
-    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/x39aXpwEtLst_8846c9e7.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/LRUGkcBfWVtk_7ef685d3.jpg"],
+    images: ["/images/japan/mount_hakodate.webp", "/images/x39aXpwEtLst_8846c9e7.webp", "/images/LRUGkcBfWVtk_7ef685d3.jpg"],
     amenities: ["wifi", "parking", "breakfast", "gym", "restaurant"], type: "商務", rooms: 350,
     description: "直通 JR 札幌站，交通極為便利。酒店位於 JR Tower 高層，客房可俯瞰札幌市區全景。設有多間餐廳、健身中心及天然溫泉大浴場，是商務與觀光旅客的理想選擇。",
     highlights: ["直通 JR 札幌站", "高層景觀客房", "天然溫泉大浴場", "多間特色餐廳"],
@@ -65,7 +65,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 2, name: "函館 La Vista 海峽之風", location: "北海道函館市", address: "北海道函館市豐川町12-6", phone: "+81-138-23-6111", website: "https://www.hotespa.net", rating: 4.8, price: 9200, currency: "TWD",
-    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/pbWZIGqzFwb3_1cf8cb26.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/kJs3KSAvxgSG_5a6666d1.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/95POE5gU6sqd_5ef46c71.jpg"],
+    images: ["/images/pbWZIGqzFwb3_1cf8cb26.jpg", "/images/kJs3KSAvxgSG_5a6666d1.jpg", "/images/95POE5gU6sqd_5ef46c71.jpg"],
     amenities: ["wifi", "breakfast", "spa", "restaurant"], type: "溫泉旅館", rooms: 350,
     description: "位於函館灣區的人氣溫泉酒店，頂樓露天溫泉可眺望函館山和津輕海峽。以豐盛的海鮮自助早餐聞名，連續多年獲得旅客高度評價。",
     highlights: ["頂樓露天溫泉", "海鮮自助早餐", "函館灣區絕佳位置", "可眺望函館山"],
@@ -76,7 +76,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 3, name: "星野 TOMAMU 度假村", location: "北海道占冠村", address: "北海道勇拂郡占冠村中TOMAMU", phone: "+81-167-58-1111", website: "https://www.snowtomamu.jp", rating: 4.9, price: 14500, currency: "TWD",
-    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/rF49zu1jbWf6_d55a82e5.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/SSs2wBQG9ItV_30bd75ef.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/LRUGkcBfWVtk_7ef685d3.jpg"],
+    images: ["/images/rF49zu1jbWf6_d55a82e5.jpg", "/images/SSs2wBQG9ItV_30bd75ef.jpg", "/images/LRUGkcBfWVtk_7ef685d3.jpg"],
     amenities: ["wifi", "parking", "pool", "gym", "restaurant", "spa"], type: "度假村", rooms: 200,
     description: "星野集團旗下的頂級度假村，冬季是粉雪天堂，夏季則有雲海平台和微笑海灘等設施。全年提供豐富的戶外活動和自然體驗，適合家庭和情侶。",
     highlights: ["雲海平台絕景", "冬季粉雪滑雪", "日本最大室內海灘", "星野集團頂級服務"],
@@ -87,7 +87,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 4, name: "小樽朝里克拉瑟酒店", location: "北海道小樽市", address: "北海道小樽市朝里川溫泉2丁目676", phone: "+81-134-52-3800", website: "https://www.classe-hotel.com", rating: 4.6, price: 7500, currency: "TWD",
-    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/u4W9AXbKy8Dp_4a8d7b4b.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/wjGGKabeMPEH_11d64129.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hcx6bCKuu4qj_230abfb2.jpg"],
+    images: ["/images/u4W9AXbKy8Dp_4a8d7b4b.webp", "/images/wjGGKabeMPEH_11d64129.jpg", "/images/japan/otaru_canal.webp"],
     amenities: ["wifi", "parking", "spa", "restaurant"], type: "溫泉旅館", rooms: 171,
     description: "位於小樽朝里川溫泉區的度假酒店，被大自然環繞。設有天然溫泉、室內外泳池及多間餐廳。距離小樽運河車程約15分鐘，是遠離喧囂的理想住所。",
     highlights: ["天然溫泉", "被大自然環繞", "近小樽運河", "四季不同景色"],
@@ -97,7 +97,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 5, name: "洞爺湖萬世閣", location: "北海道洞爺湖町", address: "北海道虻田郡洞爺湖町洞爺湖溫泉21", phone: "+81-142-73-3500", website: "https://www.toyamanseikaku.jp", rating: 4.5, price: 8800, currency: "TWD",
-    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/YlBFWcMSsdrX_e9bb0e08.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/sjxMy1SHqrpv_20205869.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/95POE5gU6sqd_5ef46c71.jpg"],
+    images: ["/images/YlBFWcMSsdrX_e9bb0e08.webp", "/images/japan/blue_pond.webp", "/images/95POE5gU6sqd_5ef46c71.jpg"],
     amenities: ["wifi", "breakfast", "spa", "pool", "restaurant"], type: "溫泉旅館", rooms: 246,
     description: "面朝洞爺湖的大型溫泉旅館，露天溫泉可直接欣賞湖景和羊蹄山。每年4月至10月的花火大會期間，可從房間直接觀賞煙火，是北海道最受歡迎的溫泉旅館之一。",
     highlights: ["湖景露天溫泉", "花火大會觀賞", "羊蹄山絕景", "豐盛自助餐"],
@@ -108,7 +108,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 6, name: "京都嵐山翠嵐豪華精選酒店", location: "日本京都", address: "京都府京都市右京區嵯峨天龍寺芒之馬場町12", phone: "+81-75-872-0101", website: "https://www.suirankyoto.com", rating: 4.9, price: 12800, currency: "TWD",
-    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/x39aXpwEtLst_8846c9e7.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/rF49zu1jbWf6_d55a82e5.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/SSs2wBQG9ItV_30bd75ef.jpg"],
+    images: ["/images/x39aXpwEtLst_8846c9e7.webp", "/images/rF49zu1jbWf6_d55a82e5.jpg", "/images/SSs2wBQG9ItV_30bd75ef.jpg"],
     amenities: ["wifi", "parking", "spa", "restaurant"], type: "豪華", rooms: 39,
     description: "嵐山保津川畔的頂級酒店，融合日式傳統與現代奢華。每間客房都能欣賞到嵐山的自然美景，設有私人溫泉和米其林餐廳。",
     highlights: ["保津川畔絕景", "私人溫泉", "米其林餐廳", "日式奢華體驗"],
@@ -118,7 +118,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 7, name: "東京安達仕酒店", location: "日本東京", address: "東京都港區虎之門1-23-4", phone: "+81-3-6830-1234", website: "https://www.hyatt.com/andaz", rating: 4.8, price: 11500, currency: "TWD",
-    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/kJs3KSAvxgSG_5a6666d1.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/LRUGkcBfWVtk_7ef685d3.jpg"],
+    images: ["/images/japan/mount_hakodate.webp", "/images/kJs3KSAvxgSG_5a6666d1.jpg", "/images/LRUGkcBfWVtk_7ef685d3.jpg"],
     amenities: ["wifi", "gym", "spa", "restaurant", "parking"], type: "設計", rooms: 164,
     description: "位於虎之門之丘52樓的頂級設計酒店，以「在地文化體驗」為核心理念。大廳設計融入日本傳統工藝元素，客房採用自然木質色調搭配落地窗，可俯瞰東京鐵塔和東京灣全景。",
     highlights: ["52樓高空景觀", "東京鐵塔全景", "日式設計美學", "頂級健身中心"],
@@ -129,7 +129,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 8, name: "大阪瑞吉酒店", location: "日本大阪", address: "大阪府大阪市中央區本町3-6-12", phone: "+81-6-6258-3333", website: "https://www.marriott.com/stregis", rating: 4.7, price: 10200, currency: "TWD",
-    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/pbWZIGqzFwb3_1cf8cb26.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/wjGGKabeMPEH_11d64129.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hcx6bCKuu4qj_230abfb2.jpg"],
+    images: ["/images/pbWZIGqzFwb3_1cf8cb26.jpg", "/images/wjGGKabeMPEH_11d64129.jpg", "/images/japan/otaru_canal.webp"],
     amenities: ["wifi", "gym", "spa", "restaurant", "breakfast"], type: "豪華", rooms: 160,
     description: "位於大阪本町的頂級酒店，以精緻的管家服務聞名。酒店內設有多間米其林推薦餐廳，頂樓酒吧可俯瞰大阪城市天際線。距離心齋橋和道頓堀步行僅10分鐘。",
     highlights: ["專屬管家服務", "米其林推薦餐廳", "近心齋橋商圈", "頂樓景觀酒吧"],
@@ -139,7 +139,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 9, name: "沖繩海麗客蘭尼度假村", location: "日本沖繩", address: "沖繩縣國頭郡恩納村名嘉真ヤーシ原2260-36", phone: "+81-98-965-0707", website: "https://www.kahanuresort.com", rating: 4.6, price: 8500, currency: "TWD",
-    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/YlBFWcMSsdrX_e9bb0e08.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/rF49zu1jbWf6_d55a82e5.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/sjxMy1SHqrpv_20205869.jpg"],
+    images: ["/images/YlBFWcMSsdrX_e9bb0e08.webp", "/images/rF49zu1jbWf6_d55a82e5.jpg", "/images/japan/blue_pond.webp"],
     amenities: ["wifi", "pool", "spa", "restaurant", "parking"], type: "度假村", rooms: 315,
     description: "面朝東海的沖繩頂級海濱度假村，擁有私人沙灘和多個無邊際泳池。提供浮潛、潛水、獨木舟等豐富水上活動，是享受沖繩碧海藍天的理想選擇。",
     highlights: ["私人沙灘", "無邊際泳池", "豐富水上活動", "海景客房"],
@@ -150,7 +150,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 10, name: "首爾四季酒店", location: "韓國首爾", address: "首爾特別市鍾路區新門內路97", phone: "+82-2-6388-5000", website: "https://www.fourseasons.com/seoul", rating: 4.9, price: 13200, currency: "TWD",
-    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/u4W9AXbKy8Dp_4a8d7b4b.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/x39aXpwEtLst_8846c9e7.webp", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/SSs2wBQG9ItV_30bd75ef.jpg"],
+    images: ["/images/u4W9AXbKy8Dp_4a8d7b4b.webp", "/images/x39aXpwEtLst_8846c9e7.webp", "/images/SSs2wBQG9ItV_30bd75ef.jpg"],
     amenities: ["wifi", "gym", "spa", "pool", "restaurant", "breakfast"], type: "豪華", rooms: 317,
     description: "位於光化門廣場旁的頂級酒店，可俯瞰景福宮和北漢山。設有韓國最大的酒店水療中心、室內泳池及多間獲獎餐廳。距離明洞、北村韓屋村等熱門景點交通便利。",
     highlights: ["景福宮全景", "頂級水療中心", "近光化門商圈", "獲獎餐廳"],
@@ -161,7 +161,7 @@ const hotels: Hotel[] = [
   },
   {
     id: 11, name: "曼谷文華東方酒店", location: "泰國曼谷", address: "48 Oriental Avenue, Bangkok 10500", phone: "+66-2-659-9000", website: "https://www.mandarinoriental.com/bangkok", rating: 4.8, price: 7800, currency: "TWD",
-    images: ["https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/95POE5gU6sqd_5ef46c71.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg", "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/kJs3KSAvxgSG_5a6666d1.jpg"],
+    images: ["/images/95POE5gU6sqd_5ef46c71.jpg", "/images/japan/mount_hakodate.webp", "/images/kJs3KSAvxgSG_5a6666d1.jpg"],
     amenities: ["wifi", "pool", "spa", "gym", "restaurant", "breakfast"], type: "經典", rooms: 393,
     description: "昭披耶河畔的傳奇酒店，自1876年開業以來一直是亞洲最頂級的酒店之一。擁有獲獎無數的泰式水療、河畔無邊際泳池及多間世界級餐廳，是體驗曼谷奢華的首選。",
     highlights: ["百年傳奇酒店", "昭披耶河畔", "頂級泰式水療", "河畔無邊際泳池"],
@@ -209,6 +209,56 @@ const hotels: Hotel[] = [
     reviews: [
       { author: "富士山迷", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=fuji", rating: 5, text: "從房間看富士山的日出，感動到說不出話來。早餐也超棒！", date: "2026-03-20" },
       { author: "溫泉控", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=hotspring", rating: 5, text: "露天溫泉看富士山是此生最棒的溫泉體驗。", date: "2026-02-15" },
+    ],
+  },
+  {
+    id: 16, name: "巴黎半島酒店", location: "法國巴黎", address: "19 Avenue Kléber, 75116 Paris", phone: "+33-1-5812-2888", website: "https://www.peninsula.com/paris", rating: 4.9, price: 18500, currency: "TWD",
+    images: ["https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&q=80", "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80"],
+    amenities: ["wifi", "pool", "spa", "gym", "restaurant", "breakfast", "parking"], type: "奢華酒店", rooms: 200,
+    description: "位於香榭麗舍大道旁的頂級酒店，融合巴黎優雅與亞洲細膩服務。屋頂餐廳可一覽艾菲爾鐵塔和巴黎天際線，是巴黎最頂級的住宿體驗之一。",
+    highlights: ["艾菲爾鐵塔景觀", "米其林星級餐廳", "屋頂露台", "MINI Cooper接送服務"],
+    reviews: [
+      { author: "巴黎控", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=paris", rating: 5, text: "從屋頂露台看艾菲爾鐵塔夜景，此生無憾。", date: "2025-09-20" },
+    ],
+  },
+  {
+    id: 17, name: "倫敦薩伏伊酒店", location: "英國倫敦", address: "Strand, London WC2R 0EZ", phone: "+44-20-7836-4343", website: "https://www.thesavoylondon.com", rating: 4.8, price: 15200, currency: "TWD",
+    images: ["https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80", "https://images.unsplash.com/photo-1526129318478-62ed807ebdf9?w=800&q=80"],
+    amenities: ["wifi", "pool", "spa", "gym", "restaurant", "breakfast"], type: "歷史名店", rooms: 267,
+    description: "1889年開業的傳奇酒店，泰晤士河畔的英式優雅典範。曾接待無數皇室貴族與名人，美國酒吧的雞尾酒享譽全球。",
+    highlights: ["泰晤士河景觀", "美國酒吧", "130年歷史", "下午茶體驗"],
+    reviews: [
+      { author: "英倫迷", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=london2", rating: 5, text: "下午茶體驗完美詮釋英式優雅，值得每一分錢。", date: "2025-11-10" },
+    ],
+  },
+  {
+    id: 18, name: "台北W酒店", location: "台灣台北", address: "台北市信義區忠孝東路五段10號", phone: "+886-2-7703-8888", website: "https://www.marriott.com/w-taipei", rating: 4.6, price: 8200, currency: "TWD",
+    images: ["https://images.unsplash.com/photo-1470004914212-05527e49370b?w=800&q=80", "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80"],
+    amenities: ["wifi", "pool", "spa", "gym", "restaurant", "breakfast"], type: "設計酒店", rooms: 405,
+    description: "信義區時尚地標，設計前衛的潮流酒店。頂樓WET Bar擁有無邊際泳池和101大樓無敵景觀，是台北夜生活的指標場所。",
+    highlights: ["WET Bar屋頂泳池", "101大樓景觀", "紫艷中餐廳", "信義商圈步行可達"],
+    reviews: [
+      { author: "台北在地人", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=taipei", rating: 4, text: "頂樓泳池看101超震撼，房間設計也很有質感。", date: "2026-01-08" },
+    ],
+  },
+  {
+    id: 19, name: "暹粒Viroth's Hotel", location: "柬埔寨暹粒", address: "Wat Bo Road, Siem Reap", phone: "+855-63-761-720", website: "https://www.viroth-hotel.com", rating: 4.9, price: 3800, currency: "TWD",
+    images: ["https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?w=800&q=80", "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=800&q=80"],
+    amenities: ["wifi", "pool", "spa", "restaurant", "breakfast", "parking"], type: "精品酒店", rooms: 39,
+    description: "TripAdvisor 多次評選為世界最佳酒店之一的隱世精品。極簡高棉風格建築搭配無微不至的管家服務，CP值極高的奢華體驗。",
+    highlights: ["管家服務", "免費嘟嘟車接送", "無邊際泳池", "高棉料理教學"],
+    reviews: [
+      { author: "背包客升級", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=backpacker2", rating: 5, text: "CP值爆表！不到4000台幣就有五星級體驗和管家服務。", date: "2025-12-05" },
+    ],
+  },
+  {
+    id: 20, name: "紐約The Plaza Hotel", location: "美國紐約", address: "768 5th Ave, New York, NY 10019", phone: "+1-212-759-3000", website: "https://www.theplazany.com", rating: 4.8, price: 21000, currency: "TWD",
+    images: ["https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80", "https://images.unsplash.com/photo-1534430480587-fd5c893fa92d?w=800&q=80"],
+    amenities: ["wifi", "spa", "gym", "restaurant", "breakfast"], type: "歷史名店", rooms: 282,
+    description: "矗立於中央公園南端的傳奇酒店，1907年開業以來一直是紐約最具代表性的地標酒店。《乘著破爛奶奶去紐約》和無數好萊塢電影的取景地。",
+    highlights: ["中央公園景觀", "The Palm Court下午茶", "120年歷史", "第五大道步行可達"],
+    reviews: [
+      { author: "NYC粉", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=nyc", rating: 5, text: "住在小說和電影裡的酒店，太夢幻了！中央公園就在門口。", date: "2025-08-18" },
     ],
   },
 ];

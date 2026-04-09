@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { GOOGLE_CLIENT_ID, FACEBOOK_APP_ID } from "@/config";
 
 export interface LinkedProvider {
   provider: "google" | "facebook" | "apple" | "line" | "twitter";
@@ -39,6 +40,40 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// 解碼 Google JWT token 取得使用者資訊
+function decodeJwt(token: string) {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(window.atob(base64));
+  } catch {
+    return null;
+  }
+}
+
+// 初始化 Facebook SDK
+function initFacebookSdk(): Promise<void> {
+  return new Promise((resolve) => {
+    if ((window as any).FB) {
+      resolve();
+      return;
+    }
+    (window as any).fbAsyncInit = () => {
+      (window as any).FB.init({
+        appId: FACEBOOK_APP_ID,
+        cookie: true,
+        xfbml: false,
+        version: "v19.0",
+      });
+      resolve();
+    };
+    // 如果 SDK 已經載入但 fbAsyncInit 還沒被呼叫
+    if (document.getElementById("facebook-jssdk")) {
+      resolve();
+    }
+  });
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,6 +87,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(parsed);
     }
     setIsLoading(false);
+
+    // 初始化 FB SDK
+    initFacebookSdk().catch(() => {});
   }, []);
 
   const persist = useCallback((u: User) => {
@@ -78,20 +116,82 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
   };
 
+  // ===== 真正的 Google 登入 =====
   const loginWithGoogle = async () => {
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    persist(createUser({ id: "g1", name: "Google 使用者", email: "user@gmail.com", provider: "google", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=google", linkedProviders: [{ provider: "google", email: "user@gmail.com", linkedAt: new Date().toISOString() }] }));
-    setIsLoading(false);
+    try {
+      const google = (window as any).google;
+      if (!google?.accounts?.oauth2) {
+        throw new Error("Google SDK 尚未載入");
+      }
+
+      const tokenResponse = await new Promise<any>((resolve, reject) => {
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: "openid email profile",
+          callback: (resp: any) => {
+            if (resp.error) reject(new Error(resp.error));
+            else resolve(resp);
+          },
+        });
+        client.requestAccessToken();
+      });
+
+      // 用 access token 取得使用者資訊
+      const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+      });
+      const profile = await res.json();
+
+      persist(createUser({
+        id: `g_${profile.sub}`,
+        name: profile.name || profile.email,
+        email: profile.email,
+        provider: "google",
+        avatar: profile.picture || undefined,
+        linkedProviders: [{ provider: "google", email: profile.email, linkedAt: new Date().toISOString() }],
+      }));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // ===== 真正的 Facebook 登入 =====
   const loginWithFacebook = async () => {
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    persist(createUser({ id: "f1", name: "Facebook 使用者", email: "user@facebook.com", provider: "facebook", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=facebook", linkedProviders: [{ provider: "facebook", email: "user@facebook.com", linkedAt: new Date().toISOString() }] }));
-    setIsLoading(false);
+    try {
+      await initFacebookSdk();
+      const FB = (window as any).FB;
+      if (!FB) throw new Error("Facebook SDK 尚未載入");
+
+      const authResponse = await new Promise<any>((resolve, reject) => {
+        FB.login((response: any) => {
+          if (response.authResponse) resolve(response.authResponse);
+          else reject(new Error("Facebook 登入被取消"));
+        }, { scope: "public_profile,email" });
+      });
+
+      const profile = await new Promise<any>((resolve, reject) => {
+        FB.api("/me", { fields: "id,name,email,picture.width(200)" }, (response: any) => {
+          if (response.error) reject(new Error(response.error.message));
+          else resolve(response);
+        });
+      });
+
+      persist(createUser({
+        id: `f_${profile.id}`,
+        name: profile.name,
+        email: profile.email || `${profile.id}@facebook.com`,
+        provider: "facebook",
+        avatar: profile.picture?.data?.url || undefined,
+        linkedProviders: [{ provider: "facebook", email: profile.email, linkedAt: new Date().toISOString() }],
+      }));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Apple / LINE / Twitter 保持模擬（需要後端才能實作完整 OAuth）
   const loginWithApple = async () => {
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 800));

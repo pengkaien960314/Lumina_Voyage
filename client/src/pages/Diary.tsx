@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BookOpen, Plus, MapPin, Calendar, Heart, MessageCircle, ImagePlus, Globe, Users, Star, Send, ChevronDown, ChevronUp, Clock, Archive } from "lucide-react";
+import { BookOpen, Plus, MapPin, Calendar, Heart, MessageCircle, ImagePlus, Globe, Users, Star, Send, ChevronDown, ChevronUp, Clock, Archive, Bookmark } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
@@ -67,21 +67,21 @@ const sampleEntries: DiaryEntry[] = [
   {
     id: "1", title: "京都的秋日私語", date: "2025-11-15", location: "日本京都",
     content: "走在嵐山竹林的小徑上，陽光透過竹葉灑下斑駁的光影。秋天的京都，楓葉如火般燃燒，每一步都是一幅畫。在清水寺的舞台上遠眺整座城市，紅葉與古寺交織成最動人的風景。傍晚時分，走進祇園的石板路，偶遇一位身著和服的藝妓，那一刻彷彿穿越了時空。",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/spot-kyoto-VxfUvqn5Qab4pRbZXHFPXx.webp",
+    image: "/images/spot-kyoto-VxfUvqn5Qab4pRbZXHFPXx.webp",
     likes: 42, liked: false, mood: "🍁", visibility: "public", comments: mockComments[0],
     author: "旅行者小林", authorAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=kobayashi",
   },
   {
     id: "2", title: "愛琴海的藍與白", date: "2025-09-20", location: "希臘聖托里尼",
     content: "聖托里尼的日落是我見過最美的。站在伊亞小鎮的懸崖邊，看著太陽緩緩沉入愛琴海，整片天空被染成了金色和粉紅色。白色的房屋在夕陽下閃耀著溫暖的光芒，藍色的穹頂與大海融為一體。這裡的每一個角落都是明信片般的風景。",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/spot-santorini-XZm7tE8W65MFkrA8cQULBz.webp",
+    image: "/images/spot-santorini-XZm7tE8W65MFkrA8cQULBz.webp",
     likes: 67, liked: true, mood: "🌅", visibility: "friends", comments: mockComments[1],
     author: "攝影師小陳", authorAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=chen",
   },
   {
     id: "3", title: "峇里島的晨間冥想", date: "2025-08-05", location: "印尼峇里島",
     content: "清晨五點，在烏布的梯田邊做瑜伽。晨霧繚繞在翠綠的稻田之間，遠處傳來寺廟的鐘聲。這是一種前所未有的寧靜，讓人忘記了所有的煩惱。午後，在叢林中的無邊際泳池裡，聽著蟬鳴和鳥叫，感受與大自然融為一體的美好。",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/spot-bali-BsoH2DrzKRxcnT4gKhZpEX.webp",
+    image: "/images/spot-bali-BsoH2DrzKRxcnT4gKhZpEX.webp",
     likes: 53, liked: false, mood: "🧘", visibility: "bestFriends", comments: mockComments[2],
     author: "花草控小美", authorAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=mei",
   },
@@ -143,6 +143,19 @@ export default function Diary() {
   const [newImage, setNewImage] = useState("");
   const [newVisibility, setNewVisibility] = useState<"public" | "friends" | "bestFriends">("public");
   const [activeTab, setActiveTab] = useState<"current" | "history">("current");
+  const [bookmarked, setBookmarked] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem("lumina_diary_bookmarks") || "[]"); } catch { return []; }
+  });
+
+  const toggleBookmark = (id: string) => {
+    setBookmarked(prev => {
+      const next = prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id];
+      localStorage.setItem("lumina_diary_bookmarks", JSON.stringify(next));
+      if (next.includes(id)) toast.success("已收藏此日記");
+      else toast.info("已取消收藏");
+      return next;
+    });
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -168,7 +181,7 @@ export default function Diary() {
   const addComment = (diaryId: string) => {
     const text = commentInputs[diaryId]?.trim();
     if (!text) return;
-    const newComment: Comment = { id: `c${Date.now()}`, author: "我", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=me", text, date: new Date().toISOString().split("T")[0] };
+    const newComment: Comment = { id: `c${Date.now()}`, author: user?.name || "我", avatar: user?.avatar || "https://api.dicebear.com/7.x/adventurer/svg?seed=me", text, date: new Date().toISOString().split("T")[0] };
     setEntries((prev) => prev.map((d) => d.id === diaryId ? { ...d, comments: [...d.comments, newComment] } : d));
     setCommentInputs((prev) => ({ ...prev, [diaryId]: "" }));
     toast.success("留言已發送");
@@ -296,13 +309,23 @@ export default function Diary() {
                   {user ? `${user.name} 的旅行回憶` : "過往旅行回憶"}
                 </h2>
               </div>
+              {(() => {
+                const userId = user?.id;
+                const count = userId ? entries.filter(e => (e as any).userId === userId).length : 0;
+                return count === 0 ? (
+                  <div className="text-center py-16 text-muted-foreground">
+                    <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="font-medium">還沒有寫過日記</p>
+                    <p className="text-sm mt-1">點擊右上角「寫日記」開始記錄你的旅行吧！</p>
+                  </div>
+                ) : null;
+              })()}
             </div>
           )}
           <div className="space-y-6">
             {(activeTab === "current" ? entries : (() => {
               const userId = user?.id;
-              const userPublished = userId ? entries.filter(e => (e as any).userId === userId) : [];
-              return [...userPublished, ...historyEntries];
+              return userId ? entries.filter(e => (e as any).userId === userId) : [];
             })()).map((entry, i) => (
               <motion.div key={entry.id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: i * 0.1 }}>
                 <Card className="overflow-hidden organic-card border-border/50">
@@ -349,6 +372,11 @@ export default function Diary() {
                       <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors" onClick={() => toggleComments(entry.id)}>
                         <MessageCircle className="w-5 h-5" />
                         <span className="text-sm font-medium">{entry.comments.length}</span>
+                      </button>
+                      <button className="flex items-center gap-2 ml-auto group" onClick={() => toggleBookmark(entry.id)}>
+                        <motion.div whileTap={{ scale: 1.3 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
+                          <Bookmark className={`w-5 h-5 transition-all duration-300 ${bookmarked.includes(entry.id) ? "fill-primary text-primary" : "text-muted-foreground group-hover:text-primary"}`} />
+                        </motion.div>
                       </button>
                     </div>
 

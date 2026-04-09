@@ -14,10 +14,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plane, ArrowRight, Clock, Search, ArrowLeftRight, Minus, Plus, X, Check, Users } from "lucide-react";
+import { Plane, ArrowRight, Clock, Search, ArrowLeftRight, Minus, Plus, X, Check, Users, Loader2, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useBooking } from "@/contexts/BookingContext";
+import { GEMINI_API_KEY } from "@/config";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -52,26 +53,60 @@ interface FlightResult {
   stops: number; cabinClass: string;
 }
 
-const generateFlights = (from: string, to: string, cabin: string): FlightResult[] => {
-  const times = ["06:30", "08:15", "10:00", "12:30", "14:45", "16:20", "18:00", "20:30"];
-  const cabinMultiplier = cabin === "first" ? 4.2 : cabin === "business" ? 2.5 : 1;
+const generateFlights = async (from: string, to: string, cabin: string, date: string): Promise<FlightResult[]> => {
+  const fromName = popularCities.find(c => c.code === from)?.name || from;
+  const toName = popularCities.find(c => c.code === to)?.name || to;
   const cabinLabel = cabin === "first" ? "頭等艙" : cabin === "business" ? "商務艙" : "經濟艙";
-  return airlines.slice(0, 6).map((al, i) => {
-    const dept = times[i % times.length];
-    const dh = parseInt(dept.split(":")[0]);
-    const dm = parseInt(dept.split(":")[1]);
-    const dur = 2 + Math.floor(Math.random() * 4);
-    const ah = (dh + dur) % 24;
-    const am = (dm + Math.floor(Math.random() * 50)) % 60;
-    const basePrice = 3000 + Math.floor(Math.random() * 15000);
-    return {
-      id: i + 1, airline: al, flightCode: `${al.code}-${100 + Math.floor(Math.random() * 900)}`,
-      from, to, departTime: dept, arriveTime: `${String(ah).padStart(2, "0")}:${String(am).padStart(2, "0")}`,
-      duration: `${dur}h ${Math.floor(Math.random() * 50 + 5)}m`,
-      price: Math.round(basePrice * cabinMultiplier), stops: i === 4 ? 1 : 0,
-      cabinClass: cabinLabel,
-    };
-  });
+
+  const prompt = `你是航班資料庫。請提供從 ${fromName}(${from}) 飛往 ${toName}(${to}) 在 ${date} 的真實航班資訊。
+要求：
+- 提供 6-8 個航班，使用真實存在的航班（中華航空CI、長榮航空BR、日本航空JL、全日空NH、國泰航空CX、星宇航空JX、台灣虎航IT、樂桃航空MM、酷航TR、亞航AK 等實際飛此航線的航空公司）
+- 只列出「真正有飛這條航線」的航空公司
+- 航班編號用真實格式（例如 CI-100）
+- 時間用 24h 格式
+- 價格用新台幣，${cabinLabel}的合理價格
+- duration 用 "Xh Ym" 格式
+- stops: 0=直飛, 1=轉機一次
+
+只回覆 JSON 陣列（不要 markdown 標記）：
+[{"airline":"航空公司名","code":"XX","flightCode":"XX-123","departTime":"08:30","arriveTime":"12:45","duration":"3h 15m","price":8500,"stops":0}]`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.4, maxOutputTokens: 2048 },
+        }),
+      }
+    );
+    const data = await res.json();
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    let jsonStr = raw;
+    const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (m) jsonStr = m[1];
+    const bs = jsonStr.indexOf("[");
+    const be = jsonStr.lastIndexOf("]");
+    if (bs !== -1 && be !== -1) jsonStr = jsonStr.substring(bs, be + 1);
+    const parsed = JSON.parse(jsonStr);
+
+    return parsed.map((f: any, i: number) => {
+      const airlineInfo = airlines.find(a => a.code === f.code) || {
+        name: f.airline, code: f.code, color: "#555555", abbr: f.code,
+      };
+      return {
+        id: i + 1, airline: airlineInfo, flightCode: f.flightCode,
+        from, to, departTime: f.departTime, arriveTime: f.arriveTime,
+        duration: f.duration, price: f.price, stops: f.stops || 0,
+        cabinClass: cabinLabel,
+      };
+    });
+  } catch {
+    return [];
+  }
 };
 
 type TripType = "oneway" | "roundtrip" | "multicity";
@@ -101,12 +136,44 @@ export default function Flights() {
 
   const paxCount = customPassengers ? parseInt(customPassengers) || passengers : passengers;
 
-  const handleSearch = () => {
+  const [searching, setSearching] = useState(false);
+
+  const handleSearch = async () => {
     const f = tripType === "multicity" ? multiCities[0].from : fromCity;
     const t = tripType === "multicity" ? multiCities[0].to : toCity;
-    setFlights(generateFlights(f, t, cabinClass));
+    setSearching(true);
+    setSearched(false);
+    try {
+      const results = await generateFlights(f, t, cabinClass, departDate);
+      if (results.length === 0) {
+        toast.error("查無航班，請嘗試其他日期或目的地");
+      } else {
+        setFlights(results);
+        toast.success(`找到 ${results.length} 個航班`);
+      }
+    } catch {
+      toast.error("搜尋失敗，請重試");
+    }
     setSearched(true);
-    toast.success("已找到最佳航班");
+    setSearching(false);
+  };
+
+  const openGoogleFlights = () => {
+    const from = tripType === "multicity" ? multiCities[0].from : fromCity;
+    const to = tripType === "multicity" ? multiCities[0].to : toCity;
+    const cabin = cabinClass === "first" ? "1" : cabinClass === "business" ? "2" : "3";
+    const url = `https://www.google.com/travel/flights?q=Flights+from+${from}+to+${to}+on+${departDate}${tripType === "roundtrip" ? `+returning+${returnDate}` : ""}&curr=TWD&tfs=CAEQAg&seat=${cabin}&px=${paxCount}`;
+    window.open(url, "_blank");
+  };
+
+  const openSkyscanner = () => {
+    const from = tripType === "multicity" ? multiCities[0].from : fromCity;
+    const to = tripType === "multicity" ? multiCities[0].to : toCity;
+    const dept = departDate.replace(/-/g, "").slice(2);
+    const ret = tripType === "roundtrip" ? returnDate.replace(/-/g, "").slice(2) : "";
+    const cabin = cabinClass === "first" ? "first" : cabinClass === "business" ? "business" : "economy";
+    const url = `https://www.skyscanner.com.tw/transport/flights/${from.toLowerCase()}/${to.toLowerCase()}/${dept}/${ret}?adults=${paxCount}&cabinclass=${cabin}`;
+    window.open(url, "_blank");
   };
 
   const sorted = [...flights].sort((a, b) => {
@@ -210,7 +277,7 @@ export default function Flights() {
                     )}
                     <div className="space-y-2">
                       <Label className="text-sm opacity-0 hidden lg:block">搜尋</Label>
-                      <Button className="w-full h-11 rounded-xl gap-2" onClick={handleSearch}><Search className="w-4 h-4" />搜尋</Button>
+                      <Button className="w-full h-11 rounded-xl gap-2" onClick={handleSearch} disabled={searching}>{searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}{searching ? "搜尋中..." : "搜尋"}</Button>
                     </div>
                   </div>
                 ) : (
@@ -242,7 +309,7 @@ export default function Flights() {
                     ))}
                     <div className="flex gap-3">
                       <Button variant="outline" size="sm" className="rounded-xl gap-1" onClick={() => setMultiCities([...multiCities, { from: multiCities[multiCities.length - 1].to, to: "TPE", date: "2026-05-10" }])}><Plus className="w-3 h-3" />新增航段</Button>
-                      <Button className="rounded-xl gap-2 flex-1" onClick={handleSearch}><Search className="w-4 h-4" />搜尋</Button>
+                      <Button className="rounded-xl gap-2 flex-1" onClick={handleSearch} disabled={searching}>{searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}{searching ? "搜尋中..." : "搜尋"}</Button>
                     </div>
                   </div>
                 )}
@@ -279,16 +346,24 @@ export default function Flights() {
       {searched && (
         <section className="py-8 flex-1">
           <div className="container max-w-4xl">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
               <p className="text-sm text-muted-foreground">找到 <span className="font-semibold text-foreground">{sorted.length}</span> 個航班</p>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-40 rounded-xl"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="price">價格最低</SelectItem>
-                  <SelectItem value="duration">飛行最短</SelectItem>
-                  <SelectItem value="time">最早出發</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs" onClick={openGoogleFlights}>
+                  <Plane className="w-3.5 h-3.5" />Google Flights
+                </Button>
+                <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs" onClick={openSkyscanner}>
+                  <Search className="w-3.5 h-3.5" />Skyscanner
+                </Button>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-36 rounded-xl h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="price">價格最低</SelectItem>
+                    <SelectItem value="duration">飛行最短</SelectItem>
+                    <SelectItem value="time">最早出發</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-4">

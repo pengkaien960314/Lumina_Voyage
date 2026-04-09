@@ -26,7 +26,7 @@ import { MapView } from "@/components/Map";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const GEMINI_API_KEY = "AIzaSyB_tEx6ILOy6U7NOwtYmclHwLWqNXyRQmQ";
+import { GEMINI_API_KEY } from "@/config";
 
 /* ==================== AI TRANSLATION TAB ==================== */
 interface ChatMessage {
@@ -69,20 +69,34 @@ const travelPhrases = [
 ];
 
 const callGemini = async (prompt: string): Promise<string> => {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
-      }),
+  if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("YOUR_")) {
+    throw new Error("請先在 config.ts 設定 Gemini API Key（到 https://aistudio.google.com/apikey 免費申請）");
+  }
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
+        }),
+      }
+    );
+    if (response.status === 403) throw new Error("API Key 無效或未啟用 Generative Language API。請到 Google Cloud Console → API & Services → 啟用「Generative Language API」");
+    if (response.status === 429) throw new Error("API 呼叫次數超過限制，請稍後再試");
+    if (!response.ok) throw new Error(`API 錯誤 ${response.status}：${response.statusText}`);
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error("AI 未回傳內容，請重試");
+    return text;
+  } catch (err: any) {
+    if (err.message?.includes("Failed to fetch") || err.message?.includes("NetworkError")) {
+      throw new Error("網路連線失敗，請確認你的網路連線正常，或檢查是否有 VPN/防火牆阻擋 API 請求");
     }
-  );
-  if (!response.ok) throw new Error(`API 錯誤: ${response.status}`);
-  const data = await response.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    throw err;
+  }
 };
 
 function TranslatorTab() {
@@ -130,8 +144,8 @@ function TranslatorTab() {
       setAiResult(parsed);
       setAiHistory(prev => [{ source: inputText, translated: parsed.translated, from: langA, to: langB, time: new Date().toLocaleTimeString() }, ...prev].slice(0, 20));
       toast.success("翻譯完成");
-    } catch {
-      toast.error("翻譯失敗，請重試");
+    } catch (err: any) {
+      toast.error(err.message || "翻譯失敗，請重試");
     }
     setLoading(false);
   };
@@ -150,8 +164,8 @@ function TranslatorTab() {
       setMessages(prev => [...prev, { id: `m${Date.now()}`, from: currentTurn, text: inputText, translated: translated.trim(), lang: fromLang }]);
       setCurrentTurn(currentTurn === "A" ? "B" : "A");
       setInputText("");
-    } catch {
-      toast.error("翻譯失敗");
+    } catch (err: any) {
+      toast.error(err.message || "翻譯失敗");
     }
     setLoading(false);
   };
@@ -168,8 +182,8 @@ function TranslatorTab() {
       const translated = await callGemini(prompt);
       setMessages(prev => [...prev, { id: `m${Date.now()}`, from: currentTurn, text: original, translated: translated.trim(), lang: fromLang }]);
       setCurrentTurn(currentTurn === "A" ? "B" : "A");
-    } catch {
-      toast.error("翻譯失敗");
+    } catch (err: any) {
+      toast.error(err.message || "翻譯失敗");
     }
     setLoading(false);
   };
@@ -765,7 +779,7 @@ function NavigationTab() {
         setLocating(false);
         toast.success("已取得當前位置");
       },
-      () => { setLocating(false); toast.error("無法取得位置，請允許定位權限"); }
+      () => { setLocating(false); toast.error("無法取得位置，請在瀏覽器允許定位權限（網址列左邊的鎖頭圖示）"); }
     );
   };
 
@@ -800,6 +814,7 @@ function NavigationTab() {
     const dr = new google.maps.DirectionsRenderer({ map, suppressMarkers: false, polylineOptions: { strokeColor: "#8B7355", strokeWeight: 5 } });
     directionsRendererRef.current = dr;
     ds.route({ origin, destination, travelMode: google.maps.TravelMode[travelMode] }, (result, status) => {
+      if (status === "REQUEST_DENIED") { setRouting(false); toast.error("Directions API 未啟用，請到 Google Cloud Console → API & Services → 啟用「Directions API」"); return; }
       setRouting(false);
       if (status === "OK" && result) {
         dr.setDirections(result);

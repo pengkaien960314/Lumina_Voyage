@@ -52,23 +52,30 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const avatarFileRef = useRef<HTMLInputElement>(null);
 
+  // 只在登入狀態變化時檢查，避免 user 更新時重置表單
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
-      return;
     }
-    if (user) {
+  }, [isAuthenticated, navigate]);
+
+  // 初始化表單（只跑一次）
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (user && !initialized.current) {
+      initialized.current = true;
       setFormName(user.name);
       setFormPhone(user.phone || "");
-      // Load extra profile data from localStorage
       const extra = localStorage.getItem("lumina_profile_extra");
       if (extra) {
-        const parsed = JSON.parse(extra);
-        setFormCity(parsed.city || "");
-        setFormBio(parsed.bio || "");
+        try {
+          const parsed = JSON.parse(extra);
+          setFormCity(parsed.city || "");
+          setFormBio(parsed.bio || "");
+        } catch { /* ignore */ }
       }
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [user]);
 
   if (!user) return null;
 
@@ -294,23 +301,47 @@ export default function Profile() {
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-4" style={{ fontFamily: "var(--font-display)" }}>近期活動</h3>
                 <div className="space-y-4">
-                  {[
-                    { icon: BookOpen, text: "發布了日記「京都的秋日私語」", time: "2 天前", color: "text-emerald-500" },
-                    { icon: Heart, text: "收藏了「聖托里尼・伊亞小鎮」", time: "3 天前", color: "text-red-500" },
-                    { icon: MapPin, text: "規劃了「東京五日遊」行程", time: "5 天前", color: "text-blue-500" },
-                    { icon: Calendar, text: "預訂了「京都嵐山翠嵐酒店」", time: "1 週前", color: "text-amber-500" },
-                  ].map((activity, i) => {
-                    const Icon = activity.icon;
-                    return (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent/50 transition-colors">
-                        <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center"><Icon className={`w-4 h-4 ${activity.color}`} /></div>
-                        <div className="flex-1">
-                          <p className="text-sm">{activity.text}</p>
-                          <p className="text-xs text-muted-foreground">{activity.time}</p>
+                  {(() => {
+                    const activities: { icon: any; text: string; time: string; color: string }[] = [];
+                    // 讀取日記
+                    try {
+                      const diaries = localStorage.getItem(`wanderlust_user_diaries_${user.id}`);
+                      if (diaries) {
+                        const parsed = JSON.parse(diaries);
+                        parsed.slice(0, 3).forEach((d: any) => {
+                          activities.push({ icon: BookOpen, text: `發布了日記「${d.title}」`, time: d.date, color: "text-emerald-500" });
+                        });
+                      }
+                    } catch { /* ignore */ }
+                    // 讀取儲存行程
+                    try {
+                      const trips = localStorage.getItem("lumina_saved_trips");
+                      if (trips) {
+                        const parsed = JSON.parse(trips);
+                        parsed.slice(0, 3).forEach((t: any) => {
+                          activities.push({ icon: MapPin, text: `儲存了行程「${t.name}」`, time: t.createdAt?.split("T")[0] || "", color: "text-blue-500" });
+                        });
+                      }
+                    } catch { /* ignore */ }
+                    // 排序並取前 5 筆
+                    activities.sort((a, b) => b.time.localeCompare(a.time));
+                    const display = activities.slice(0, 5);
+                    if (display.length === 0) {
+                      return <p className="text-sm text-muted-foreground text-center py-4">尚無近期活動，開始寫日記或規劃行程吧！</p>;
+                    }
+                    return display.map((activity, i) => {
+                      const Icon = activity.icon;
+                      return (
+                        <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent/50 transition-colors">
+                          <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center"><Icon className={`w-4 h-4 ${activity.color}`} /></div>
+                          <div className="flex-1">
+                            <p className="text-sm">{activity.text}</p>
+                            <p className="text-xs text-muted-foreground">{activity.time}</p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    });
+                  })()}
                 </div>
               </CardContent>
             </Card>

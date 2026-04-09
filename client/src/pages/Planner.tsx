@@ -30,12 +30,14 @@ import { toast } from "sonner";
 import { useBooking } from "@/contexts/BookingContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PlacesAutocomplete from "@/components/PlacesAutocomplete";
 
-const GEMINI_API_KEY = "AIzaSyB_tEx6ILOy6U7NOwtYmclHwLWqNXyRQmQ";
+import { GEMINI_API_KEY } from "@/config";
 
 interface Activity {
   id: string;
   time: string;
+  duration?: number; // 停留分鐘數
   title: string;
   location: string;
   type: string;
@@ -172,6 +174,7 @@ export default function Planner() {
     const activity: Activity = {
       id: `a${Date.now()}`, time: newActivity.time || "12:00", title: newActivity.title || "",
       location: newActivity.location || "", type: newActivity.type || "sightseeing",
+      duration: newActivity.duration || undefined,
       notes: newActivity.notes || "", image: newActivity.image || "",
     };
     setDays(prev => prev.map(d => d.id === dayId ? { ...d, activities: [...d.activities, activity].sort((a, b) => a.time.localeCompare(b.time)) } : d));
@@ -277,15 +280,27 @@ export default function Planner() {
     return colors[type] || "bg-gray-100 text-gray-700";
   };
 
-  // Save current trip to history
+  // Save current trip to history (same name → update)
   const saveCurrentTrip = () => {
-    const trip: SavedTrip = {
-      id: `trip_${Date.now()}`, name: tripName, startDate, days,
-      createdAt: new Date().toISOString(), isAiGenerated: false,
-    };
-    const updated = [trip, ...savedTrips].slice(0, 50);
-    saveTripsToStorage(updated);
-    toast.success("行程已儲存到歷史紀錄");
+    const existingIndex = savedTrips.findIndex(t => t.name === tripName);
+    if (existingIndex !== -1) {
+      const updated = [...savedTrips];
+      updated[existingIndex] = {
+        ...updated[existingIndex],
+        startDate, days,
+        createdAt: new Date().toISOString(),
+      };
+      saveTripsToStorage(updated);
+      toast.success("行程已更新！");
+    } else {
+      const trip: SavedTrip = {
+        id: `trip_${Date.now()}`, name: tripName, startDate, days,
+        createdAt: new Date().toISOString(), isAiGenerated: false,
+      };
+      const updated = [trip, ...savedTrips].slice(0, 50);
+      saveTripsToStorage(updated);
+      toast.success("行程已儲存到歷史紀錄");
+    }
   };
 
   // Load trip from history
@@ -508,6 +523,7 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
                                               </div>
                                               <h4 className="font-semibold text-sm">{act.title}</h4>
                                               {act.location && <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1"><MapPin className="w-3 h-3" />{act.location}</div>}
+                                              {act.duration && <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5"><Clock className="w-3 h-3" />停留 {act.duration >= 60 ? `${Math.floor(act.duration / 60)}h${act.duration % 60 > 0 ? ` ${act.duration % 60}m` : ""}` : `${act.duration}m`}</div>}
                                               {act.notes && <p className="text-xs text-muted-foreground mt-2 italic">{act.notes}</p>}
                                               {act.image && <img src={act.image} alt="" className="mt-2 rounded-lg w-full h-24 object-cover" />}
                                             </div>
@@ -527,7 +543,10 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
                                   <DialogContent>
                                     <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>新增活動</DialogTitle></DialogHeader>
                                     <div className="space-y-4 mt-4">
-                                      <div className="space-y-2"><Label>時間</Label><Input type="time" value={newActivity.time || ""} onChange={e => setNewActivity({ ...newActivity, time: e.target.value })} /></div>
+                                      <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-2"><Label>時間</Label><Input type="time" value={newActivity.time || ""} onChange={e => setNewActivity({ ...newActivity, time: e.target.value })} /></div>
+                                        <div className="space-y-2"><Label>停留（分鐘）</Label><Input type="number" min="0" step="15" placeholder="60" value={newActivity.duration || ""} onChange={e => setNewActivity({ ...newActivity, duration: parseInt(e.target.value) || undefined })} /></div>
+                                      </div>
                                       <div className="space-y-2">
                                         <Label>類型</Label>
                                         <Select value={newActivity.type || "sightseeing"} onValueChange={v => setNewActivity({ ...newActivity, type: v })}>
@@ -536,7 +555,7 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
                                         </Select>
                                       </div>
                                       <div className="space-y-2"><Label>活動名稱</Label><Input placeholder="例：參觀東京鐵塔" value={newActivity.title || ""} onChange={e => setNewActivity({ ...newActivity, title: e.target.value })} /></div>
-                                      <div className="space-y-2"><Label>地點</Label><Input placeholder="例：東京都港區" value={newActivity.location || ""} onChange={e => setNewActivity({ ...newActivity, location: e.target.value })} /></div>
+                                      <div className="space-y-2"><Label>地點</Label><PlacesAutocomplete placeholder="例：東京都港區" value={newActivity.location || ""} onChange={v => setNewActivity({ ...newActivity, location: v })} /></div>
                                       <div className="space-y-2">
                                         <Label>圖片</Label>
                                         <div className="flex gap-2">
@@ -740,7 +759,10 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
           <DialogHeader><DialogTitle style={{ fontFamily: "var(--font-display)" }}>編輯活動</DialogTitle></DialogHeader>
           {editingAct && (
             <div className="space-y-4 mt-2">
-              <div className="space-y-2"><Label>時間</Label><Input type="time" value={editForm.time || ""} onChange={e => setEditForm({ ...editForm, time: e.target.value })} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2"><Label>時間</Label><Input type="time" value={editForm.time || ""} onChange={e => setEditForm({ ...editForm, time: e.target.value })} /></div>
+                <div className="space-y-2"><Label>停留（分鐘）</Label><Input type="number" min="0" step="15" placeholder="60" value={editForm.duration || ""} onChange={e => setEditForm({ ...editForm, duration: parseInt(e.target.value) || undefined })} /></div>
+              </div>
               <div className="space-y-2">
                 <Label>類型</Label>
                 <Select value={editForm.type || "sightseeing"} onValueChange={v => setEditForm({ ...editForm, type: v })}>
@@ -749,7 +771,7 @@ type 只能是：sightseeing, food, hotel, transport, cafe, shopping, entertainm
                 </Select>
               </div>
               <div className="space-y-2"><Label>活動名稱</Label><Input value={editForm.title || ""} onChange={e => setEditForm({ ...editForm, title: e.target.value })} /></div>
-              <div className="space-y-2"><Label>地點</Label><Input value={editForm.location || ""} onChange={e => setEditForm({ ...editForm, location: e.target.value })} /></div>
+              <div className="space-y-2"><Label>地點</Label><PlacesAutocomplete value={editForm.location || ""} onChange={v => setEditForm({ ...editForm, location: v })} /></div>
               <div className="space-y-2">
                 <Label>圖片</Label>
                 <div className="flex gap-2">

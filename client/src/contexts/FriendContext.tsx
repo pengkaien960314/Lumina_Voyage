@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 export interface Friend {
   id: string;
@@ -34,19 +34,10 @@ interface FriendContextType {
 
 const FriendContext = createContext<FriendContextType | undefined>(undefined);
 
-const sampleFriends: Friend[] = [
-  { id: "f1", name: "小明", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=ming", status: "friend", addedAt: "2026-03-01" },
-  { id: "f2", name: "美咲", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=misaki", status: "bestFriend", addedAt: "2026-02-15" },
-  { id: "f3", name: "John", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=john", status: "friend", addedAt: "2026-01-20" },
-];
-
-const sampleRequests: FriendRequest[] = [
-  { id: "r1", fromName: "櫻花妹", fromAvatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=sakura", method: "id", createdAt: "2026-04-01", status: "pending" },
-];
-
 export function FriendProvider({ children }: { children: React.ReactNode }) {
-  const [friends, setFriends] = useState<Friend[]>(sampleFriends);
-  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>(sampleRequests);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+
   const [myCode] = useState(() => {
     const stored = localStorage.getItem("lumina_my_code");
     if (stored) return stored;
@@ -54,7 +45,7 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("lumina_my_code", code);
     return code;
   });
-  
+
   const [myId] = useState(() => {
     const stored = localStorage.getItem("lumina_my_id");
     if (stored) return stored;
@@ -63,29 +54,96 @@ export function FriendProvider({ children }: { children: React.ReactNode }) {
     return id;
   });
 
+  // 讀取 localStorage
   useEffect(() => {
-    const stored = localStorage.getItem("lumina_friends");
-    if (stored) setFriends(JSON.parse(stored));
+    try {
+      const storedFriends = localStorage.getItem("lumina_friends");
+      if (storedFriends) setFriends(JSON.parse(storedFriends));
+    } catch { /* ignore */ }
+    try {
+      const storedRequests = localStorage.getItem("lumina_friend_requests");
+      if (storedRequests) setFriendRequests(JSON.parse(storedRequests));
+    } catch { /* ignore */ }
   }, []);
 
-  const save = (data: Friend[]) => localStorage.setItem("lumina_friends", JSON.stringify(data));
+  const saveFriends = useCallback((data: Friend[]) => {
+    setFriends(data);
+    localStorage.setItem("lumina_friends", JSON.stringify(data));
+  }, []);
 
-  const addFriend = (f: Friend) => { const next = [...friends, f]; setFriends(next); save(next); };
-  const removeFriend = (id: string) => { const next = friends.filter((f) => f.id !== id); setFriends(next); save(next); };
-  const toggleBestFriend = (id: string) => {
-    const next = friends.map((f) => f.id === id ? { ...f, status: (f.status === "bestFriend" ? "friend" : "bestFriend") as "friend" | "bestFriend" } : f);
-    setFriends(next);
-    save(next);
-  };
-  const addFriendRequest = (r: FriendRequest) => setFriendRequests([...friendRequests, r]);
-  const acceptRequest = (id: string) => {
-    const req = friendRequests.find((r) => r.id === id);
-    if (req) {
-      addFriend({ id: `f${Date.now()}`, name: req.fromName, avatar: req.fromAvatar, status: "friend", addedAt: new Date().toISOString().split("T")[0] });
-      setFriendRequests(friendRequests.map((r) => r.id === id ? { ...r, status: "accepted" } : r));
-    }
-  };
-  const rejectRequest = (id: string) => setFriendRequests(friendRequests.map((r) => r.id === id ? { ...r, status: "rejected" } : r));
+  const saveRequests = useCallback((data: FriendRequest[]) => {
+    setFriendRequests(data);
+    localStorage.setItem("lumina_friend_requests", JSON.stringify(data));
+  }, []);
+
+  const addFriend = useCallback((f: Friend) => {
+    setFriends(prev => {
+      // 避免重複
+      if (prev.some(existing => existing.name === f.name && existing.avatar === f.avatar)) return prev;
+      const next = [...prev, f];
+      localStorage.setItem("lumina_friends", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const removeFriend = useCallback((id: string) => {
+    setFriends(prev => {
+      const next = prev.filter((f) => f.id !== id);
+      localStorage.setItem("lumina_friends", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const toggleBestFriend = useCallback((id: string) => {
+    setFriends(prev => {
+      const next = prev.map((f) =>
+        f.id === id
+          ? { ...f, status: (f.status === "bestFriend" ? "friend" : "bestFriend") as "friend" | "bestFriend" }
+          : f
+      );
+      localStorage.setItem("lumina_friends", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const addFriendRequest = useCallback((r: FriendRequest) => {
+    setFriendRequests(prev => {
+      const next = [...prev, r];
+      localStorage.setItem("lumina_friend_requests", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const acceptRequest = useCallback((id: string) => {
+    setFriendRequests(prev => {
+      const req = prev.find((r) => r.id === id);
+      if (req) {
+        const newFriend: Friend = {
+          id: `f${Date.now()}`,
+          name: req.fromName,
+          avatar: req.fromAvatar,
+          status: "friend",
+          addedAt: new Date().toISOString().split("T")[0],
+        };
+        setFriends(fp => {
+          const next = [...fp, newFriend];
+          localStorage.setItem("lumina_friends", JSON.stringify(next));
+          return next;
+        });
+      }
+      const next = prev.map((r) => r.id === id ? { ...r, status: "accepted" as const } : r);
+      localStorage.setItem("lumina_friend_requests", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const rejectRequest = useCallback((id: string) => {
+    setFriendRequests(prev => {
+      const next = prev.map((r) => r.id === id ? { ...r, status: "rejected" as const } : r);
+      localStorage.setItem("lumina_friend_requests", JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   return (
     <FriendContext.Provider value={{ friends, friendRequests, myCode, myId, addFriend, removeFriend, toggleBestFriend, addFriendRequest, acceptRequest, rejectRequest }}>

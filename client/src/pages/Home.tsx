@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
+import Stories from "@/components/Stories";
 import Footer from "@/components/Footer";
 
 interface FeaturedSpot {
@@ -40,7 +41,7 @@ interface FeaturedSpot {
 const featuredSpots: FeaturedSpot[] = [
   {
     id: 1, name: "小樽運河", location: "北海道小樽市", rating: 4.8, reviews: 12453, category: "文化",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hcx6bCKuu4qj_230abfb2.jpg",
+    image: "/images/japan/otaru_canal.webp",
     description: "浪漫運河與石造倉庫群，冬季雪燈路超夢幻",
     priceJPY: "免費", priceTWD: "免費",
     highlights: ["雪燈路祭典", "玻璃工藝體驗", "運河遊船", "壽司屋通"],
@@ -50,7 +51,7 @@ const featuredSpots: FeaturedSpot[] = [
   },
   {
     id: 2, name: "函館山夜景", location: "北海道函館市", rating: 4.9, reviews: 21345, category: "城市",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg",
+    image: "/images/japan/mount_hakodate.webp",
     description: "世界三大夜景之一，百萬夜景盡收眼底",
     priceJPY: "¥1,800", priceTWD: "約NT$390",
     highlights: ["纜車體驗", "星形城郭", "日落時分最美", "函館朝市"],
@@ -60,7 +61,7 @@ const featuredSpots: FeaturedSpot[] = [
   },
   {
     id: 3, name: "美瑛青池", location: "北海道美瑛町", rating: 4.8, reviews: 9876, category: "自然",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/sjxMy1SHqrpv_20205869.jpg",
+    image: "/images/japan/blue_pond.webp",
     description: "Apple桌布取景地，夢幻的鈷藍色湖面",
     priceJPY: "免費", priceTWD: "免費",
     highlights: ["冬季點燈", "Apple桌布", "白鬚瀑布", "拼布之路"],
@@ -132,12 +133,19 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
+      {/* Stories Section */}
+      <section className="pt-20 pb-4 bg-background">
+        <div className="container">
+          <Stories />
+        </div>
+      </section>
+
       {/* Hero Section */}
-      <section className="relative h-[85vh] min-h-[600px] flex items-center overflow-hidden">
+      <section className="relative h-[75vh] min-h-[600px] flex items-center overflow-hidden">
         <img
-          src="https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hero-bg-g7PvFnkctds2rCztknx8gW.webp"
+          src="/images/hero-bg-g7PvFnkctds2rCztknx8gW.webp"
           alt="Hero"
-          fetchPriority="high"
+          fetchpriority="high"
           loading="eager"
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -419,7 +427,7 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               className="relative rounded-3xl overflow-hidden"
             >
-              <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hero-bg-g7PvFnkctds2rCztknx8gW.webp" alt="CTA" className="absolute inset-0 w-full h-full object-cover" />
+              <img src="/images/hero-bg-g7PvFnkctds2rCztknx8gW.webp" alt="CTA" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/50" />
               <div className="relative z-10 py-16 px-8 md:px-16 text-center">
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-4" style={{ fontFamily: "var(--font-display)" }}>

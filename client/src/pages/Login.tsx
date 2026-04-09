@@ -81,7 +81,7 @@ export default function Login() {
       {/* Left: Image Panel */}
       <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden">
         <img
-          src="https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/login-bg-aeGnUp6sk4tugju5gwSD2j.webp"
+          src="/images/login-bg-aeGnUp6sk4tugju5gwSD2j.webp"
           alt="Nature"
           className="absolute inset-0 w-full h-full object-cover"
         />

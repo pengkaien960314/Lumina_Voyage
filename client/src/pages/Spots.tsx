@@ -37,10 +37,10 @@ interface Spot {
 const allSpots: Spot[] = [
   {
     id: 1, name: "小樽運河", location: "北海道小樽市", rating: 4.8, reviews: 12453, category: "文化",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hcx6bCKuu4qj_230abfb2.jpg",
+    image: "/images/japan/otaru_canal.webp",
     gallery: [
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/u4W9AXbKy8Dp_4a8d7b4b.webp",
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/hcx6bCKuu4qj_230abfb2.jpg"
+      "/images/u4W9AXbKy8Dp_4a8d7b4b.webp",
+      "/images/japan/otaru_canal.webp"
     ],
     description: "浪漫運河與石造倉庫群，冬季雪燈路超夢幻",
     priceJPY: "免費", priceTWD: "免費",
@@ -51,9 +51,9 @@ const allSpots: Spot[] = [
   },
   {
     id: 2, name: "富良野薰衣草花田", location: "北海道富良野市", rating: 4.9, reviews: 18762, category: "自然",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/kJs3KSAvxgSG_5a6666d1.jpg",
+    image: "/images/kJs3KSAvxgSG_5a6666d1.jpg",
     gallery: [
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/kJs3KSAvxgSG_5a6666d1.jpg"
+      "/images/kJs3KSAvxgSG_5a6666d1.jpg"
     ],
     description: "夏季限定的紫色花海，富田農場必訪打卡聖地",
     priceJPY: "免費", priceTWD: "免費",
@@ -64,9 +64,9 @@ const allSpots: Spot[] = [
   },
   {
     id: 3, name: "函館山夜景", location: "北海道函館市", rating: 4.9, reviews: 21345, category: "城市",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg",
+    image: "/images/japan/mount_hakodate.webp",
     gallery: [
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg"
+      "/images/japan/mount_hakodate.webp"
     ],
     description: "世界三大夜景之一，百萬夜景盡收眼底",
     priceJPY: "¥1,800", priceTWD: "約NT$390",
@@ -77,7 +77,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 4, name: "旭山動物園", location: "北海道旭川市", rating: 4.7, reviews: 15678, category: "親子",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/wjGGKabeMPEH_11d64129.jpg",
+    image: "/images/wjGGKabeMPEH_11d64129.jpg",
     gallery: [],
     description: "日本最北動物園，企鵝散步超療癒",
     priceJPY: "¥1,000", priceTWD: "約NT$215",
@@ -88,9 +88,9 @@ const allSpots: Spot[] = [
   },
   {
     id: 5, name: "美瑛青池", location: "北海道美瑛町", rating: 4.8, reviews: 9876, category: "自然",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/sjxMy1SHqrpv_20205869.jpg",
+    image: "/images/japan/blue_pond.webp",
     gallery: [
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/sjxMy1SHqrpv_20205869.jpg"
+      "/images/japan/blue_pond.webp"
     ],
     description: "Apple桌布取景地，夢幻的鈷藍色湖面",
     priceJPY: "免費", priceTWD: "免費",
@@ -101,7 +101,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 6, name: "登別地獄谷", location: "北海道登別市", rating: 4.6, reviews: 8765, category: "自然",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/YlBFWcMSsdrX_e9bb0e08.webp",
+    image: "/images/YlBFWcMSsdrX_e9bb0e08.webp",
     gallery: [],
     description: "火山口遺跡的壯觀地熱景觀，溫泉聖地",
     priceJPY: "免費", priceTWD: "免費",
@@ -112,9 +112,9 @@ const allSpots: Spot[] = [
   },
   {
     id: 7, name: "二世古滑雪場", location: "北海道俱知安町", rating: 4.9, reviews: 14321, category: "運動",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/LRUGkcBfWVtk_7ef685d3.jpg",
+    image: "/images/LRUGkcBfWVtk_7ef685d3.jpg",
     gallery: [
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/rF49zu1jbWf6_d55a82e5.jpg"
+      "/images/rF49zu1jbWf6_d55a82e5.jpg"
     ],
     description: "世界級粉雪天堂，滑雪愛好者朝聖地",
     priceJPY: "¥6,600", priceTWD: "約NT$1,420",
@@ -125,7 +125,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 8, name: "札幌狸小路商店街", location: "北海道札幌市", rating: 4.5, reviews: 19876, category: "購物",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/u4W9AXbKy8Dp_4a8d7b4b.webp",
+    image: "/images/u4W9AXbKy8Dp_4a8d7b4b.webp",
     gallery: [],
     description: "北海道最大商店街，美食購物一次滿足",
     priceJPY: "免費", priceTWD: "免費",
@@ -136,7 +136,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 9, name: "洞爺湖", location: "北海道洞爺湖町", rating: 4.7, reviews: 11234, category: "自然",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/wjGGKabeMPEH_11d64129.jpg",
+    image: "/images/wjGGKabeMPEH_11d64129.jpg",
     gallery: [],
     description: "火山湖畔的絕美風光，四季皆宜的療癒聖地",
     priceJPY: "免費", priceTWD: "免費",
@@ -147,7 +147,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 10, name: "白色戀人公園", location: "北海道札幌市", rating: 4.6, reviews: 16543, category: "文化",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/YlBFWcMSsdrX_e9bb0e08.webp",
+    image: "/images/YlBFWcMSsdrX_e9bb0e08.webp",
     gallery: [],
     description: "白色戀人巧克力主題樂園，夢幻歐式建築",
     priceJPY: "¥800", priceTWD: "約NT$172",
@@ -158,7 +158,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 11, name: "層雲峽溫泉", location: "北海道上川町", rating: 4.7, reviews: 7654, category: "自然",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/wjGGKabeMPEH_11d64129.jpg",
+    image: "/images/wjGGKabeMPEH_11d64129.jpg",
     gallery: [],
     description: "大雪山國家公園內的峽谷溫泉，秋季紅葉絕景",
     priceJPY: "¥600", priceTWD: "約NT$129",
@@ -169,7 +169,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 12, name: "積丹半島", location: "北海道積丹町", rating: 4.6, reviews: 5432, category: "自然",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/sjxMy1SHqrpv_20205869.jpg",
+    image: "/images/japan/blue_pond.webp",
     gallery: [],
     description: "積丹藍的透明海水，北海道唯一的海中國定公園",
     priceJPY: "免費", priceTWD: "免費",
@@ -180,7 +180,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 13, name: "星野度假村TOMAMU", location: "北海道占冠村", rating: 4.8, reviews: 13456, category: "運動",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/LRUGkcBfWVtk_7ef685d3.jpg",
+    image: "/images/LRUGkcBfWVtk_7ef685d3.jpg",
     gallery: [],
     description: "雲海平台與冰之教堂，四季皆有驚喜",
     priceJPY: "¥2,200", priceTWD: "約NT$473",
@@ -191,7 +191,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 14, name: "五稜郭公園", location: "北海道函館市", rating: 4.7, reviews: 10234, category: "文化",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg",
+    image: "/images/japan/mount_hakodate.webp",
     gallery: [],
     description: "日本第一座西式城郭，星形要塞的歷史遺跡",
     priceJPY: "¥900", priceTWD: "約NT$194",
@@ -202,7 +202,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 15, name: "支笏湖", location: "北海道千歲市", rating: 4.6, reviews: 6789, category: "自然",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/sjxMy1SHqrpv_20205869.jpg",
+    image: "/images/japan/blue_pond.webp",
     gallery: [],
     description: "日本最北的不凍湖，透明度極高的火山口湖",
     priceJPY: "免費", priceTWD: "免費",
@@ -214,7 +214,7 @@ const allSpots: Spot[] = [
   // 原有國際景點
   {
     id: 16, name: "京都・伏見稻荷大社", location: "日本京都", rating: 4.9, reviews: 45678, category: "文化",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/spot-kyoto-VxfUvqn5Qab4pRbZXHFPXx.webp",
+    image: "/images/spot-kyoto-VxfUvqn5Qab4pRbZXHFPXx.webp",
     gallery: [],
     description: "千本鳥居的壯觀景象，日本最具代表性的神社",
     priceJPY: "免費", priceTWD: "免費",
@@ -225,7 +225,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 17, name: "聖托里尼・伊亞小鎮", location: "希臘愛琴海", rating: 4.8, reviews: 34567, category: "海島",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/spot-santorini-XZm7tE8W65MFkrA8cQULBz.webp",
+    image: "/images/spot-santorini-XZm7tE8W65MFkrA8cQULBz.webp",
     gallery: [],
     description: "白色建築與藍色穹頂的夢幻組合",
     priceJPY: "€20", priceTWD: "約NT$700",
@@ -236,7 +236,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 18, name: "峇里島・烏布梯田", location: "印尼峇里島", rating: 4.7, reviews: 23456, category: "自然",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/spot-bali-BsoH2DrzKRxcnT4gKhZpEX.webp",
+    image: "/images/spot-bali-BsoH2DrzKRxcnT4gKhZpEX.webp",
     gallery: [],
     description: "翠綠梯田與古老寺廟交織的熱帶天堂",
     priceJPY: "IDR 50K", priceTWD: "約NT$100",
@@ -247,7 +247,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 19, name: "北海道大學銀杏大道", location: "北海道札幌市", rating: 4.5, reviews: 8901, category: "文化",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/fK0QEKwLfLGJ_1ae98389.jpg",
+    image: "/images/japan/mount_hakodate.webp",
     gallery: [],
     description: "秋季金黃銀杏隧道，校園散步的浪漫時光",
     priceJPY: "免費", priceTWD: "免費",
@@ -258,7 +258,7 @@ const allSpots: Spot[] = [
   },
   {
     id: 20, name: "四季彩之丘", location: "北海道美瑛町", rating: 4.7, reviews: 7890, category: "自然",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663512600352/D9s4Fysq3ePNYMv8Pr6f9t/kJs3KSAvxgSG_5a6666d1.jpg",
+    image: "/images/kJs3KSAvxgSG_5a6666d1.jpg",
     gallery: [],
     description: "七彩花田與十勝岳連峰的壯闘全景",
     priceJPY: "¥500", priceTWD: "約NT$108",
@@ -321,6 +321,61 @@ const allSpots: Spot[] = [
     access: "JR舞浜站步行即達", hours: "8:00-21:00", bestSeason: "全年（聖誕節/萬聖節特別活動）",
     backDesc: "東京迪士尼海洋是全球獨一無二的海洋主題迪士尼樂園，以七大港口為主題區域，融合冒險、奇幻和浪漫元素。園區的建築和造景精緻到令人歎為觀止，無論是地中海港灣、神秘島還是美國海濱，每個角落都是拍照勝地。人氣設施包括驚魂古塔、地心探險之旅和玩具總動員瘋狂遊戲屋。達菲熊及其朋友們是園區限定角色，相關商品非常搶手。",
     tips: "建議使用迪士尼APP預約等候。平日入園人潮較少。園區內的火山餐廳氛圍獨特，建議預約。"
+  },
+  {
+    id: 26, name: "巴黎艾菲爾鐵塔", location: "法國巴黎", rating: 4.7, reviews: 89200, category: "城市",
+    image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce65f4?w=800&q=80",
+    gallery: [],
+    description: "浪漫之都的永恆地標，俯瞰巴黎全景",
+    priceJPY: "€29.40", priceTWD: "約NT$1,020",
+    highlights: ["頂層觀景台", "塞納河遊船", "香榭麗舍大道", "夜間燈光秀", "戰神廣場野餐"],
+    access: "Metro 6號線 Bir-Hakeim站", hours: "9:00-00:45", bestSeason: "春秋（4-6月/9-10月）",
+    backDesc: "建於1889年的艾菲爾鐵塔高324公尺，是巴黎最具代表性的建築。三層觀景平台提供不同角度的城市全景，頂層可遠眺70公里。每晚整點的燈光秀持續5分鐘，閃耀的金色光芒令人難忘。",
+    tips: "強烈建議線上預約門票避免排隊。日落前1小時上塔可同時欣賞日景與夜景。"
+  },
+  {
+    id: 27, name: "倫敦大英博物館", location: "英國倫敦", rating: 4.8, reviews: 67500, category: "文化",
+    image: "https://images.unsplash.com/photo-1590080876401-07afe972ced5?w=800&q=80",
+    gallery: [],
+    description: "世界最大博物館之一，藏品橫跨200萬年人類歷史",
+    priceJPY: "免費", priceTWD: "免費",
+    highlights: ["羅塞塔石碑", "埃及木乃伊", "帕德嫩神殿雕塑", "劉易斯棋子", "中國瓷器廳"],
+    access: "Tottenham Court Road站步行5分鐘", hours: "10:00-17:00（週五至20:30）", bestSeason: "全年",
+    backDesc: "大英博物館擁有超過800萬件藏品，從古埃及文物到現代藝術應有盡有。必看的羅塞塔石碑是解讀古埃及象形文字的關鍵，埃及木乃伊展廳則是最受歡迎的區域。博物館免費入場，但建議捐款£5。",
+    tips: "建議安排至少3小時。週五延長開放到20:30人潮較少。語音導覽£7很值得。"
+  },
+  {
+    id: 28, name: "紐約中央公園", location: "美國紐約", rating: 4.8, reviews: 54300, category: "自然",
+    image: "https://images.unsplash.com/photo-1568515387631-8b650bbcdb90?w=800&q=80",
+    gallery: [],
+    description: "曼哈頓心臟的城市綠洲，四季皆美",
+    priceJPY: "免費", priceTWD: "免費",
+    highlights: ["畢士達噴泉", "弓橋", "草莓園", "中央公園動物園", "貝塞斯達露台"],
+    access: "多條地鐵線路可達", hours: "6:00-1:00", bestSeason: "秋季（10月紅葉）",
+    backDesc: "中央公園面積843英畝，是紐約市民的後花園。秋天的紅葉與摩天大樓形成絕美對比，冬天的溜冰場浪漫至極。園內有超過20個遊樂場、7個湖泊和36座橋。",
+    tips: "騎單車繞園約需1.5小時。秋季的North Woods紅葉最美。"
+  },
+  {
+    id: 29, name: "九份老街", location: "台灣新北市", rating: 4.5, reviews: 31200, category: "文化",
+    image: "https://images.unsplash.com/photo-1558981852-426c6c22a060?w=800&q=80",
+    gallery: [],
+    description: "《神隱少女》靈感來源，山城燈火與海景交織",
+    priceJPY: "免費", priceTWD: "免費",
+    highlights: ["阿妹茶樓", "昇平戲院", "金礦博物館", "芋圓", "基山街"],
+    access: "台北車站搭1062公車約1.5小時", hours: "全天（店鋪約10:00-20:00）", bestSeason: "全年（傍晚最美）",
+    backDesc: "九份曾是淘金重鎮，如今以蜿蜒的石階、紅燈籠和山海美景聞名。窄小的基山街和豎崎路兩旁是各種小吃和手工藝品店。傍晚時分紅燈籠亮起，整座山城宛如宮崎駿動畫中的場景。",
+    tips: "平日傍晚前往最佳，假日人潮非常擁擠。必吃阿蘭草仔粿和賴阿婆芋圓。"
+  },
+  {
+    id: 30, name: "吳哥窟", location: "柬埔寨暹粒", rating: 4.9, reviews: 45600, category: "文化",
+    image: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?w=800&q=80",
+    gallery: [],
+    description: "世界最大宗教建築群，高棉帝國的千年瑰寶",
+    priceJPY: "$37 USD", priceTWD: "約NT$1,200（一日券）",
+    highlights: ["吳哥窟日出", "巴戎寺微笑", "塔普倫寺", "女皇宮", "洞里薩湖"],
+    access: "暹粒機場搭嘟嘟車20分鐘", hours: "5:30-17:30", bestSeason: "乾季（11-3月）",
+    backDesc: "吳哥窟建於12世紀，是世界七大奇蹟之一。整座建築群佔地超過400平方公里，包含上百座寺廟遺跡。日出時倒映在護城河的剪影是最經典的畫面。巴戎寺的216尊微笑石佛面和被巨樹纏繞的塔普倫寺同樣震撼人心。",
+    tips: "建議購買三日券($62)慢慢遊覽。清晨5點前抵達才能佔到好位置看日出。"
   },
 ];
 
