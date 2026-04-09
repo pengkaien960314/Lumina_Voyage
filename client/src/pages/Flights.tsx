@@ -198,6 +198,20 @@ export default function Flights() {
     toast.success("機票預訂成功！確認信已發送至您的信箱");
   };
 
+  const openKayak = () => {
+    const from = tripType === "multicity" ? multiCities[0].from : fromCity;
+    const to = tripType === "multicity" ? multiCities[0].to : toCity;
+    const url = `https://www.kayak.com.tw/flights/${from}-${to}/${departDate}${tripType === "roundtrip" ? `/${returnDate}` : ""}?sort=bestflight_a&fs=cabin=${cabinClass === "first" ? "f" : cabinClass === "business" ? "b" : "e"}&adults=${paxCount}`;
+    window.open(url, "_blank");
+  };
+
+  const openTrip = () => {
+    const from = tripType === "multicity" ? multiCities[0].from : fromCity;
+    const to = tripType === "multicity" ? multiCities[0].to : toCity;
+    const url = `https://www.trip.com/flights/${from.toLowerCase()}-to-${to.toLowerCase()}/tickets-${from.toLowerCase()}-${to.toLowerCase()}?dcity=${from}&acity=${to}&ddate=${departDate}${tripType === "roundtrip" ? `&rdate=${returnDate}` : ""}&class=${cabinClass === "first" ? "F" : cabinClass === "business" ? "C" : "Y"}&adult=${paxCount}`;
+    window.open(url, "_blank");
+  };
+
   const getCityName = (code: string) => popularCities.find((c) => c.code === code)?.name || code;
 
   const [citySearch, setCitySearch] = useState("");
@@ -340,6 +354,28 @@ export default function Flights() {
               </CardContent>
             </Card>
           </motion.div>
+        </div>
+      </section>
+
+      {/* 快速搜尋平台 */}
+      <section className="py-6">
+        <div className="container max-w-4xl">
+          <p className="text-sm font-semibold mb-3" style={{ fontFamily: "var(--font-display)" }}>在其他平台搜尋即時票價</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Button variant="outline" className="h-16 rounded-xl flex-col gap-1 hover:border-primary/50" onClick={openGoogleFlights}>
+              <span className="text-lg">✈️</span><span className="text-xs font-medium">Google Flights</span>
+            </Button>
+            <Button variant="outline" className="h-16 rounded-xl flex-col gap-1 hover:border-primary/50" onClick={openSkyscanner}>
+              <span className="text-lg">🔍</span><span className="text-xs font-medium">Skyscanner</span>
+            </Button>
+            <Button variant="outline" className="h-16 rounded-xl flex-col gap-1 hover:border-primary/50" onClick={openKayak}>
+              <span className="text-lg">🛫</span><span className="text-xs font-medium">Kayak</span>
+            </Button>
+            <Button variant="outline" className="h-16 rounded-xl flex-col gap-1 hover:border-primary/50" onClick={openTrip}>
+              <span className="text-lg">🌏</span><span className="text-xs font-medium">Trip.com</span>
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">點擊會帶入你的搜尋條件，直接跳轉到對應平台查看即時票價</p>
         </div>
       </section>
 

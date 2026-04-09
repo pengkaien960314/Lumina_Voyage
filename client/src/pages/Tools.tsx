@@ -99,8 +99,27 @@ const callGemini = async (prompt: string): Promise<string> => {
   }
 };
 
+// Free translation (MyMemory API - no key needed)
+const freeTranslate = async (text: string, from: string, to: string): Promise<string> => {
+  // Map language codes for MyMemory
+  const langMap: Record<string, string> = {
+    "zh-TW": "zh-TW", "zh-CN": "zh-CN", "ja": "ja", "en": "en", "ko": "ko",
+    "th": "th", "fr": "fr", "es": "es", "de": "de", "it": "it", "pt": "pt",
+    "ru": "ru", "ar": "ar", "vi": "vi", "id": "id", "ms": "ms",
+  };
+  const fromCode = langMap[from] || from;
+  const toCode = langMap[to] || to;
+  const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${fromCode}|${toCode}`);
+  if (!res.ok) throw new Error("翻譯服務暫時無法使用");
+  const data = await res.json();
+  if (data.responseStatus === 200 && data.responseData?.translatedText) {
+    return data.responseData.translatedText;
+  }
+  throw new Error("翻譯失敗，請重試");
+};
+
 function TranslatorTab() {
-  const [mode, setMode] = useState<"ai" | "conversation" | "phrases">("ai");
+  const [mode, setMode] = useState<"translate" | "ai" | "conversation" | "phrases">("translate");
   const [langA, setLangA] = useState("zh-TW");
   const [langB, setLangB] = useState("ja");
   const [inputText, setInputText] = useState("");
@@ -120,7 +139,24 @@ function TranslatorTab() {
     chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  // AI Translation
+  // Basic translation (free, no API key)
+  const [basicResult, setBasicResult] = useState<string>("");
+  const basicTranslate = async () => {
+    if (!inputText.trim()) { toast.error("請輸入要翻譯的文字"); return; }
+    setLoading(true);
+    setBasicResult("");
+    try {
+      const result = await freeTranslate(inputText, langA, langB);
+      setBasicResult(result);
+      setAiHistory(prev => [{ source: inputText, translated: result, from: langA, to: langB, time: new Date().toLocaleTimeString() }, ...prev].slice(0, 20));
+      toast.success("翻譯完成");
+    } catch (err: any) {
+      toast.error(err.message || "翻譯失敗");
+    }
+    setLoading(false);
+  };
+
+  // AI Translation (advanced)
   const aiTranslate = async () => {
     if (!inputText.trim()) { toast.error("請輸入要翻譯的文字"); return; }
     setLoading(true);
@@ -156,11 +192,8 @@ function TranslatorTab() {
     setLoading(true);
     const fromLang = currentTurn === "A" ? langA : langB;
     const toLang = currentTurn === "A" ? langB : langA;
-    const fromLabel = langOptions.find(l => l.code === fromLang)?.label || fromLang;
-    const toLabel = langOptions.find(l => l.code === toLang)?.label || toLang;
     try {
-      const prompt = `將以下${fromLabel}文字翻譯成${toLabel}，只回覆翻譯結果，不要加任何解釋：\n${inputText}`;
-      const translated = await callGemini(prompt);
+      const translated = await freeTranslate(inputText, fromLang, toLang);
       setMessages(prev => [...prev, { id: `m${Date.now()}`, from: currentTurn, text: inputText, translated: translated.trim(), lang: fromLang }]);
       setCurrentTurn(currentTurn === "A" ? "B" : "A");
       setInputText("");
@@ -175,11 +208,8 @@ function TranslatorTab() {
     setLoading(true);
     const fromLang = currentTurn === "A" ? langA : langB;
     const toLang = currentTurn === "A" ? langB : langA;
-    const fromLabel = langOptions.find(l => l.code === fromLang)?.label || fromLang;
-    const toLabel = langOptions.find(l => l.code === toLang)?.label || toLang;
     try {
-      const prompt = `將以下${fromLabel}文字翻譯成${toLabel}，只回覆翻譯結果：\n${original}`;
-      const translated = await callGemini(prompt);
+      const translated = await freeTranslate(original, fromLang, toLang);
       setMessages(prev => [...prev, { id: `m${Date.now()}`, from: currentTurn, text: original, translated: translated.trim(), lang: fromLang }]);
       setCurrentTurn(currentTurn === "A" ? "B" : "A");
     } catch (err: any) {
@@ -223,10 +253,8 @@ function TranslatorTab() {
   // Phrase translation
   const translatePhrase = async (phrase: string) => {
     setPhraseLoading(phrase);
-    const toLabel = langOptions.find(l => l.code === langB)?.label || langB;
     try {
-      const prompt = `將「${phrase}」翻譯成${toLabel}，並附上發音提示。格式：翻譯結果（發音）`;
-      const result = await callGemini(prompt);
+      const result = await freeTranslate(phrase, "zh-TW", langB);
       toast.success(result.trim(), { duration: 5000 });
     } catch {
       toast.error("翻譯失敗");
@@ -255,6 +283,9 @@ function TranslatorTab() {
     <div className="space-y-4">
       {/* Mode Selector */}
       <div className="flex gap-2">
+        <Button variant={mode === "translate" ? "default" : "outline"} size="sm" className="rounded-full gap-1.5 flex-1" onClick={() => setMode("translate")}>
+          <Languages className="w-3.5 h-3.5" />即時翻譯
+        </Button>
         <Button variant={mode === "ai" ? "default" : "outline"} size="sm" className="rounded-full gap-1.5 flex-1" onClick={() => setMode("ai")}>
           <Sparkles className="w-3.5 h-3.5" />AI 翻譯
         </Button>
@@ -288,6 +319,25 @@ function TranslatorTab() {
       </div>
 
       {/* AI Translation Mode */}
+      {mode === "translate" && (
+        <div className="space-y-3">
+          <Textarea placeholder="輸入要翻譯的文字..." value={inputText} onChange={e => setInputText(e.target.value)} rows={3} className="rounded-xl resize-none" />
+          <Button className="w-full rounded-xl gap-2" onClick={basicTranslate} disabled={loading}>
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
+            翻譯
+          </Button>
+          {basicResult && (
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl">
+              <p className="text-lg font-medium">{basicResult}</p>
+              <div className="flex gap-2 mt-2">
+                <Button variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => { navigator.clipboard.writeText(basicResult); toast.success("已複製"); }}><Copy className="w-3.5 h-3.5" /></Button>
+                <Button variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" onClick={() => { if (window.speechSynthesis) { const u = new SpeechSynthesisUtterance(basicResult); u.lang = langB; u.rate = 0.9; window.speechSynthesis.speak(u); } }}><Volume2 className="w-3.5 h-3.5" /></Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {mode === "ai" && (
         <div className="space-y-4">
           <Textarea placeholder="輸入要翻譯的文字..." value={inputText} onChange={e => setInputText(e.target.value)} rows={4} className="rounded-xl resize-none" />

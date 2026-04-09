@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
-import Stories from "@/components/Stories";
 import Footer from "@/components/Footer";
 
 interface FeaturedSpot {
@@ -133,15 +132,8 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      {/* Stories Section */}
-      <section className="pt-20 pb-4 bg-background">
-        <div className="container">
-          <Stories />
-        </div>
-      </section>
-
       {/* Hero Section */}
-      <section className="relative h-[75vh] min-h-[600px] flex items-center overflow-hidden">
+      <section className="relative h-[85vh] min-h-[600px] flex items-center overflow-hidden">
         <img
           src="/images/hero-bg-g7PvFnkctds2rCztknx8gW.webp"
           alt="Hero"

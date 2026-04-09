@@ -18,6 +18,7 @@ import { BookOpen, Plus, MapPin, Calendar, Heart, MessageCircle, ImagePlus, Glob
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
+import Stories from "@/components/Stories";
 import Footer from "@/components/Footer";
 
 interface Comment {
@@ -142,7 +143,7 @@ export default function Diary() {
   const [newLocation, setNewLocation] = useState("");
   const [newImage, setNewImage] = useState("");
   const [newVisibility, setNewVisibility] = useState<"public" | "friends" | "bestFriends">("public");
-  const [activeTab, setActiveTab] = useState<"current" | "history">("current");
+  const [activeTab, setActiveTab] = useState<"current" | "history" | "stories">("current");
   const [bookmarked, setBookmarked] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem("lumina_diary_bookmarks") || "[]"); } catch { return []; }
   });
@@ -249,6 +250,9 @@ export default function Diary() {
                 <button onClick={() => setActiveTab("history")} className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${activeTab === "history" ? "bg-primary text-primary-foreground" : "bg-accent/50 text-muted-foreground hover:bg-accent"}`}>
                   <Archive className="w-4 h-4" />歷史日記
                 </button>
+                <button onClick={() => setActiveTab("stories")} className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${activeTab === "stories" ? "bg-primary text-primary-foreground" : "bg-accent/50 text-muted-foreground hover:bg-accent"}`}>
+                  <Heart className="w-4 h-4" />限時動態
+                </button>
               </div>
             </div>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -301,6 +305,11 @@ export default function Diary() {
 
       <section className="py-8 flex-1">
         <div className="container max-w-2xl">
+          {activeTab === "stories" && (
+            <div className="mb-6">
+              <Stories />
+            </div>
+          )}
           {activeTab === "history" && (
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-4">
