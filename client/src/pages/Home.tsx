@@ -17,6 +17,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import LiquidGlass from "@/components/LiquidGlass";
 
 interface FeaturedSpot {
   id: number;
@@ -192,14 +193,14 @@ export default function Home() {
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
-        {/* 半透明覆蓋：讓文字可讀但背景圖清晰可見 */}
-        <div className="absolute inset-0 bg-white/40 dark:bg-black/50 backdrop-blur-[2px]" />
+        {/* 半透明覆蓋：降低遮蓋讓背景清晰 */}
+        <div className="absolute inset-0 bg-white/20 dark:bg-black/30" />
         <div className="container relative z-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="text-center mb-14">
-            <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: "var(--font-display)" }}>
+            <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-bold mb-4 text-white dark:text-white" style={{ fontFamily: "var(--font-display)", textShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>
               一站式旅行體驗
             </motion.h2>
-            <motion.p variants={fadeUp} custom={1} className="text-muted-foreground max-w-xl mx-auto">
+            <motion.p variants={fadeUp} custom={1} className="text-white/75 max-w-xl mx-auto" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
               從靈感到出發，我們提供你所需的一切旅行工具
             </motion.p>
           </motion.div>
@@ -208,6 +209,7 @@ export default function Home() {
             {features.map((f, i) => {
               const Icon = f.icon;
               const isZoomed = zoomedFeature === i;
+              const positions = ["20% 30%", "50% 20%", "70% 50%", "30% 70%", "40% 40%", "60% 30%", "25% 60%", "75% 45%"];
               return (
                 <motion.div
                   key={f.title}
@@ -217,25 +219,24 @@ export default function Home() {
                   onClick={() => handleFeatureClick(i)}
                 >
                   <motion.div
-                    className={`group p-5 rounded-2xl liquid-glass-card text-center ${isZoomed ? "z-[200]" : ""}`}
-                    animate={isZoomed ? {
-                      scale: 1.15,
-                      opacity: 0,
-                      y: -10,
-                      zIndex: 200,
-                    } : {
-                      scale: 1,
-                      opacity: 1,
-                      y: 0,
-                      zIndex: 1,
-                    }}
+                    animate={isZoomed ? { scale: 1.15, opacity: 0, y: -10, zIndex: 200 } : { scale: 1, opacity: 1, y: 0, zIndex: 1 }}
                     transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                   >
-                    <div className={`w-12 h-12 rounded-xl ${f.bg} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
-                      <Icon className={`w-6 h-6 ${f.color}`} />
-                    </div>
-                    <h3 className="font-semibold text-sm mb-1" style={{ fontFamily: "var(--font-sans)" }}>{f.title}</h3>
-                    <p className="text-xs text-muted-foreground">{f.desc}</p>
+                    <LiquidGlass
+                      bgImage="/images/home/experience.jpg"
+                      zoom={280}
+                      bgPosition={positions[i] || "center"}
+                      dimAmount={0.4}
+                      radius="1.25rem"
+                    >
+                      <div className="p-5 text-center min-h-[120px] flex flex-col items-center justify-center">
+                        <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center mx-auto mb-3">
+                          <Icon className="w-6 h-6 text-white drop-shadow-lg" />
+                        </div>
+                        <h3 className="font-semibold text-sm text-white mb-0.5" style={{ fontFamily: "var(--font-sans)", textShadow: "0 1px 6px rgba(0,0,0,0.4)" }}>{f.title}</h3>
+                        <p className="text-[11px] text-white/70" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>{f.desc}</p>
+                      </div>
+                    </LiquidGlass>
                   </motion.div>
                 </motion.div>
               );
@@ -252,20 +253,20 @@ export default function Home() {
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-white/40 dark:bg-black/50 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-white/20 dark:bg-black/30" />
         <div className="container relative z-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="flex items-end justify-between mb-12">
             <div>
-              <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-bold mb-3" style={{ fontFamily: "var(--font-display)" }}>
+              <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-bold mb-3 text-white" style={{ fontFamily: "var(--font-display)", textShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>
                 精選目的地
               </motion.h2>
-              <motion.p variants={fadeUp} custom={1} className="text-muted-foreground">
+              <motion.p variants={fadeUp} custom={1} className="text-white/75" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.2)" }}>
                 最受旅人喜愛的夢幻景點
               </motion.p>
             </div>
             <motion.div variants={fadeUp} custom={2}>
               <Link href="/spots">
-                <Button variant="ghost" className="gap-2 text-primary" style={{ fontFamily: "var(--font-sans)" }}>
+                <Button variant="ghost" className="gap-2 text-white hover:text-white hover:bg-white/10" style={{ fontFamily: "var(--font-sans)" }}>
                   查看全部 <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
@@ -283,32 +284,38 @@ export default function Home() {
                 whileHover={{ y: -6 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
               >
-                <div className="liquid-glass-card overflow-hidden group hover:shadow-xl transition-shadow duration-500">
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img src={spot.image} alt={spot.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <Badge className="absolute top-3 left-3 rounded-full bg-white/80 text-stone-700 backdrop-blur-sm border-0 text-xs">{spot.category}</Badge>
-                    <div className="absolute bottom-3 left-3 right-3">
-                      <h3 className="text-white font-bold text-lg drop-shadow-lg" style={{ fontFamily: "var(--font-display)" }}>{spot.name}</h3>
-                      <div className="flex items-center gap-1.5 text-white/90 text-sm mt-1">
+                <LiquidGlass
+                  bgImage={spot.image}
+                  zoom={180}
+                  bgPosition="center"
+                  dimAmount={0.3}
+                  radius="1.5rem"
+                >
+                  <div className="relative min-h-[260px] flex flex-col">
+                    {/* Top: category badge */}
+                    <div className="p-4 pb-0">
+                      <Badge className="rounded-full bg-white/15 text-white backdrop-blur-sm border-white/20 text-xs">{spot.category}</Badge>
+                    </div>
+                    {/* Bottom: info */}
+                    <div className="mt-auto p-4 pt-8">
+                      <h3 className="text-white font-bold text-xl drop-shadow-lg mb-1" style={{ fontFamily: "var(--font-display)" }}>{spot.name}</h3>
+                      <div className="flex items-center gap-1.5 text-white/85 text-sm mb-3">
                         <MapPin className="w-3.5 h-3.5" />{spot.location}
                       </div>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                        <span className="text-sm font-medium">{spot.rating}</span>
-                        <span className="text-xs text-muted-foreground">({spot.reviews.toLocaleString()})</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                          <span className="text-sm font-medium text-white">{spot.rating}</span>
+                          <span className="text-xs text-white/60">({spot.reviews.toLocaleString()})</span>
+                        </div>
+                        <span className="text-sm font-semibold text-amber-300">
+                          {spot.priceJPY}{spot.priceTWD !== spot.priceJPY && spot.priceTWD !== "免費" ? ` (${spot.priceTWD})` : ""}
+                        </span>
                       </div>
-                      <span className="text-sm font-semibold text-primary">
-                        {spot.priceJPY}{spot.priceTWD !== spot.priceJPY && spot.priceTWD !== "免費" ? ` (${spot.priceTWD})` : ""}
-                      </span>
+                      <p className="text-xs text-white/65 mt-2 line-clamp-2" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>{spot.description}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{spot.description}</p>
                   </div>
-                </div>
+                </LiquidGlass>
               </motion.div>
             ))}
           </motion.div>
