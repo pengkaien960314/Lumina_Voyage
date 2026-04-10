@@ -1,5 +1,5 @@
 /*
- * BottomNav — 手機底部 Tab Bar
+ * BottomNav — 浮動橢圓形玻璃 Tab Bar
  * 整合：景點+行程 → 探索 | 飯店+機票 → 訂購
  */
 import { Link, useLocation } from "wouter";
@@ -39,53 +39,63 @@ export default function BottomNav() {
   if (location === "/login" || location === "/forgot-password") return null;
 
   return (
-    <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border/40"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    <div
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)" }}
     >
-      <div className="flex items-center justify-around h-16 px-1">
-        {allTabs.map((tab) => {
-          const isActive = isTabActive(tab.path);
-          const Icon = tab.icon;
+      <nav className="pointer-events-auto bottom-nav-pill">
+        <div className="flex items-center justify-around gap-1 h-14 px-3">
+          {allTabs.map((tab) => {
+            const isActive = isTabActive(tab.path);
+            const Icon = tab.icon;
 
-          return (
-            <Link key={tab.path} href={tab.path}>
-              <motion.div
-                whileTap={{ scale: 0.88 }}
-                className="flex flex-col items-center justify-center gap-0.5 min-w-[48px] py-1 cursor-pointer"
-              >
-                {tab.path === "/profile" && isAuthenticated ? (
-                  <div className={`rounded-full transition-all duration-200 ${isActive ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""}`}>
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={user?.avatar} alt={user?.name} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                        {user?.name?.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <Icon className={`w-5 h-5 transition-colors duration-200 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
-                    {isActive && (
-                      <motion.div
-                        layoutId="bottomNavIndicator"
-                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
-                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      />
-                    )}
-                  </div>
-                )}
-                <span
-                  className={`text-[10px] font-medium transition-colors duration-200 ${isActive ? "text-primary" : "text-muted-foreground"}`}
-                  style={{ fontFamily: "var(--font-sans)" }}
+            return (
+              <Link key={tab.path} href={tab.path}>
+                <motion.div
+                  whileTap={{ scale: 0.85 }}
+                  className={`relative flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-full cursor-pointer transition-all duration-300 ${
+                    isActive ? "bg-white/20 dark:bg-white/10" : ""
+                  }`}
                 >
-                  {tab.label}
-                </span>
-              </motion.div>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+                  {tab.path === "/profile" && isAuthenticated ? (
+                    <div className={`rounded-full transition-all duration-200 ${isActive ? "ring-2 ring-white/50 ring-offset-1 ring-offset-transparent" : ""}`}>
+                      <Avatar className="h-5 w-5">
+                        <AvatarImage src={user?.avatar} alt={user?.name} />
+                        <AvatarFallback className="bg-white/20 text-foreground text-[8px]">
+                          {user?.name?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                  ) : (
+                    <Icon
+                      className={`w-5 h-5 transition-all duration-200 ${
+                        isActive ? "text-primary scale-110" : "text-muted-foreground"
+                      }`}
+                    />
+                  )}
+                  <span
+                    className={`text-[9px] font-semibold leading-none transition-all duration-200 ${
+                      isActive ? "text-primary" : "text-muted-foreground"
+                    }`}
+                    style={{ fontFamily: "var(--font-sans)" }}
+                  >
+                    {tab.label}
+                  </span>
+
+                  {/* Active indicator dot */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="pill-indicator"
+                      className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </motion.div>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
   );
 }

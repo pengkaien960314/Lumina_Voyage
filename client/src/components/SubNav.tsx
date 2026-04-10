@@ -9,7 +9,7 @@ export default function SubNav({ items }: SubNavProps) {
   const [location] = useLocation();
 
   return (
-    <div className="flex gap-1 p-1 bg-secondary/60 backdrop-blur-sm rounded-xl w-fit">
+    <div className="flex gap-1 p-1.5 liquid-glass rounded-2xl w-fit">
       {items.map((item) => {
         const isActive = location === item.path;
         return (

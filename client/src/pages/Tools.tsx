@@ -969,10 +969,10 @@ export default function Tools() {
                   <button
                     key={t.value}
                     onClick={() => setActiveTab(t.value)}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-200 ${
+                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all duration-200 ${
                       isActive
-                        ? "border-primary bg-primary/5 shadow-sm"
-                        : "border-border/50 bg-card hover:border-primary/30 hover:bg-accent/30"
+                        ? "liquid-glass-card border-0 shadow-lg"
+                        : "border-2 border-border/50 bg-card hover:border-primary/30 hover:bg-accent/30"
                     }`}
                   >
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isActive ? "bg-primary/10" : "bg-secondary/50"}`}>

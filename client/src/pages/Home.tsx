@@ -184,10 +184,16 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Features Section - Click to zoom fullscreen then navigate */}
+      {/* Features Section — 一站式旅行體驗背景圖 */}
       <section className="py-20 relative overflow-hidden">
-        <img src="/images/home/experience.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-8" loading="lazy" />
-        <div className="absolute inset-0 bg-background/92 backdrop-blur-sm" />
+        <img
+          src="/images/home/experience.jpg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+        />
+        {/* 半透明覆蓋：讓文字可讀但背景圖清晰可見 */}
+        <div className="absolute inset-0 bg-white/40 dark:bg-black/50 backdrop-blur-[2px]" />
         <div className="container relative z-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="text-center mb-14">
             <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: "var(--font-display)" }}>
@@ -211,7 +217,7 @@ export default function Home() {
                   onClick={() => handleFeatureClick(i)}
                 >
                   <motion.div
-                    className={`group p-5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 hover:shadow-lg transition-all duration-400 text-center ${isZoomed ? "z-[200]" : ""}`}
+                    className={`group p-5 rounded-2xl liquid-glass-card text-center ${isZoomed ? "z-[200]" : ""}`}
                     animate={isZoomed ? {
                       scale: 1.15,
                       opacity: 0,
@@ -238,10 +244,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Destinations - Flip Cards (same as Spots page) */}
+      {/* Featured Destinations — 精選目的地背景圖 */}
       <section className="py-20 relative overflow-hidden">
-        <img src="/images/home/destination.PNG" alt="" className="absolute inset-0 w-full h-full object-cover opacity-6" loading="lazy" />
-        <div className="absolute inset-0 bg-background/93 backdrop-blur-sm" />
+        <img
+          src="/images/home/destination.PNG"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-white/40 dark:bg-black/50 backdrop-blur-[2px]" />
         <div className="container relative z-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="flex items-end justify-between mb-12">
             <div>
@@ -272,7 +283,7 @@ export default function Home() {
                 whileHover={{ y: -6 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
               >
-                <div className="organic-card overflow-hidden bg-card border border-border/50 group hover:shadow-xl transition-shadow duration-500">
+                <div className="liquid-glass-card overflow-hidden group hover:shadow-xl transition-shadow duration-500">
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img src={spot.image} alt={spot.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
