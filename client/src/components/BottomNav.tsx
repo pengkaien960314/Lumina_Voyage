@@ -40,11 +40,11 @@ export default function BottomNav() {
 
   return (
     <div
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
-      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)" }}
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none px-4"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 8px)" }}
     >
-      <nav className="pointer-events-auto bottom-nav-pill">
-        <div className="flex items-center justify-around gap-1 h-14 px-3">
+      <nav className="pointer-events-auto bottom-nav-pill w-full max-w-md">
+        <div className="flex items-center justify-around h-[60px] px-2">
           {allTabs.map((tab) => {
             const isActive = isTabActive(tab.path);
             const Icon = tab.icon;
@@ -53,7 +53,7 @@ export default function BottomNav() {
               <Link key={tab.path} href={tab.path}>
                 <motion.div
                   whileTap={{ scale: 0.85 }}
-                  className={`relative flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-full cursor-pointer transition-all duration-300 ${
+                  className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 py-2 rounded-full cursor-pointer transition-all duration-300 ${
                     isActive ? "bg-white/20 dark:bg-white/10" : ""
                   }`}
                 >
